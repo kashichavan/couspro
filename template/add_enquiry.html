@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add New Enquiry{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --orange: rgb(254, 119, 67);
+    --off-white: rgb(239, 238, 234);
+    --dark-blue: rgb(39, 63, 79);
+    --black: rgb(0, 0, 0);
+  }
+
+  body {
+    background-color: var(--off-white);
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .enquiry-container {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(39, 63, 79, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .enquiry-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--orange);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .enquiry-container:hover::before {
+    transform: scaleY(1);
+  }
+
+  .enquiry-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(39, 63, 79, 0.15);
+  }
+
+  .form-title {
+    color: var(--dark-blue);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--orange);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .form-title::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background: var(--orange);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 0.5; width: 0; }
+    50% { opacity: 1; width: 50%; }
+    100% { opacity: 0.5; width: 100%; }
+  }
+
+  .form-control, .form-select {
+    border: 2px solid rgba(39, 63, 79, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 0.25rem rgba(254, 119, 67, 0.25);
+  }
+
+  .form-label {
+    color: var(--dark-blue);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    display: block;
+  }
+
+  .form-control:focus + .form-label,
+  .form-control:not(:placeholder-shown) + .form-label {
+    color: var(--orange);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .btn-submit {
+    background-color: var(--orange);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .btn-submit::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0)
+    );
+    transition: all 0.5s ease;
+    z-index: -1;
+  }
+
+  .btn-submit:hover::before {
+    left: 100%;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(254, 119, 67, 0.4);
+    background-color: rgb(244, 109, 57);
+  }
+
+  .help-text {
+    font-size: 0.85rem;
+    color: var(--dark-blue);
+    opacity: 0.7;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
+  /* Form field animations */
+  .form-group {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s forwards;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .form-group:nth-child(1) { animation-delay: 0.1s; }
+  .form-group:nth-child(2) { animation-delay: 0.2s; }
+  .form-group:nth-child(3) { animation-delay: 0.3s; }
+  .form-group:nth-child(4) { animation-delay: 0.4s; }
+  .form-group:nth-child(5) { animation-delay: 0.5s; }
+  .form-group:nth-child(6) { animation-delay: 0.6s; }
+
+  .form-floating {
+    position: relative;
+  }
+  
+  /* Dropdown specific styling */
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23273F4F' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem !important;
+    transition: all 0.3s ease;
+  }
+  
+  /* Course-specific styling */
+  .form-select option[value="java_full_stack"] {
+    background-color: rgba(248, 152, 32, 0.1);
+  }
+  
+  .form-select option[value="python_full_stack"] {
+    background-color: rgba(48, 105, 152, 0.1);
+  }
+  
+  .java-selected {
+    background-image: linear-gradient(to right, rgba(248, 152, 32, 0.1), transparent) !important;
+  }
+  
+  .python-selected {
+    background-image: linear-gradient(to right, rgba(48, 105, 152, 0.1), transparent) !important;
+  }
+  
+  .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(254, 119, 67, 0.25);
+    border-color: var(--orange);
+  }
+  
+  /* Dropdown animation */
+  @keyframes selectPulse {
+    0% { border-color: rgba(254, 119, 67, 0.2); }
+    50% { border-color: rgba(254, 119, 67, 0.8); }
+    100% { border-color: rgba(254, 119, 67, 0.2); }
+  }
+  
+  .form-select:hover {
+    animation: selectPulse 1.5s infinite;
+  }
+
+  /* Input field highlight effect */
+  .highlight-container {
+    position: relative;
+  }
+
+  .highlight-container::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--orange);
+    transition: all 0.3s ease;
+  }
+
+  .highlight-container:focus-within::after {
+    width: 100%;
+    left: 0;
+  }
+
+  /* Card with pattern */
+  .pattern-background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background-image: 
+      radial-gradient(var(--orange) 2px, transparent 2px), 
+      radial-gradient(var(--orange) 2px, transparent 2px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    opacity: 0.1;
+    z-index: 0;
+    border-bottom-left-radius: 100%;
+  }
+
+  .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="enquiry-container">
+        <div class="pattern-background"></div>
+        <h2 class="form-title mb-4">New Enquiry</h2>
+        
+        <p class="lead mb-4">Please fill in the form below to submit a new enquiry. Our counsellors will reach out to you soon.</p>
+        
+        <form method="POST" class="enquiry-form">
+          {% csrf_token %}
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group highlight-container">
+                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                {{ form.name }}
+                {% if form.name.help_text %}
+                <div class="help-text">{{ form.name.help_text }}</div>
+                {% endif %}
+                {% if form.name.errors %}
+                <div class="invalid-feedback">{{ form.name.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group highlight-container">
+                <label for="{{ form.mobile.id_for_label }}" class="form-label">{{ form.mobile.label }}</label>
+                {{ form.mobile }}
+                {% if form.mobile.help_text %}
+                <div class="help-text">{{ form.mobile.help_text }}</div>
+                {% endif %}
+                {% if form.mobile.errors %}
+                <div class="invalid-feedback">{{ form.mobile.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group highlight-container">
+            <label for="{{ form.subject.id_for_label }}" class="form-label">Select Course</label>
+            {{ form.subject }}
+            {% if form.subject.help_text %}
+            <div class="help-text">{{ form.subject.help_text }}</div>
+            {% endif %}
+            {% if form.subject.errors %}
+            <div class="invalid-feedback">{{ form.subject.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group highlight-container">
+            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
+            {{ form.enquiry_type }}
+            {% if form.enquiry_type.help_text %}
+            <div class="help-text">{{ form.enquiry_type.help_text }}</div>
+            {% endif %}
+            {% if form.enquiry_type.errors %}
+            <div class="invalid-feedback">{{ form.enquiry_type.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group highlight-container">
+                <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+                {{ form.status }}
+                {% if form.status.help_text %}
+                <div class="help-text">{{ form.status.help_text }}</div>
+                {% endif %}
+                {% if form.status.errors %}
+                <div class="invalid-feedback">{{ form.status.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="form-group highlight-container">
+                <label for="{{ form.followup_date.id_for_label }}" class="form-label">{{ form.followup_date.label }}</label>
+                {{ form.followup_date }}
+                {% if form.followup_date.help_text %}
+                <div class="help-text">{{ form.followup_date.help_text }}</div>
+                {% endif %}
+                {% if form.followup_date.errors %}
+                <div class="invalid-feedback">{{ form.followup_date.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group highlight-container">
+            <label for="{{ form.counsellor.id_for_label }}" class="form-label">{{ form.counsellor.label }}</label>
+            {{ form.counsellor }}
+            {% if form.counsellor.help_text %}
+            <div class="help-text">{{ form.counsellor.help_text }}</div>
+            {% endif %}
+            {% if form.counsellor.errors %}
+            <div class="invalid-feedback">{{ form.counsellor.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group text-center mt-4 mb-3">
+            <button type="submit" class="btn btn-submit">
+              <i class="fas fa-paper-plane me-2"></i>Submit Enquiry
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Adding animation to the form container
+    const formContainer = document.querySelector('.enquiry-container');
+    formContainer.classList.add('animate__animated', 'animate__fadeIn');
+    
+    // Show selected option with animation
+    const subjectDropdown = document.querySelector('select[name="subject"]');
+    if (subjectDropdown) {
+      subjectDropdown.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        selectedOption.classList.add('selected-option');
+        
+        // Add a subtle flash effect on selection
+        this.style.backgroundColor = 'rgba(254, 119, 67, 0.1)';
+        setTimeout(() => {
+          this.style.backgroundColor = '';
+        }, 300);
+        
+        // Add special styling based on selected course
+        if (this.value === 'java_full_stack') {
+          this.classList.add('java-selected');
+          this.style.borderLeft = '3px solid #f89820'; // Java color
+        } else if (this.value === 'python_full_stack') {
+          this.classList.add('python-selected');
+          this.style.borderLeft = '3px solid #306998'; // Python color
+        } else {
+          this.classList.remove('java-selected', 'python-selected');
+          this.style.borderLeft = '';
+        }
+      });
+    }
+    
+    // Form validation visual feedback
+    const formInputs = document.querySelectorAll('.form-control, .form-select');
+    
+    formInputs.forEach(input => {
+      // Add focus effect
+      input.addEventListener('focus', function() {
+        this.closest('.highlight-container').classList.add('active');
+      });
+      
+      input.addEventListener('blur', function() {
+        this.closest('.highlight-container').classList.remove('active');
+      });
+      
+      // Validate on input
+      input.addEventListener('input', function() {
+        if (this.value.trim() !== '') {
+          this.classList.add('is-valid');
+          this.classList.remove('is-invalid');
+        } else {
+          this.classList.remove('is-valid');
+          if (this.hasAttribute('required')) {
+            this.classList.add('is-invalid');
+          }
+        }
+      });
+    });
+    
+    // Button click effect
+    const submitBtn = document.querySelector('.btn-submit');
+    submitBtn.addEventListener('click', function(e) {
+      // Add ripple effect
+      let ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      this.appendChild(ripple);
+      
+      let x = e.clientX - e.target.getBoundingClientRect().left;
+      let y = e.clientY - e.target.getBoundingClientRect().top;
+      
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

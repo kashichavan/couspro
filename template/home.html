@@ -1,0 +1,716 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Enquiry Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+        color: var(--white);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat-card .stat-icon {
+        font-size: 3rem;
+        opacity: 0.2;
+        position: absolute;
+        bottom: -10px;
+        right: 10px;
+    }
+    
+    .stat-card .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .stat-card .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .dashboard-section {
+        margin-bottom: 3rem;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .section-title h2 {
+        margin-bottom: 0;
+        font-size: 1.8rem;
+    }
+    
+    .section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: rgba(0, 0, 0, 0.1);
+        margin-left: 1rem;
+    }
+    
+    .enquiry-table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .enquiry-table th {
+        background-color: var(--secondary);
+        color: var(--white);
+        font-weight: 600;
+        text-align: left;
+        padding: 1rem;
+    }
+    
+    .enquiry-table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .enquiry-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .enquiry-table tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+    
+    .enquiry-table tr:hover {
+        background-color: rgba(254, 119, 67, 0.05);
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: var(--warning);
+    }
+    
+    .status-joined {
+        background-color: rgba(76, 175, 80, 0.15);
+        color: var(--success);
+    }
+    
+    .status-dropout {
+        background-color: rgba(244, 67, 54, 0.15);
+        color: var(--danger);
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .action-card {
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        text-align: center;
+        padding: 2rem 1.5rem;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .action-icon {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+    
+    .action-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .action-description {
+        font-size: 0.9rem;
+        color: var(--gray);
+    }
+    
+    .welcome-banner {
+        background: linear-gradient(145deg, var(--secondary), var(--secondary-light));
+        color: var(--white);
+        padding: 2.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .welcome-banner h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .welcome-banner p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 700px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .welcome-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 400px;
+        height: 100%;
+        background: url('/api/placeholder/400/320') no-repeat;
+        background-size: contain;
+        background-position: right;
+        opacity: 0.1;
+    }
+    
+    .welcome-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Activity Feed */
+    .activity-feed {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(254, 119, 67, 0.1);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: var(--gray);
+    }
+    
+    /* Charts container */
+    .chart-container {
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        color: var(--secondary);
+    }
+    
+    /* Calendar */
+    .mini-calendar {
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .calendar-title {
+        font-weight: 600;
+    }
+    
+    .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .calendar-nav button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--primary);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .calendar-nav button:hover {
+        background-color: rgba(254, 119, 67, 0.1);
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .calendar-day-name {
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+        color: var(--gray);
+    }
+    
+    .calendar-day {
+        text-align: center;
+        padding: 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .calendar-day:hover {
+        background-color: rgba(254, 119, 67, 0.1);
+    }
+    
+    .calendar-day.today {
+        background-color: var(--primary);
+        color: var(--white);
+        font-weight: 600;
+    }
+    
+    .calendar-day.has-events {
+        position: relative;
+    }
+    
+    .calendar-day.has-events::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: var(--primary);
+    }
+    
+    /* Dark mode adjustments */
+    body.dark-mode .action-card,
+    body.dark-mode .chart-container,
+    body.dark-mode .mini-calendar,
+    body.dark-mode .enquiry-table {
+        background-color: var(--secondary);
+        color: var(--light);
+    }
+    
+    body.dark-mode .enquiry-table tr:nth-child(even) {
+        background-color: var(--secondary-light);
+    }
+    
+    body.dark-mode .enquiry-table tr:hover {
+        background-color: rgba(254, 119, 67, 0.1);
+    }
+    
+    body.dark-mode .action-description {
+        color: var(--light);
+        opacity: 0.7;
+    }
+    
+    body.dark-mode .section-title::after {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    body.dark-mode .enquiry-table td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    body.dark-mode .activity-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    body.dark-mode .activity-time {
+        color: var(--light);
+        opacity: 0.7;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .welcome-banner {
+            padding: 1.5rem;
+        }
+        
+        .welcome-banner h1 {
+            font-size: 1.8rem;
+        }
+        
+        .welcome-banner p {
+            font-size: 1rem;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2rem;
+        }
+        
+        .welcome-actions {
+            flex-direction: column;
+        }
+        
+        .welcome-actions .btn {
+            width: 100%;
+        }
+        
+        .dashboard-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<section class="welcome-banner" data-aos="fade-up">
+    <h1>Welcome to EnquiryPortal Dashboard</h1>
+    <p>Manage your enquiries efficiently with our comprehensive dashboard. Track follow-ups, view statistics, and manage your leads all in one place.</p>
+    <div class="welcome-actions">
+        <a href="{% url 'enquiry:add_enquiry' %}" class="btn">Add New Enquiry</a>
+        <a href="{% url 'enquiry:today_followups' %}" class="btn btn-outline">Today's Follow-ups</a>
+    </div>
+</section>
+
+<!-- Stats Cards -->
+<section class="dashboard-stats" data-aos="fade-up" data-aos-delay="100">
+    <div class="stat-card">
+        <div class="stat-value">{{ pending_count }}</div>
+        <div class="stat-label">Pending Enquiries</div>
+        <div class="stat-icon">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ joined_count }}</div>
+        <div class="stat-label">Joined Students</div>
+        <div class="stat-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ dropout_count }}</div>
+        <div class="stat-label">Dropouts</div>
+        <div class="stat-icon">
+            <i class="fas fa-user-times"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ today_followup_count }}</div>
+        <div class="stat-label">Today's Follow-ups</div>
+        <div class="stat-icon">
+            <i class="fas fa-phone"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="200">
+    <div class="section-title">
+        <h2>Quick Actions</h2>
+    </div>
+    
+    <div class="quick-actions">
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h3 class="action-title">Add Enquiry</h3>
+            <p class="action-description">Register a new student enquiry</p>
+            <a href="{% url 'enquiry:add_enquiry' %}" class="btn btn-outline">Add Now</a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <h3 class="action-title">Add Counsellor</h3>
+            <p class="action-description">Register a new counsellor</p>
+            <a href="{% url 'enquiry:add_counsellor' %}" class="btn btn-outline">Add Now</a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-phone-alt"></i>
+            </div>
+            <h3 class="action-title">Today's Follow-ups</h3>
+            <p class="action-description">View and manage today's follow-ups</p>
+            <a href="{% url 'enquiry:today_followups' %}" class="btn btn-outline">View Now</a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="action-title">Reports</h3>
+            <p class="action-description">View detailed analytics</p>
+            <a href="#" class="btn btn-outline">View Reports</a>
+        </div>
+    </div>
+</section>
+
+<!-- Two Column Layout -->
+<div class="dashboard-section" data-aos="fade-up" data-aos-delay="300">
+    <div class="section-title">
+        <h2>Recent Activities</h2>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;" class="dashboard-layout">
+        <!-- Recent Enquiries -->
+        <div class="chart-container">
+            <h3 class="chart-title">Recent Enquiries</h3>
+            
+            <div class="table-responsive">
+                <table class="enquiry-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Phone</th>
+                            <th>Follow-up Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enquiry in recent_enquiries %}
+                        <tr>
+                            <td>{{ enquiry.name }}</td>
+                            <td>{{ enquiry.course }}</td>
+                            <td>{{ enquiry.phone }}</td>
+                            <td>{{ enquiry.followup_date }}</td>
+                            <td>
+                                {% if enquiry.status == 'pending' %}
+                                <span class="status-badge status-pending">Pending</span>
+                                {% elif enquiry.status == 'joined' %}
+                                <span class="status-badge status-joined">Joined</span>
+                                {% elif enquiry.status == 'dropout' %}
+                                <span class="status-badge status-dropout">Dropout</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No recent enquiries found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Mini Calendar -->
+        <div class="mini-calendar">
+            <div class="calendar-header">
+                <h3 class="calendar-title">May 2025</h3>
+                <div class="calendar-nav">
+                    <button><i class="fas fa-chevron-left"></i></button>
+                    <button><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="calendar-day-name">Sun</div>
+                <div class="calendar-day-name">Mon</div>
+                <div class="calendar-day-name">Tue</div>
+                <div class="calendar-day-name">Wed</div>
+                <div class="calendar-day-name">Thu</div>
+                <div class="calendar-day-name">Fri</div>
+                <div class="calendar-day-name">Sat</div>
+                
+                <!-- Empty days from previous month -->
+                <div class="calendar-day"></div>
+                <div class="calendar-day"></div>
+                <div class="calendar-day"></div>
+                <div class="calendar-day">1</div>
+                <div class="calendar-day">2</div>
+                <div class="calendar-day">3</div>
+                <div class="calendar-day">4</div>
+                
+                <div class="calendar-day today">5</div>
+                <div class="calendar-day has-events">6</div>
+                <div class="calendar-day has-events">7</div>
+                <div class="calendar-day">8</div>
+                <div class="calendar-day">9</div>
+                <div class="calendar-day">10</div>
+                <div class="calendar-day">11</div>
+                
+                <div class="calendar-day">12</div>
+                <div class="calendar-day has-events">13</div>
+                <div class="calendar-day">14</div>
+                <div class="calendar-day">15</div>
+                <div class="calendar-day has-events">16</div>
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+                <div class="calendar-day">21</div>
+                <div class="calendar-day has-events">22</div>
+                <div class="calendar-day">23</div>
+                <div class="calendar-day">24</div>
+                <div class="calendar-day">25</div>
+                
+                <div class="calendar-day">26</div>
+                <div class="calendar-day">27</div>
+                <div class="calendar-day has-events">28</div>
+                <div class="calendar-day">29</div>
+                <div class="calendar-day">30</div>
+                <div class="calendar-day">31</div>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 1rem;">Upcoming Follow-ups</h4>
+                <div class="activity-feed">
+                    {% for followup in upcoming_followups %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ followup.name }} - {{ followup.course }}</div>
+                            <div class="activity-time">{{ followup.followup_date }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No upcoming follow-ups scheduled.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conversion Trends -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="400">
+    <div class="section-title">
+        <h2>Conversion Statistics</h2>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+        <div class="chart-container">
+            <h3 class="chart-title">Status Distribution</h3>
+            <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end;">
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
+                        <div style="background: var(--warning); width: 50px; height: {{ pending_percentage }}px; border-radius: 5px 5px 0 0;"></div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <div>Pending</div>
+                            <div style="font-weight: bold;">{{ pending_count }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
+                        <div style="background: var(--success); width: 50px; height: {{ joined_percentage }}px; border-radius: 5px 5px 0 0;"></div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <div>Joined</div>
+                            <div style="font-weight: bold;">{{ joined_count }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
+                        <div style="background: var(--danger); width: 50px; height: {{ dropout_percentage }}px; border-radius: 5px 5px 0 0;"></div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <div>Dropout</div>
+                            <div style="font-weight: bold;">{{ dropout_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3 class="chart-title">Course Distribution</h3>
+            <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; text-align: center; padding: 20px;">
+                    <p style="margin-bottom: 15px; font-size: 0.9rem;">Connect your data to visualize course enrollment trends.</p>
+                    <div class="btn btn-outline">Connect Data</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Calendar day click handler
+        const calendarDays = document.querySelectorAll('.calendar-day');
+        calendarDays.forEach(day => {
+            if (day.textContent.trim() !== '') {
+                day.addEventListener('click', function() {
+                    alert(`You clicked on May ${this.textContent}, 2025`);
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

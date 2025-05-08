@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-orange">Bulk Enquiry Upload</h2>
+    
+    <div class="card mb-4 shadow">
+        <div class="card-body">
+            <h5 class="card-title text-orange">Instructions</h5>
+            <ul class="list-instructions">
+                <li>Download the template and fill in the data</li>
+                <li>Maintain the exact column order</li>
+                <li>Use exact choice values as shown in parentheses</li>
+                <li>Dates must be in DD-MM-YYYY format</li>
+                <li>Counsellor names must exist in the system</li>
+            </ul>
+            <a href="{% url 'enquiry:download_dummy_template' %}" class="btn btn-download">
+                <i class="fas fa-download"></i> Download Template
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="text-orange">{{ form.excel_file.label }}</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="excel_file" id="id_excel_file">
+                        <label class="custom-file-label" for="id_excel_file">Choose Excel file</label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Supported formats: .xlsx, .xls
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-upload">
+                    <i class="fas fa-upload"></i> Upload Enquiries
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-orange: #FF6B00;
+    --dark-orange: #CC5500;
+    --light-orange: #FFE5D6;
+}
+
+.text-orange {
+    color: var(--primary-orange) !important;
+}
+
+.btn-download {
+    background-color: var(--primary-orange);
+    color: white;
+    border-radius: 25px;
+    padding: 8px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-download:hover {
+    background-color: var(--dark-orange);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-upload {
+    background-color: var(--primary-orange);
+    color: white;
+    border-radius: 25px;
+    padding: 10px 30px;
+    transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+    background-color: var(--dark-orange);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.list-instructions {
+    list-style-type: none;
+    padding-left: 1rem;
+}
+
+.list-instructions li {
+    margin-bottom: 0.8rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.list-instructions li:before {
+    content: "•";
+    color: var(--primary-orange);
+    position: absolute;
+    left: 0;
+}
+
+.custom-file-input {
+    border-color: var(--primary-orange);
+}
+
+.custom-file-input:focus {
+    border-color: var(--dark-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255,107,0,0.25);
+}
+
+.custom-file-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+.alert-success {
+    background-color: var(--light-orange);
+    border-color: var(--primary-orange);
+    color: var(--dark-orange);
+}
+
+.close {
+    color: var(--dark-orange);
+}
+
+.shadow {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+</style>
+
+<script>
+document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+    const fileName = document.getElementById("id_excel_file").files[0].name;
+    const label = e.target.nextElementSibling;
+    label.innerText = fileName;
+    label.classList.add('text-orange');
+});
+
+// Add smooth dismissal for alerts
+document.querySelectorAll('.alert .close').forEach(button => {
+    button.addEventListener('click', () => {
+        const alert = button.closest('.alert');
+        alert.style.transition = 'opacity 0.3s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 300);
+    });
+});
+
+// Add hover effect to cards
+document.querySelectorAll('.card').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-5px)';
+    });
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0)';
+    });
+});
+</script>
+{% endblock %}

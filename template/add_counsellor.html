@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Counsellor | EnquiryPortal{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: rgb(254, 119, 67);
+        --primary-dark: rgb(224, 89, 37);
+        --off-white: rgb(239, 238, 234);
+        --dark-blue: rgb(39, 63, 79);
+        --black: rgb(0, 0, 0);
+        --white: #ffffff;
+        --gray: #6c757d;
+        --light: #f8f9fa;
+        --success: #4caf50;
+        --danger: #dc3545;
+        --secondary: var(--dark-blue);
+        --secondary-light: rgba(39, 63, 79, 0.8);
+    }
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--off-white);
+    }
+    
+    .counsellor-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 30px rgba(254, 119, 67, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .counsellor-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+        transform: rotate(30deg);
+        z-index: 1;
+    }
+    
+    .counsellor-header h1 {
+        color: var(--white);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .counsellor-header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        max-width: 800px;
+        position: relative;
+        z-index: 2;
+        font-weight: 300;
+    }
+    
+    .counsellor-form-container {
+        background-color: var(--white);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        transform: translateY(0);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .counsellor-form-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .counsellor-form-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 6px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+        color: var(--secondary);
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+    }
+    
+    .form-title i {
+        color: var(--primary);
+        margin-right: 0.8rem;
+        font-size: 1.8rem;
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .form-control {
+        padding: 1rem;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        width: 100%;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(254, 119, 67, 0.1);
+        outline: none;
+    }
+    
+    .form-floating {
+        position: relative;
+    }
+    
+    .form-floating label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 1rem;
+        pointer-events: none;
+        transform-origin: 0 0;
+        transition: all 0.3s ease;
+        color: var(--gray);
+        font-weight: 500;
+    }
+    
+    .form-floating .form-control:focus ~ label,
+    .form-floating .form-control:not(:placeholder-shown) ~ label,
+    .form-floating .form-control.has-value ~ label {
+        transform: translateY(-1.5rem) scale(0.85);
+        color: var(--primary);
+    }
+    
+    .form-floating .form-control:focus {
+        padding-top: 1.625rem;
+        padding-bottom: 0.625rem;
+    }
+    
+    .form-submit {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    
+    .btn-submit {
+        padding: 0.8rem 2.5rem;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 50px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(254, 119, 67, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(254, 119, 67, 0.4);
+    }
+    
+    .btn-submit::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: width 0.3s ease;
+        z-index: -1;
+    }
+    
+    .btn-submit:hover::after {
+        width: 100%;
+    }
+    
+    .error-message {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .error-message i {
+        margin-right: 0.4rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .required-badge {
+        background-color: rgba(254, 119, 67, 0.1);
+        color: var(--primary);
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 50px;
+        margin-left: 0.5rem;
+        font-weight: 600;
+    }
+    
+    @keyframes success-pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+        }
+    }
+    
+    .form-submitted .btn-submit {
+        background: linear-gradient(135deg, var(--success) 0%, #2E7D32 100%);
+        animation: success-pulse 1.5s infinite;
+    }
+    
+    .decoration {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.1;
+        z-index: 0;
+    }
+    
+    .decoration-1 {
+        width: 300px;
+        height: 300px;
+        background-color: var(--primary);
+        top: -150px;
+        right: -150px;
+    }
+    
+    .decoration-2 {
+        width: 200px;
+        height: 200px;
+        background-color: var(--secondary);
+        bottom: -100px;
+        left: -100px;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .counsellor-header {
+            padding: 2rem 1.5rem;
+        }
+        
+        .counsellor-header h1 {
+            font-size: 2rem;
+        }
+    }
+    
+    body.dark-mode {
+        background-color: var(--black);
+    }
+    
+    body.dark-mode .counsellor-form-container {
+        background-color: var(--secondary);
+    }
+    
+    body.dark-mode .form-title {
+        color: var(--light);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    body.dark-mode .form-control {
+        background-color: var(--secondary-light);
+        color: var(--light);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    body.dark-mode .error-message {
+        color: #FF6B6B;
+    }
+    
+    body.dark-mode .required-badge {
+        background-color: rgba(254, 119, 67, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="counsellor-page">
+    <div class="decoration decoration-1"></div>
+    <div class="decoration decoration-2"></div>
+
+    <div class="counsellor-header" data-aos="fade-up">
+        <h1><i class="fas fa-user-tie"></i> Add Counsellor</h1>
+        <p>Register a new counsellor to our system. Counsellors are responsible for following up with enquiries and providing guidance to potential students.</p>
+    </div>
+    
+    <div class="counsellor-form-container" data-aos="fade-up" data-aos-delay="200">
+        <h2 class="form-title"><i class="fas fa-clipboard-list"></i> Counsellor Information</h2>
+        
+        <form method="post" id="counsellorForm" class="counsellor-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <div class="form-floating">
+                    {{ form.name.as_widget }}
+                    <label for="{{ form.name.id_for_label }}">
+                        Counsellor Name
+                        <span class="required-badge">Required</span>
+                    </label>
+                    {% if form.name.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.name.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-floating">
+                    {{ form.mobile.as_widget }}
+                    <label for="{{ form.mobile.id_for_label }}">
+                        Contact Number
+                        <span class="required-badge">Required</span>
+                    </label>
+                    {% if form.mobile.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.mobile.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-floating">
+                    {{ form.department.as_widget }}
+                    <label for="{{ form.department.id_for_label }}">
+                        Department
+                        <span class="required-badge">Required</span>
+                    </label>
+                    {% if form.department.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i> {{ form.department.errors.0 }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-submit">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-user-plus"></i> Register Counsellor
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('counsellorForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+
+        // Add floating label functionality
+        inputs.forEach(input => {
+            const floatingLabel = input.closest('.form-floating');
+            
+            input.addEventListener('input', function() {
+                if (this.value) {
+                    this.classList.add('has-value');
+                } else {
+                    this.classList.remove('has-value');
+                }
+            });
+
+            input.addEventListener('focus', () => {
+                floatingLabel.querySelector('label').style.color = 'var(--primary)';
+            });
+
+            input.addEventListener('blur', () => {
+                floatingLabel.querySelector('label').style.color = 'var(--gray)';
+            });
+
+            // Initialize has-value class
+            if (input.value) {
+                input.classList.add('has-value');
+            }
+        });
+
+        // Form submission handling
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (input.required && !input.value.trim()) {
+                    isValid = false;
+                    const errorDiv = input.closest('.form-floating').querySelector('.error-message');
+                    if (!errorDiv) {
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'error-message';
+                        errorMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i> This field is required`;
+                        input.closest('.form-floating').appendChild(errorMessage);
+                    }
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+            } else {
+                form.classList.add('form-submitted');
+            }
+        });
+
+        // Remove error messages on input
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const errorDiv = this.closest('.form-floating').querySelector('.error-message');
+                if (errorDiv && !this.hasAttribute('data-server-error')) {
+                    errorDiv.remove();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

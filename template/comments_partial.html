@@ -1,0 +1,15 @@
+{% load tz %}
+
+{% for comment in comments %}
+<div class="comment-item">
+    <div class="comment-text">{{ comment.comment }}</div>
+    <div class="comment-meta">
+        <span class="author">{{ comment.author.username }}</span>
+        <span class="timestamp">
+            {{ comment.created_at|timezone:"Asia/Kolkata"|date:"M d, Y H:i" }}
+        </span>
+    </div>
+</div>
+{% empty %}
+<div class="text-muted">No comments yet</div>
+{% endfor %}

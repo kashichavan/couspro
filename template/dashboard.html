@@ -1,0 +1,1457 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Enquiry Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Main Variables */
+:root {
+  --primary: #fe7743;
+  --primary-light: #ff9d74;
+  --primary-dark: #e45a23;
+  --secondary: #2c3e50;
+  --secondary-light: #3d5366;
+  --white: #ffffff;
+  --light: #f8f9fa;
+  --gray: #6c757d;
+  --success: #4caf50;
+  --warning: #ffc107;
+  --danger: #f44336;
+  --dark: #343a40;
+  --font-primary: 'Poppins', sans-serif;
+  --font-secondary: 'Space Grotesk', sans-serif;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* Global Styles */
+body {
+  font-family: var(--font-primary);
+  background-color: #f9fafb;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.btn {
+  display: inline-block;
+  font-weight: 500;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.375rem;
+  transition: var(--transition);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(254, 119, 67, 0.2);
+}
+
+.btn:hover {
+  background-color: var(--primary-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(254, 119, 67, 0.3);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Dashboard Stats */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  color: var(--white);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card .stat-icon {
+  font-size: 3rem;
+  opacity: 0.2;
+  position: absolute;
+  bottom: -10px;
+  right: 10px;
+}
+
+.stat-card .stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-secondary);
+}
+
+.stat-card .stat-label {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.section-title h2 {
+  margin-bottom: 0;
+  font-size: 1.8rem;
+  color: var(--secondary);
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin-left: 1rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.action-card {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: var(--transition);
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.action-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.action-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--secondary);
+}
+
+.action-description {
+  font-size: 0.9rem;
+  color: var(--gray);
+  margin-bottom: 1.5rem;
+}
+
+/* Enquiry Table */
+.enquiry-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.enquiry-table th {
+  background-color: var(--secondary);
+  color: var(--white);
+  font-weight: 600;
+  text-align: left;
+  padding: 1rem;
+}
+
+.enquiry-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.enquiry-table tr:last-child td {
+  border-bottom: none;
+}
+
+.enquiry-table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.enquiry-table tr:hover {
+  background-color: rgba(254, 119, 67, 0.05);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: var(--warning);
+}
+
+.status-joined {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--success);
+}
+
+.status-dropout {
+  background-color: rgba(244, 67, 54, 0.15);
+  color: var(--danger);
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(145deg, var(--secondary), var(--secondary-light));
+  color: var(--white);
+  padding: 2.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(44, 62, 80, 0.2);
+}
+
+.welcome-banner h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-secondary);
+}
+
+.welcome-banner p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  max-width: 700px;
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100%;
+  background: url('/api/placeholder/400/320') no-repeat;
+  background-size: contain;
+  background-position: right;
+  opacity: 0.1;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Chart Container */
+.chart-container {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+}
+
+.chart-container:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.chart-title {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  color: var(--secondary);
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.chart-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* Activity Feed */
+.activity-feed {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.activity-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activity-feed::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.activity-feed::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 3px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: var(--transition);
+}
+
+.activity-item:hover {
+  background-color: rgba(254, 119, 67, 0.03);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(254, 119, 67, 0.1);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.activity-item:hover .activity-icon {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+/* Calendar Styles */
+.mini-calendar {
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.mini-calendar:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-title {
+  font-weight: 600;
+  color: var(--secondary);
+  font-size: 1.2rem;
+}
+
+.calendar-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.calendar-nav button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-nav button:hover {
+  background-color: rgba(254, 119, 67, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.calendar-day-name {
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  color: var(--gray);
+}
+
+.calendar-day {
+  text-align: center;
+  padding: 0.5rem 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+
+.calendar-day:hover {
+  background-color: rgba(254, 119, 67, 0.1);
+  transform: scale(1.1);
+}
+
+.calendar-day.today {
+  background-color: var(--primary);
+  color: var(--white);
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(254, 119, 67, 0.3);
+}
+
+.calendar-day.has-events {
+  position: relative;
+  font-weight: 600;
+  color: var(--secondary);
+  border: 2px solid var(--success);
+}
+
+.calendar-day.empty {
+  pointer-events: none;
+  background: none;
+}
+
+/* Performance bars */
+.performance-bar {
+  width: 100%;
+  background-color: #f0f0f0;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.performance-value {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  border-radius: 5px;
+  transition: width 1s ease-in-out;
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: var(--gray);
+}
+
+.loading::after {
+  content: '';
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(254, 119, 67, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark Mode Adjustments */
+body.dark-mode {
+  background-color: #1a1a2e;
+  color: #f0f0f0;
+}
+
+body.dark-mode .action-card,
+body.dark-mode .chart-container,
+body.dark-mode .mini-calendar,
+body.dark-mode .enquiry-table {
+  background-color: #272741;
+  color: #f0f0f0;
+}
+
+body.dark-mode .enquiry-table th {
+  background-color: #1a1a2e;
+}
+
+body.dark-mode .enquiry-table tr:nth-child(even) {
+  background-color: #20203a;
+}
+
+body.dark-mode .enquiry-table tr:hover {
+  background-color: #2f2f4f;
+}
+
+body.dark-mode .enquiry-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .action-description {
+  color: #c3c3d1;
+}
+
+body.dark-mode .section-title h2 {
+  color: #f0f0f0;
+}
+
+body.dark-mode .section-title::after {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .activity-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .activity-time {
+  color: #a0a0b8;
+}
+
+body.dark-mode .chart-title {
+  color: #f0f0f0;
+}
+
+body.dark-mode .performance-bar {
+  background-color: #3a3a5a;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .welcome-banner h1 {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .welcome-banner {
+    padding: 1.5rem;
+  }
+  
+  .welcome-banner h1 {
+    font-size: 1.8rem;
+  }
+  
+  .welcome-banner p {
+    font-size: 1rem;
+  }
+  
+  .stat-card .stat-value {
+    font-size: 2rem;
+  }
+  
+  .welcome-actions {
+    flex-direction: column;
+  }
+  
+  .welcome-actions .btn {
+    width: 100%;
+  }
+  
+  .dashboard-layout {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .action-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .section-title h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card {
+    padding: 1.2rem;
+  }
+  
+  .stat-card .stat-value {
+    font-size: 1.8rem;
+  }
+  
+  .stat-card .stat-label {
+    font-size: 0.9rem;
+  }
+  
+  .enquiry-table th,
+  .enquiry-table td {
+    padding: 0.75rem;
+  }
+}
+
+/* Animation Effects */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Custom checkbox style */
+.custom-checkbox {
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #eee;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: var(--primary);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.custom-checkbox .checkmark:after {
+  left: 7px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
+  z-index: 999;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Additional hover effects */
+.btn, .action-card, .stat-card, .chart-container, .mini-calendar, .calendar-day, .calendar-nav button {
+  will-change: transform;
+}
+
+/* Utilities */
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mt-4 { margin-top: 1.5rem !important; }
+.mt-5 { margin-top: 3rem !important; }
+
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+.text-left { text-align: left !important; }
+
+.fw-bold { font-weight: 700 !important; }
+.fw-semi { font-weight: 600 !important; }
+.fw-normal { font-weight: 400 !important; }
+
+.text-primary { color: var(--primary) !important; }
+.text-secondary { color: var(--secondary) !important; }
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-danger { color: var(--danger) !important; }
+.text-gray { color: var(--gray) !important; }
+.text-white { color: var(--white) !important; }
+
+.bg-primary { background-color: var(--primary) !important; }
+.bg-secondary { background-color: var(--secondary) !important; }
+.bg-success { background-color: var(--success) !important; }
+.bg-warning { background-color: var(--warning) !important; }
+.bg-danger { background-color: var(--danger) !important; }
+.bg-light { background-color: var(--light) !important; }
+.bg-white { background-color: var(--white) !important; }
+
+.d-flex { display: flex !important; }
+.align-items-center { align-items: center !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-center { justify-content: center !important; }
+
+.flex-column { flex-direction: column !important; }
+.flex-1 { flex: 1 !important; }
+
+.rounded { border-radius: 0.375rem !important; }
+.rounded-lg { border-radius: 0.5rem !important; }
+.rounded-circle { border-radius: 50% !important; }
+
+.shadow-sm { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.075) !important; }
+.shadow { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important; }
+.shadow-lg { box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15) !important; }
+
+.cursor-pointer { cursor: pointer !important; }
+
+/* Remove default marker for lists */
+.list-unstyled {
+  list-style: none;
+  padding-left: 0;
+}
+
+/* Link color variations */
+.link-primary { color: var(--primary); }
+.link-primary:hover { color: var(--primary-dark); }
+
+.link-secondary { color: var(--secondary); }
+.link-secondary:hover { color: var(--secondary-light); }
+
+.link-gray { color: var(--gray); }
+.link-gray:hover { color: #495057; }
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  background-color: var(--secondary);
+  color: var(--white);
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--secondary) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<section class="welcome-banner" data-aos="fade-up">
+    <h1>Welcome to EnquiryPortal Dashboard</h1>
+    <p>Manage your enquiries efficiently with our comprehensive dashboard. Track follow-ups, view statistics, and manage your leads all in one place.</p>
+    <div class="welcome-actions">
+        <a href="{% url 'enquiry:add_enquiry' %}" class="btn">Add New Enquiry</a>
+        <a href="{% url 'enquiry:today_followups' %}" class="btn btn-outline">Today's Follow-ups</a>
+    </div>
+</section>
+
+<!-- Stats Cards -->
+<section class="dashboard-stats" data-aos="fade-up" data-aos-delay="100">
+    <div class="stat-card">
+        <div class="stat-value">{{ pending_count }}</div>
+        <div class="stat-label">Pending Enquiries</div>
+        <div class="stat-icon">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ joined_count }}</div>
+        <div class="stat-label">Joined Students</div>
+        <div class="stat-icon">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ dropout_count }}</div>
+        <div class="stat-label">Dropouts</div>
+        <div class="stat-icon">
+            <i class="fas fa-user-times"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-value">{{ today_followup_count }}</div>
+        <div class="stat-label">Today's Follow-ups</div>
+        <div class="stat-icon">
+            <i class="fas fa-phone"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="200">
+    <div class="section-title">
+        <h2>Quick Actions</h2>
+    </div>
+    
+    <div class="quick-actions">
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h3 class="action-title">Add Enquiry</h3>
+            <p class="action-description">Register a new student enquiry</p>
+            <a href="{% url 'enquiry:add_enquiry' %}" class="btn btn-outline">Add Now</a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <h3 class="action-title">Add Counsellor</h3>
+            <p class="action-description">Register a new counsellor</p>
+            <a href="{% url 'enquiry:add_counsellor' %}" class="btn btn-outline">Add Now</a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-phone-alt"></i>
+            </div>
+            <h3 class="action-title">Today's Follow-ups</h3>
+            <p class="action-description">View and manage today's follow-ups</p>
+            <a href="{% url 'enquiry:today_followups' %}" class="btn btn-outline">View Now</a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="action-title">Reports</h3>
+            <p class="action-description">View detailed analytics</p>
+            <a href="#" class="btn btn-outline">View Reports</a>
+        </div>
+    </div>
+</section>
+
+<!-- Two Column Layout -->
+<div class="dashboard-section" data-aos="fade-up" data-aos-delay="300">
+    <div class="section-title">
+        <h2>Recent Activities</h2>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;" class="dashboard-layout">
+        <!-- Recent Enquiries -->
+        <div class="chart-container">
+            <h3 class="chart-title">Recent Enquiries</h3>
+            
+            <div class="table-responsive">
+                <table class="enquiry-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Phone</th>
+                            <th>Follow-up Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enquiry in recent_enquiries %}
+                        <tr>
+                            <td><a href="{% url 'enquiry:enquiry_details' enquiry.id %}">{{ enquiry.name }}</a></td>
+                            <td>{{ enquiry.course }}</td>
+                            <td>{{ enquiry.phone }}</td>
+                            <td>{{ enquiry.followup_date }}</td>
+                            <td>
+                                {% if enquiry.status == 'pending' %}
+                                <span class="status-badge status-pending">Pending</span>
+                                {% elif enquiry.status == 'joined' %}
+                                <span class="status-badge status-joined">Joined</span>
+                                {% elif enquiry.status == 'dropout' %}
+                                <span class="status-badge status-dropout">Dropout</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center;">No recent enquiries found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+        <div class="mini-calendar">
+            <div class="calendar-header">
+                <h3 class="calendar-title" id="calendar-month-year">{{ month_name }} {{ current_year }}</h3>
+            </div>
+        
+            <div id="calendar-container">
+                <div class="calendar-grid">
+                    {% for day_name in weekday_names %}
+                        <div class="calendar-day-name">{{ day_name }}</div>
+                    {% endfor %}
+        
+                    {% for week in calendar_data %}
+                        {% for day in week %}
+                            {% if day == 0 %}
+                                <div class="calendar-day empty"></div>
+                            {% else %}
+                                <div class="calendar-day {% if day == current_day %}today{% endif %} {% if day in followup_dates %}has-events{% endif %}"
+                                     data-date="{{ current_year }}-{{ current_month|stringformat:'02d' }}-{{ day|stringformat:'02d' }}">
+                                    {{ day }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        
+            <div style="margin-top: 1.5rem;">
+                <h4>Upcoming Follow-ups</h4>
+                <div class="activity-feed">
+                    {% for followup in upcoming_followups %}
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-phone-alt"></i></div>
+                                <div class="activity-content">
+                                    <div class="activity-title">
+                                        <a href="{% url 'enquiry:enquiry_details' followup.id %}">
+                                            {{ followup.name }}
+                                        </a> - {{ followup.course }}
+                                    </div>
+                                    <div class="activity-time">{{ followup.followup_date }}</div>
+                                </div>
+                              
+                            
+                            
+                        </div>
+                    {% empty %}
+                        <p>No upcoming follow-ups.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+<!-- Conversion Trends -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="400">
+    <div class="section-title">
+        <h2>Conversion Statistics</h2>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+        <div class="chart-container">
+            <h3 class="chart-title">Status Distribution</h3>
+            <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end;">
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
+                        <div style="background: var(--warning); width: 50px; height: {{ pending_percentage }}px; border-radius: 5px 5px 0 0;"></div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <div>Pending</div>
+                            <div style="font-weight: bold;">{{ pending_count }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
+                        <div style="background: var(--success); width: 50px; height: {{ joined_percentage }}px; border-radius: 5px 5px 0 0;"></div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <div>Joined</div>
+                            <div style="font-weight: bold;">{{ joined_count }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
+                        <div style="background: var(--danger); width: 50px; height: {{ dropout_percentage }}px; border-radius: 5px 5px 0 0;"></div>
+                        <div style="margin-top: 10px; text-align: center;">
+                            <div>Dropout</div>
+                            <div style="font-weight: bold;">{{ dropout_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3 class="chart-title">Conversion Rate by Course</h3>
+            <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                    {% for course in course_stats %}
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <div style="width: 100px; min-width: 100px; margin-right: 10px;">{{ course.name }}</div>
+                        <div style="flex: 1; background-color: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
+                            <div style="width: {{ course.conversion_rate }}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 10px;"></div>
+                        </div>
+                        <div style="margin-left: 10px; font-weight: bold;">{{ course.conversion_rate }}%</div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center;">No course data available.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Counselor Performance -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="600">
+    <div class="section-title">
+        <h2>Counselor Performance</h2>
+    </div>
+    
+    <div class="chart-container">
+        <h3 class="chart-title">Top Performing Counselors</h3>
+        <div class="table-responsive">
+            <table class="enquiry-table">
+                <thead>
+                    <tr>
+                        <th>Counselor</th>
+                        <th>Total Enquiries</th>
+                        <th>Conversions</th>
+                        <th>Conversion Rate</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for counselor in counselor_performance %}
+                    <tr>
+                        <td>{{ counselor.name }}</td>
+                        <td>{{ counselor.total_enquiries }}</td>
+                        <td>{{ counselor.conversions }}</td>
+                        <td>{{ counselor.conversion_rate }}%</td>
+                        <td>
+                            <div style="width: 100%; background-color: #f0f0f0; height: 10px; border-radius: 5px; overflow: hidden;">
+                                <div style="width: {{ counselor.conversion_rate }}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 5px;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center;">No counselor data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Monthly Trend -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="700">
+    <div class="section-title">
+        <h2>Monthly Trends</h2>
+    </div>
+    
+    <div class="chart-container">
+        <h3 class="chart-title">Enquiry & Conversion Trends</h3>
+        <div style="height: 300px; display: flex; flex-direction: column; justify-content: flex-end;">
+            <div style="display: flex; height: 250px; align-items: flex-end; position: relative;">
+                <!-- Y-axis labels -->
+                <div style="position: absolute; height: 100%; left: -40px; display: flex; flex-direction: column; justify-content: space-between; text-align: right;">
+                    <div>50</div>
+                    <div>40</div>
+                    <div>30</div>
+                    <div>20</div>
+                    <div>10</div>
+                    <div>0</div>
+                </div>
+                
+                <!-- X-axis grid lines -->
+                <div style="position: absolute; width: 100%; height: 100%; left: 0; display: flex; flex-direction: column; justify-content: space-between; z-index: 0;">
+                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
+                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
+                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
+                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
+                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
+                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.1);"></div>
+                </div>
+                
+                <!-- Bars -->
+                <div style="flex: 1; display: flex; justify-content: space-around; z-index: 1;">
+                    {% for month in monthly_stats %}
+                    <div style="display: flex; flex-direction: column; align-items: center; width: 60px;">
+                        <div style="display: flex; height: 200px; width: 60px; justify-content: center; align-items: flex-end;">
+                            <!-- Enquiry bar -->
+                            <div style="width: 20px; height: {{ month.total_height }}px; background: var(--primary); border-radius: 2px 2px 0 0; margin-right: 2px;"></div>
+                            <!-- Conversion bar -->
+                            <div style="width: 20px; height: {{ month.conversion_height }}px; background: var(--success); border-radius: 2px 2px 0 0;"></div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.8rem;">{{ month.name }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div style="display: flex; justify-content: center; margin-top: 20px;">
+                <div style="display: flex; align-items: center; margin-right: 20px;">
+                    <div style="width: 15px; height: 15px; background-color: var(--primary); margin-right: 10px; border-radius: 3px;"></div>
+                    <div>Total Enquiries</div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 15px; height: 15px; background-color: var(--success); margin-right: 10px; border-radius: 3px;"></div>
+                    <div>Conversions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Activities Log -->
+<section class="dashboard-section" data-aos="fade-up" data-aos-delay="800">
+    <div class="section-title">
+        <h2>Recent Activities</h2>
+    </div>
+    
+    <div class="chart-container">
+        <h3 class="chart-title">Activity Log</h3>
+        <div class="activity-feed">
+            {% for activity in recent_activities %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    {% if activity.type == 'enquiry' %}
+                    <i class="fas fa-user-plus"></i>
+                    {% elif activity.type == 'followup' %}
+                    <i class="fas fa-phone-alt"></i>
+                    {% elif activity.type == 'status' %}
+                    <i class="fas fa-exchange-alt"></i>
+                    {% elif activity.type == 'counselor' %}
+                    <i class="fas fa-user-tie"></i>
+                    {% else %}
+                    <i class="fas fa-clipboard-check"></i>
+                    {% endif %}
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">{{ activity.message }}</div>
+                    <div class="activity-time">{{ activity.timestamp }}</div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No recent activities found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Calendar functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const calendarTitle = document.getElementById('calendar-month-year');
+        const followupsContainer = document.getElementById('followups-container');
+        
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        
+        // Event listeners for month navigation
+        prevMonthBtn.addEventListener('click', function() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateCalendar();
+        });
+        
+        nextMonthBtn.addEventListener('click', function() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendar();
+        });
+        
+        // Function to update calendar
+        function updateCalendar() {
+            // Display loading state
+            const calendarContainer = document.getElementById('calendar-container');
+            calendarContainer.innerHTML = '<div class="calendar-loading">Loading calendar...</div>';
+            
+            // Display loading state for followups
+            followupsContainer.innerHTML = '<div class="followups-loading">Loading follow-ups...</div>';
+            
+            // Update calendar title
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            // AJAX call to fetch calendar data
+            fetch(`/api/calendar-data/?month=${currentMonth + 1}&year=${currentYear}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Render calendar grid
+                    let calendarHTML = `
+                        <div class="calendar-grid">
+                            <div class="calendar-day-name">Sun</div>
+                            <div class="calendar-day-name">Mon</div>
+                            <div class="calendar-day-name">Tue</div>
+                            <div class="calendar-day-name">Wed</div>
+                            <div class="calendar-day-name">Thu</div>
+                            <div class="calendar-day-name">Fri</div>
+                            <div class="calendar-day-name">Sat</div>
+                    `;
+                    
+                    // Add empty days at the beginning
+                    for (let i = 0; i < data.first_day_of_month; i++) {
+                        calendarHTML += `<div class="calendar-day empty"></div>`;
+                    }
+                    
+                    // Add days of the month
+                    const today = new Date();
+                    for (let day = 1; day <= data.days_in_month; day++) {
+                        const isToday = today.getDate() === day && 
+                                       today.getMonth() === currentMonth && 
+                                       today.getFullYear() === currentYear;
+                        
+                        const hasEvents = data.followup_dates.includes(day);
+                        
+                        calendarHTML += `
+                            <div class="calendar-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}" 
+                                 data-date="${currentYear}-${currentMonth + 1}-${day}">
+                                ${day}
+                            </div>
+                        `;
+                    }
+                    
+                    calendarHTML += `</div>`;
+                    calendarContainer.innerHTML = calendarHTML;
+                    
+                    // Add click event to calendar days
+                    document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
+                        day.addEventListener('click', function() {
+                            const date = this.getAttribute('data-date');
+                            loadFollowups(date);
+                        });
+                    });
+                    
+                    // Load followups for the current month
+                    loadFollowups(`${currentYear}-${currentMonth + 1}`);
+                })
+                .catch(error => {
+                    console.error('Error fetching calendar data:', error);
+                    calendarContainer.innerHTML = '<div class="calendar-loading">Error loading calendar</div>';
+                });
+        }
+        
+        // Function to load followups for a specific date
+        function loadFollowups(date) {
+            // Display loading state
+            followupsContainer.innerHTML = '<div class="followups-loading">Loading follow-ups...</div>';
+            
+            // AJAX call to fetch followups
+            fetch(`/api/followups/?date=${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    let followupsHTML = '';
+                    
+                    if (data.followups.length > 0) {
+                        data.followups.forEach(followup => {
+                            followupsHTML += `
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-phone-alt"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">${followup.name} - ${followup.course}</div>
+                                        <div class="activity-time">${followup.followup_date}</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        followupsHTML = '<p>No follow-ups scheduled for this date.</p>';
+                    }
+                    
+                    followupsContainer.innerHTML = followupsHTML;
+                })
+                .catch(error => {
+                    console.error('Error fetching followups:', error);
+                    followupsContainer.innerHTML = '<div class="followups-loading">Error loading follow-ups</div>';
+                });
+        }
+        
+        // Initialize calendar
+        updateCalendar();
+        
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+    });
+</script>
+{% endblock %}

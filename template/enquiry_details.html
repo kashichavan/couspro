@@ -1,0 +1,1044 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enquiry Details - {{ enquiry.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root {
+    --primary: #FF7730;
+    --primary-light: #FFE0D1;
+    --primary-dark: #E35A17;
+    --white: #FFFFFF;
+    --light-gray: #F8F9FA;
+    --medium-gray: #E9ECEF;
+    --text-dark: #2D3748;
+    --text-muted: #718096;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
+    --radius: 12px;
+}
+
+body {
+    background-color: #F5F7FA;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.enquiry-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+/* Header and Navigation */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+}
+
+.back-button {
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.back-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--white);
+}
+
+.page-title {
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.action-btn {
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: var(--transition);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+}
+
+.primary-btn {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.primary-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    color: var(--white);
+}
+
+.outline-btn {
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.outline-btn:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Main Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cards */
+.card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+}
+
+.card-header {
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header-primary {
+    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+    color: var(--white);
+    border-bottom: none;
+}
+
+.card-title {
+    font-weight: 700;
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-icon {
+    background: rgba(255,255,255,0.2);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+}
+
+.status-pending { 
+    background: #FFF3CD; 
+    color: #856404; 
+}
+
+.status-joined { 
+    background: #D4EDDA; 
+    color: #155724; 
+}
+
+.status-dropout { 
+    background: #F8D7DA; 
+    color: #721C24; 
+}
+
+/* Profile Card */
+.profile-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.profile-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: var(--text-dark);
+}
+
+.profile-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+/* Detail List */
+.detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detail-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    align-items: center;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.detail-content {
+    flex-grow: 1;
+}
+
+.detail-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--primary-light);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.timeline-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+
+/* Comment Section */
+.comment-card {
+    background: var(--light-gray);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--primary);
+    transition: var(--transition);
+}
+
+.comment-card:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.comment-meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.comment-date {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.comment-text {
+    color: var(--text-dark);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #E2E8F0;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    resize: none;
+    transition: var(--transition);
+}
+
+.comment-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.submit-button {
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.submit-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Modals */
+.modal-content {
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary);
+    color: var(--white);
+    border-bottom: none;
+    padding: 1.2rem 1.5rem;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 1rem 1.5rem 1.5rem;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    display: none;
+    overflow: hidden;
+}
+
+.toast-body {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.toast-body::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: var(--primary);
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Scrollbar styling */
+.custom-scrollbar {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--light-gray);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .action-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .detail-icon {
+        margin-bottom: 0.5rem;
+    }
+    
+    .comment-meta {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="enquiry-container">
+    <!-- Header with Navigation -->
+    <div class="page-header" data-aos="fade-down">
+        <div class="breadcrumb-nav">
+            <a href="{% url 'enquiry:enquary_list' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
+            <h1 class="page-title ms-3">Enquiry: {{ enquiry.name }}</h1>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn outline-btn" data-bs-toggle="modal" data-bs-target="#editStatusModal">
+                <i class="fas fa-tag"></i>
+                Change Status
+            </button>
+            
+            <button class="action-btn primary-btn" data-bs-toggle="modal" data-bs-target="#editFollowupModal">
+                <i class="fas fa-calendar-alt"></i>
+                {% if enquiry.followup_date %}Update Follow-up{% else %}Schedule Follow-up{% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+        <!-- Left Column - Main Content -->
+        <div class="main-content">
+            <!-- Course Details Card -->
+            <div class="card" data-aos="fade-up">
+                <div class="card-header card-header-primary">
+                    <h2 class="card-title">
+                        <div class="card-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        Course Details
+                    </h2>
+                    <span class="status-badge status-{{ enquiry.status|lower }}">
+                        <i class="fas fa-circle" style="font-size: 0.7rem;"></i>
+                        {{ enquiry.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <ul class="detail-list">
+                        <li class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="detail-content">
+                                <div class="detail-label">Subject</div>
+                                <div class="detail-value">{{ enquiry.get_subject_display }}</div>
+                            </div>
+                        </li>
+                        <li class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div class="detail-content">
+                                <div class="detail-label">Medium</div>
+                                <div class="detail-value">{{ enquiry.get_medium_display }} Medium</div>
+                            </div>
+                        </li>
+                        <li class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="detail-content">
+                                <div class="detail-label">Counsellor</div>
+                                <div class="detail-value">{{ enquiry.counsellor.name }}</div>
+                            </div>
+                        </li>
+                        <li class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="detail-content">
+                                <div class="detail-label">Follow-up Date</div>
+                                <div class="detail-value">
+                                    {% if enquiry.followup_date %}
+                                        {{ enquiry.followup_date|date:"M d, Y" }}
+                                    {% else %}
+                                        Not scheduled
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Comments Card -->
+            <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-comments" style="color: var(--primary);"></i>
+                        Discussion & Updates
+                    </h2>
+                    <span class="comment-count status-badge" style="background: var(--primary-light); color: var(--primary);">
+                        {{ comments|length }} Comments
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <div class="custom-scrollbar">
+                        {% if comments %}
+                            {% for comment in comments %}
+                            <div class="comment-card" data-aos="fade-up" data-aos-delay="50">
+                                <div class="comment-meta">
+                                    <span class="comment-author">
+                                        <i class="fas fa-user-circle"></i>
+                                        {{ comment.created_by }}
+                                    </span>
+                                    <span class="comment-date">
+                                        <i class="far fa-clock"></i>
+                                        {{ comment.created_at|date:"M d, Y H:i" }}
+                                    </span>
+                                </div>
+                                <p class="comment-text">{{ comment.comment }}</p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4" data-aos="fade-in">
+                                <i class="fas fa-comments" style="font-size: 3rem; color: #E2E8F0; margin-bottom: 1rem;"></i>
+                                <p style="color: var(--text-muted);">No comments yet. Be the first to add one!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <form class="comment-form mt-3" id="commentForm" data-aos="fade-up">
+                        <textarea class="comment-input" 
+                                id="newComment" 
+                                rows="3"
+                                placeholder="Add your comment here..."
+                                required></textarea>
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-paper-plane"></i>
+                            Post Comment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Profile & Timeline -->
+        <div class="sidebar">
+            <!-- Profile Card -->
+            <div class="card" data-aos="fade-left">
+                <div class="card-body profile-card">
+                    <div class="profile-image">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 class="profile-name">{{ enquiry.name }}</h3>
+                    <div class="profile-contact">
+                        <span class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            {{ enquiry.mobile }}
+                        </span>
+                        {% if enquiry.email %}
+                        <span class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            {{ enquiry.email }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <button class="action-btn primary-btn w-100">
+                        <i class="fas fa-phone-alt"></i>
+                        Contact
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Timeline Card -->
+            <div class="card" data-aos="fade-left" data-aos-delay="100">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history" style="color: var(--primary);"></i>
+                        Activity Timeline
+                    </h2>
+                </div>
+                
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                <i class="far fa-calendar"></i>
+                                {{ enquiry.created_at|date:"M d, Y H:i" }}
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Enquiry Created</strong>
+                                <p>New enquiry registered by {{ enquiry.counsellor.name }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if enquiry.followup_date %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                <i class="far fa-calendar-check"></i>
+                                {{ enquiry.followup_date|date:"M d, Y" }}
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Follow-up Scheduled</strong>
+                                <p>Next follow-up date has been set</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if comments %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                <i class="far fa-comment"></i>
+                                {{ comments.last.created_at|date:"M d, Y H:i" }}
+                            </div>
+                            <div class="timeline-content">
+                                <strong>Latest Comment</strong>
+                                <p>By {{ comments.last.created_by }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Follow-up Modal -->
+<div class="modal fade" id="editFollowupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Update Follow-up Date
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label for="followupDateInput" class="form-label">Select new follow-up date:</label>
+                <input type="date" class="form-control" id="followupDateInput" 
+                       value="{{ enquiry.followup_date|date:'Y-m-d' }}">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="submit-button" id="saveFollowup">
+                    <i class="fas fa-save me-1"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Status Modal -->
+<div class="modal fade" id="editStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-tag me-2"></i>
+                    Change Status
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex flex-column gap-2">
+                    <button class="status-badge status-pending w-100 p-3 mb-2" data-status="pending">
+                        <i class="fas fa-hourglass me-2"></i>
+                        Pending
+                    </button>
+                    <button class="status-badge status-joined w-100 p-3 mb-2" data-status="joined">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Joined
+                    </button>
+                    <button class="status-badge status-dropout w-100 p-3" data-status="dropout">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Dropout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <div class="toast-body"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation library
+    const animationScript = document.createElement('script');
+    animationScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js';
+    document.head.appendChild(animationScript);
+    
+    // Add animation stylesheet
+    const animationStyle = document.createElement('link');
+    animationStyle.rel = 'stylesheet';
+    animationStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css';
+    document.head.appendChild(animationStyle);
+    
+    // Initialize animations after script loads
+    animationScript.onload = function() {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 50
+        });
+    };
+
+    // Toast notification function
+    const showToast = (message, type = 'info') => {
+        const toast = document.getElementById('toast');
+        const toastBody = toast.querySelector('.toast-body');
+        
+        // Clear previous content
+        toastBody.innerHTML = '';
+        
+        // Add icon based on type
+        let icon = 'info-circle';
+        if (type === 'success') icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        
+        // Create icon element
+        const iconElement = document.createElement('i');
+        iconElement.className = `fas fa-${icon}`;
+        iconElement.style.color = type === 'success' ? '#28a745' : 
+                                  type === 'error' ? '#dc3545' : 
+                                  '#17a2b8';
+        
+        // Create message element
+        const messageElement = document.createElement('span');
+        messageElement.textContent = message;
+        
+        // Append to toast body
+        toastBody.appendChild(iconElement);
+        toastBody.appendChild(messageElement);
+        
+        // Show toast with animation
+        toast.style.display = 'block';
+        toast.style.animation = 'slideIn 0.3s ease forwards';
+        
+        // Hide after delay
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                toast.style.display = 'none';
+                toast.style.opacity = '1';
+            }, 300);
+        }, 3000);
+    };
+
+    // Comment Form Handling
+    document.getElementById('commentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const comment = document.getElementById('newComment').value;
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        
+        // Disable button and show loading state
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+        
+        try {
+            const response = await fetch('{% url "enquiry:add_comment" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    enquiry_id: '{{ enquiry.id }}',
+                    comment: comment
+                })
+            });
+
+            if (response.ok) {
+                showToast('Comment added successfully!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Failed to add comment', 'error');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
+            }
+        } catch (error) {
+            showToast('Network error occurred', 'error');
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
+        }
+    });
+
+    // Follow-up Date Handling
+    document.getElementById('saveFollowup').addEventListener('click', async () => {
+        const newDate = document.getElementById('followupDateInput').value;
+        const saveButton = document.getElementById('saveFollowup');
+        
+        // Disable button and show loading state
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        
+        try {
+            const response = await fetch('{% url "enquiry:update_followup_date" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    enquiry_id: '{{ enquiry.id }}',
+                    followup_date: newDate
+                })
+            });
+
+            if (response.ok) {
+                showToast('Follow-up date updated successfully!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Failed to update follow-up date', 'error');
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<i class="fas fa-save me-1"></i> Save Changes';
+            }
+        } catch (error) {
+            showToast('Network error occurred', 'error');
+            saveButton.disabled = false;
+            saveButton.innerHTML = '<i class="fas fa-save me-1"></i> Save Changes';
+        }
+    });
+
+    // Status Update Handling
+    document.querySelectorAll('.status-badge[data-status]').forEach(badge => {
+        badge.addEventListener('click', async () => {
+            const newStatus = badge.dataset.status;
+            const statusText = badge.textContent.trim();
+            
+            try {
+                const response = await fetch('{% url "enquiry:update_status" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        enquiry_id: '{{ enquiry.id }}',
+                        new_status: newStatus
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`Status updated to ${statusText}!`, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Failed to update status', 'error');
+                }
+            } catch (error) {
+                showToast('Network error occurred', 'error');
+            }
+        });
+    });
+    
+    // Additional functionality for better UX
+    const handleContactButton = () => {
+        const phoneNumber = '{{ enquiry.mobile }}';
+        window.location.href = `tel:${phoneNumber}`;
+    };
+    
+    // Add click event to contact button if it exists
+    const contactButton = document.querySelector('.action-btn.primary-btn.w-100');
+    if (contactButton) {
+        contactButton.addEventListener('click', handleContactButton);
+    }
+    
+    // Add hover effects to timeline items
+    document.querySelectorAll('.timeline-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            item.style.transform = 'translateX(5px)';
+            item.style.transition = 'transform 0.3s ease';
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            item.style.transform = 'translateX(0)';
+        });
+    });
+    
+    // Add visual feedback to detail items
+    document.querySelectorAll('.detail-item').forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            item.style.backgroundColor = 'var(--light-gray)';
+            item.style.transition = 'background-color 0.3s ease';
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            item.style.backgroundColor = 'transparent';
+        });
+    });
+});
+</script>
+{% endblock %}
