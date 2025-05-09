@@ -938,6 +938,7 @@
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -1098,8 +1099,8 @@ $(document).ready(function() {
         }, 3000);
     }
 
-    // Trigger for opening the date picker modal
-    $('.followup-date').click(function() {
+    // Trigger for opening the date picker modal (fixed for pagination)
+    $(document).on('click', '.followup-date', function() {
         const enquiryId = $(this).data('enquiry-id');
         $('#currentEnquiryId').val(enquiryId);
         $('#datePickerModal').modal('show');
@@ -1208,4 +1209,5 @@ $(document).ready(function() {
     });
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
