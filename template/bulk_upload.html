@@ -4,185 +4,670 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-orange">Bulk Enquiry Upload</h2>
     
-    <div class="card mb-4 shadow">
-        <div class="card-body">
-            <h5 class="card-title text-orange">Instructions</h5>
-            <ul class="list-instructions">
-                <li>Download the template and fill in the data</li>
-                <li>Maintain the exact column order</li>
-                <li>Use exact choice values as shown in parentheses</li>
-                <li>Dates must be in DD-MM-YYYY format</li>
-                <li>Counsellor names must exist in the system</li>
-            </ul>
-            <a href="{% url 'enquiry:download_dummy_template' %}" class="btn btn-download">
-                <i class="fas fa-download"></i> Download Template
-            </a>
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-gradient-orange text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-file-upload me-2"></i>Upload Enquiries</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="instruction-container mb-4">
+                        <h5 class="card-title text-orange border-bottom border-orange pb-2 mb-3">Instructions</h5>
+                        <ul class="instruction-list">
+                            <li>Download the template and fill in all required data</li>
+                            <li>Maintain the exact column order as in the template</li>
+                            <li>Use exact values for choice fields (details below)</li>
+                            <li>All dates must be in <strong>DD-MM-YYYY</strong> format</li>
+                            <li>Counsellor names must match exactly with names in the system</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="template-download mb-4">
+                        <a href="{% url 'enquiry:download_dummy_template' %}" class="btn btn-template">
+                            <i class="fas fa-download me-2"></i> Download Template
+                        </a>
+                    </div>
+                    
+                    <div class="field-guide p-3 mb-4">
+                        <h6 class="text-orange mb-3"><i class="fas fa-exclamation-circle me-2"></i>Required Field Formats:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="format-list">
+                                    <li><strong>Subject:</strong> 
+                                        <span class="badge bg-light text-dark">java_full_stack</span>
+                                        <span class="badge bg-light text-dark">python_full_stack</span>
+                                        <span class="badge bg-light text-dark">other</span>
+                                    </li>
+                                    <li><strong>Status:</strong> 
+                                        <span class="badge bg-success">joined</span>
+                                        <span class="badge bg-warning text-dark">pending</span>
+                                        <span class="badge bg-danger">dropout</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="format-list">
+                                    <li><strong>Enquiry Type:</strong> 
+                                        <span class="badge bg-light text-dark">someone_telephonic</span>
+                                        <span class="badge bg-light text-dark">direct_telephonic</span>
+                                        <span class="badge bg-light text-dark">someone_walkin</span>
+                                        <span class="badge bg-light text-dark">direct_walkin</span>
+                                        <span class="badge bg-light text-dark">telephonic_to_walkin</span>
+                                    </li>
+                                    <li><strong>Dates:</strong> <span class="text-danger">DD-MM-YYYY</span> format (e.g., 21-05-2025)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label class="form-label text-orange fw-bold">{{ form.excel_file.label }}</label>
+                            <div class="custom-file-container">
+                                <input type="file" class="custom-file-input" name="excel_file" id="id_excel_file" accept=".xlsx,.xls">
+                                <label class="custom-file-label" for="id_excel_file">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i>Choose Excel file
+                                </label>
+                                <div class="selected-file mt-2 d-none">
+                                    <span class="selected-file-name"></span>
+                                    <button type="button" class="btn-remove-file">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>Supported formats: .xlsx, .xls
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-upload">
+                            <i class="fas fa-upload me-2"></i> Upload Enquiries
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-lg border-0 rounded-3 h-100">
+                <div class="card-header bg-gradient-orange text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Upload Process</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="process-info">
+                        <p class="mb-3"><i class="fas fa-info-circle text-orange me-2"></i> The system will process your file and:</p>
+                        <ol class="process-steps">
+                            <li>
+                                <div class="step-icon"><i class="fas fa-check-circle"></i></div>
+                                <div class="step-text">Validate all data according to system requirements</div>
+                            </li>
+                            <li>
+                                <div class="step-icon"><i class="fas fa-database"></i></div>
+                                <div class="step-text">Create enquiries for valid records</div>
+                            </li>
+                            <li>
+                                <div class="step-icon"><i class="fas fa-file-excel"></i></div>
+                                <div class="step-text">Generate a report for any failed records</div>
+                            </li>
+                            <li>
+                                <div class="step-icon"><i class="fas fa-download"></i></div>
+                                <div class="step-text">Automatically download failed records with error messages</div>
+                            </li>
+                        </ol>
+                        <div class="alert alert-info border-left-info mt-4">
+                            <div class="alert-icon"><i class="fas fa-lightbulb"></i></div>
+                            <div class="alert-content">
+                                <strong>Note:</strong> If there are any failed records, you'll receive an Excel file with errors highlighted.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
+    
     {% if messages %}
-    <div class="messages">
+    <div class="messages-container">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span>&times;</span>
-            </button>
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                {% if message.tags == 'success' %}
+                <i class="fas fa-check-circle me-2 fs-4"></i>
+                {% elif message.tags == 'error' %}
+                <i class="fas fa-exclamation-triangle me-2 fs-4"></i>
+                {% else %}
+                <i class="fas fa-info-circle me-2 fs-4"></i>
+                {% endif %}
+                <div>{{ message }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <div class="card shadow">
-        <div class="card-body">
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label class="text-orange">{{ form.excel_file.label }}</label>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" name="excel_file" id="id_excel_file">
-                        <label class="custom-file-label" for="id_excel_file">Choose Excel file</label>
-                    </div>
-                    <small class="form-text text-muted">
-                        Supported formats: .xlsx, .xls
-                    </small>
+    <div id="failureContent" class="mt-4 d-none">
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-header bg-warning text-dark py-3">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Failed Records</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning mb-4">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>Some records could not be processed.</strong> Please check the errors below and download the file to fix these issues.
                 </div>
-                <button type="submit" class="btn btn-upload">
-                    <i class="fas fa-upload"></i> Upload Enquiries
-                </button>
-            </form>
+                
+                <div class="text-center mb-4">
+                    <a href="#" id="downloadFailedBtn" class="btn btn-warning">
+                        <i class="fas fa-download me-2"></i>Download Failed Records
+                    </a>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped" id="failedRecordsTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Subject</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Will be populated via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="uploadProgress" class="progress mt-3 mb-4 d-none">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-orange" role="progressbar" 
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+            <span class="progress-text">Processing...</span>
         </div>
     </div>
 </div>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
     --primary-orange: #FF6B00;
     --dark-orange: #CC5500;
     --light-orange: #FFE5D6;
+    --mid-orange: #FF8C40;
+    --warning-yellow: #FFC107;
+    --success-green: #28a745;
+    --danger-red: #dc3545;
+    --info-blue: #17a2b8;
+    --neutral-gray: #6c757d;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
 }
 
 .text-orange {
     color: var(--primary-orange) !important;
 }
 
-.btn-download {
-    background-color: var(--primary-orange);
-    color: white;
-    border-radius: 25px;
-    padding: 8px 20px;
-    transition: all 0.3s ease;
+.bg-orange {
+    background-color: var(--primary-orange) !important;
 }
 
-.btn-download:hover {
-    background-color: var(--dark-orange);
-    color: white;
-    transform: translateY(-1px);
+.bg-gradient-orange {
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange)) !important;
 }
 
-.btn-upload {
-    background-color: var(--primary-orange);
-    color: white;
-    border-radius: 25px;
-    padding: 10px 30px;
-    transition: all 0.3s ease;
+.border-orange {
+    border-color: var(--primary-orange) !important;
 }
 
-.btn-upload:hover {
-    background-color: var(--dark-orange);
-    color: white;
-    transform: translateY(-1px);
-}
-
+/* Card styles */
 .card {
     border: none;
-    border-radius: 15px;
-    transition: transform 0.3s ease;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.card-header {
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+}
+
+.card-title {
+    font-weight: 600;
+}
+
+/* Button styles */
+.btn-template, .btn-upload {
+    background-color: var(--primary-orange);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(255, 107, 0, 0.2);
+}
+
+.btn-template:hover, .btn-upload:hover {
+    background-color: var(--dark-orange);
+    color: white;
     transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 107, 0, 0.3);
 }
 
-.list-instructions {
-    list-style-type: none;
-    padding-left: 1rem;
+.btn-warning {
+    background-color: var(--warning-yellow);
+    color: #212529;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(255, 193, 7, 0.2);
 }
 
-.list-instructions li {
-    margin-bottom: 0.8rem;
-    padding-left: 1.5rem;
+.btn-warning:hover {
+    background-color: #e0a800;
+    color: #212529;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 193, 7, 0.3);
+}
+
+/* Custom file input */
+.custom-file-container {
     position: relative;
-}
-
-.list-instructions li:before {
-    content: "•";
-    color: var(--primary-orange);
-    position: absolute;
-    left: 0;
+    margin-bottom: 1rem;
 }
 
 .custom-file-input {
-    border-color: var(--primary-orange);
-}
-
-.custom-file-input:focus {
-    border-color: var(--dark-orange);
-    box-shadow: 0 0 0 0.2rem rgba(255,107,0,0.25);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
 }
 
 .custom-file-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    background-color: #f8f9fa;
+    border: 2px dashed var(--primary-orange);
+    border-radius: 12px;
+    color: var(--neutral-gray);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.custom-file-label:hover {
+    background-color: var(--light-orange);
+    color: var(--dark-orange);
+}
+
+.selected-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: var(--light-orange);
+    border-radius: 8px;
+    color: var(--dark-orange);
+    font-weight: 500;
+}
+
+.selected-file-name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.alert {
+.btn-remove-file {
+    background: none;
+    border: none;
+    color: var(--dark-orange);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-remove-file:hover {
+    color: var(--danger-red);
+    transform: scale(1.1);
+}
+
+/* Instruction and format lists */
+.instruction-list, .format-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.instruction-list li, .format-list li {
+    margin-bottom: 0.8rem;
+    padding-left: 1.75rem;
+    position: relative;
+}
+
+.instruction-list li:before {
+    content: "•";
+    color: var(--primary-orange);
+    position: absolute;
+    left: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.format-list li:before {
+    content: "→";
+    color: var(--primary-orange);
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+/* Field guide */
+.field-guide {
+    background-color: #f8f9fa;
     border-radius: 10px;
+    border-left: 4px solid var(--primary-orange);
 }
 
-.alert-success {
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.65em;
+    border-radius: 4px;
+    font-size: 0.75em;
+    margin-right: 0.25rem;
+}
+
+/* Process steps */
+.process-steps {
+    list-style-type: none;
+    padding-left: 0;
+    counter-reset: step;
+}
+
+.process-steps li {
+    display: flex;
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.step-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     background-color: var(--light-orange);
-    border-color: var(--primary-orange);
-    color: var(--dark-orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    color: var(--primary-orange);
+    flex-shrink: 0;
 }
 
-.close {
-    color: var(--dark-orange);
+.step-text {
+    padding-top: 8px;
 }
 
-.shadow {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+/* Alert styles */
+.alert {
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-info {
+    background-color: #e6f7ff;
+    color: #0c5460;
+    border: none;
+    display: flex;
+    align-items: flex-start;
+}
+
+.alert-icon {
+    margin-right: 12px;
+    font-size: 1.25rem;
+    color: var(--info-blue);
+}
+
+.border-left-info {
+    border-left: 4px solid var(--info-blue);
+}
+
+/* Progress bar */
+.progress {
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+}
+
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: width 0.6s ease;
+}
+
+.progress-text {
+    position: absolute;
+    text-align: center;
+    line-height: 1;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Failed records table */
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.table tr:hover {
+    background-color: rgba(255, 107, 0, 0.05);
+}
+
+/* Messages */
+.messages-container {
+    margin-bottom: 2rem;
+}
+
+.alert-dismissible {
+    position: relative;
+    padding-right: 4rem;
+}
+
+.btn-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1.25rem;
+    background: transparent;
+    border: 0;
+    font-size: 1.25rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+    .process-steps li {
+        flex-direction: column;
+    }
+    
+    .step-icon {
+        margin-bottom: 10px;
+    }
 }
 </style>
 
 <script>
-document.querySelector('.custom-file-input').addEventListener('change', function(e) {
-    const fileName = document.getElementById("id_excel_file").files[0].name;
-    const label = e.target.nextElementSibling;
-    label.innerText = fileName;
-    label.classList.add('text-orange');
-});
-
-// Add smooth dismissal for alerts
-document.querySelectorAll('.alert .close').forEach(button => {
-    button.addEventListener('click', () => {
-        const alert = button.closest('.alert');
-        alert.style.transition = 'opacity 0.3s';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 300);
+document.addEventListener('DOMContentLoaded', function() {
+    // File input handling
+    const fileInput = document.getElementById('id_excel_file');
+    const fileLabel = document.querySelector('.custom-file-label');
+    const selectedFile = document.querySelector('.selected-file');
+    const selectedFileName = document.querySelector('.selected-file-name');
+    const removeFileBtn = document.querySelector('.btn-remove-file');
+    
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+            fileLabel.classList.add('d-none');
+            selectedFile.classList.remove('d-none');
+            selectedFileName.textContent = fileName;
+        }
     });
-});
-
-// Add hover effect to cards
-document.querySelectorAll('.card').forEach(card => {
-    card.style.cursor = 'pointer';
-    card.addEventListener('mouseenter', () => {
-        card.style.transform = 'translateY(-5px)';
+    
+    removeFileBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        fileLabel.classList.remove('d-none');
+        selectedFile.classList.add('d-none');
+        selectedFileName.textContent = '';
     });
-    card.addEventListener('mouseleave', () => {
-        card.style.transform = 'translateY(0)';
+    
+    // Form submission and progress bar
+    const uploadForm = document.getElementById('uploadForm');
+    const progressBar = document.getElementById('uploadProgress');
+    const progressBarInner = progressBar.querySelector('.progress-bar');
+    
+    uploadForm.addEventListener('submit', function(e) {
+        // Check if a file is selected
+        if (fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Please select a file to upload');
+            return;
+        }
+        
+        // Show progress bar
+        progressBar.classList.remove('d-none');
+        progressBar.classList.add('fade-in');
+        
+        // Simulate progress (since we don't have real-time progress)
+        let width = 0;
+        const interval = setInterval(function() {
+            if (width >= 90) {
+                clearInterval(interval);
+            } else {
+                width += Math.floor(Math.random() * 10) + 1;
+                if (width > 90) width = 90; // Don't reach 100% until complete
+                progressBarInner.style.width = width + '%';
+                progressBarInner.setAttribute('aria-valuenow', width);
+            }
+        }, 300);
+        
+        // Submit form normally - the response will be handled by the server
+        // If there are errors, the file will be downloaded automatically
     });
+    
+    // Handle response for failed records (this would be triggered if there were errors)
+    // Note: In a real implementation, this would be handled by receiving JSON data
+    // from the server or by a redirect to a new page
+    
+    // For demonstration, let's simulate a way to show failed records
+    // This would be populated from the server response in a real implementation
+    function showFailedRecords(failedData) {
+        const failureContent = document.getElementById('failureContent');
+        const failedRecordsTable = document.getElementById('failedRecordsTable').querySelector('tbody');
+        
+        // Clear existing rows
+        failedRecordsTable.innerHTML = '';
+        
+        // Add data rows
+        failedData.forEach(function(record) {
+            const row = document.createElement('tr');
+            
+            const nameCell = document.createElement('td');
+            nameCell.textContent = record.name;
+            
+            const mobileCell = document.createElement('td');
+            mobileCell.textContent = record.mobile;
+            
+            const subjectCell = document.createElement('td');
+            subjectCell.textContent = record.subject;
+            
+            const errorCell = document.createElement('td');
+            errorCell.textContent = record.error;
+            errorCell.classList.add('text-danger');
+            
+            row.appendChild(nameCell);
+            row.appendChild(mobileCell);
+            row.appendChild(subjectCell);
+            row.appendChild(errorCell);
+            
+            failedRecordsTable.appendChild(row);
+        });
+        
+        // Show the failure content
+        failureContent.classList.remove('d-none');
+        failureContent.classList.add('fade-in');
+        
+        // Scroll to the failure content
+        failureContent.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // For demonstration purposes only - would be triggered by real data in production
+    const mockFailedRecordsBtn = document.getElementById('downloadFailedBtn');
+    mockFailedRecordsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // In a real implementation, this would be a download link to the failed records file
+        alert('In a real implementation, this would download the failed records Excel file');
+    });
+    
+    // Auto-close alerts after 8 seconds
+    setTimeout(function() {
+        document.querySelectorAll('.alert').forEach(alert => {
+            if (alert.closest('#failureContent') === null) { // Don't auto-close the failed records alert
+                const closeBtn = alert.querySelector('.btn-close');
+                if (closeBtn) closeBtn.click();
+            }
+        });
+    }, 8000);
 });
 </script>
-{% endblock %}
+{% endblock %}      

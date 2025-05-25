@@ -1,0 +1,1255 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ title }} - Enquiry Portal{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    :root {
+        --primary-orange: #ff7f00;
+        --dark-orange: #e67300;
+        --light-orange: #ffae42;
+        --orange-50: #fff5e6;
+        --orange-100: #ffe0b3;
+        --gray-50: #f8f9fa;
+        --gray-100: #f1f3f4;
+        --gray-600: #6c757d;
+        --gray-900: #212529;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+        --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+        --border-radius: 12px;
+        --border-radius-sm: 8px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--gray-50);
+        color: var(--gray-900);
+        line-height: 1.6;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .export-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        transition: var(--transition);
+        backdrop-filter: blur(10px);
+    }
+
+    .export-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Tab Navigation - Made smaller and more compact */
+    .tab-navigation {
+        background: white;
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--shadow-sm);
+        padding: 0.25rem;
+        margin-bottom: 2rem;
+        display: inline-flex;
+        gap: 0.25rem;
+        width: auto;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 1rem;
+        border-radius: calc(var(--border-radius-sm) - 2px);
+        font-weight: 500;
+        font-size: 0.85rem;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        background: transparent;
+        color: var(--gray-600);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        white-space: nowrap;
+        min-width: 100px;
+    }
+
+    .tab-btn:hover {
+        background-color: var(--orange-50);
+        color: var(--primary-orange);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tab-btn i {
+        font-size: 0.8rem;
+    }
+
+    /* Search Section */
+    .search-section1 {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control {
+        border: 2px solid var(--gray-100);
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: var(--transition);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 0.2rem rgba(255, 127, 0, 0.1);
+    }
+
+    .input-group-text {
+        background-color: var(--orange-50);
+        border: 2px solid var(--gray-100);
+        color: var(--dark-orange);
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        border: none;
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid var(--primary-orange);
+        color: var(--primary-orange);
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-orange);
+        border-color: var(--primary-orange);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Data Card */
+    .data-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .data-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .count-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+
+    .badge-today {
+        background-color: var(--danger-color);
+        animation: pulse 2s infinite;
+    }
+
+    .badge-past {
+        background-color: #dc2626;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    /* Table Styles */
+    .table-container {
+        padding: 2rem;
+    }
+
+    .custom-table {
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .custom-table thead th {
+        background-color: var(--orange-50);
+        color: var(--dark-orange);
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        border: none;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .custom-table thead th:first-child {
+        border-radius: var(--border-radius-sm) 0 0 0;
+    }
+
+    .custom-table thead th:last-child {
+        border-radius: 0 var(--border-radius-sm) 0 0;
+    }
+
+    .custom-table tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: var(--orange-50);
+        transform: scale(1.01);
+    }
+
+    .custom-table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    /* Student Avatar */
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .student-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.125rem;
+        flex-shrink: 0;
+    }
+
+    .student-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--gray-900);
+        font-size: 0.95rem;
+    }
+
+    .student-details .text-muted {
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        font-size: 0.875rem;
+        transition: var(--transition);
+    }
+
+    .btn-action-primary {
+        background-color: var(--primary-orange);
+        color: white;
+    }
+    
+    .btn-action-primary:hover {
+        background-color: var(--dark-orange);
+        transform: scale(1.1);
+    }
+
+    .btn-action-outline {
+        background-color: transparent;
+        border: 2px solid var(--primary-orange);
+        color: var(--primary-orange);
+    }
+
+    .btn-action-outline:hover {
+        background-color: var(--primary-orange);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    /* Due Date Badge - Normal rectangular style instead of rounded */
+    .due-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 4px; /* Changed from 50px to 4px for normal rectangular style */
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .due-badge-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* Amount Display */
+    .amount {
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+    }
+
+    .amount-danger {
+        color: var(--danger-color);
+    }
+
+    .amount-success {
+        color: var(--success-color);
+    }
+
+    /* Balance Info in Modal */
+    .balance-info {
+        background-color: var(--orange-50);
+        border: 1px solid var(--orange-100);
+        border-radius: var(--border-radius-sm);
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .balance-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .balance-item:last-child {
+        margin-bottom: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--orange-100);
+    }
+
+    .balance-label {
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .balance-value {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+    }
+
+    .balance-remaining {
+        color: var(--danger-color);
+    }
+
+    /* No Data State */
+    .no-data {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--gray-600);
+    }
+
+    .no-data-icon {
+        font-size: 4rem;
+        color: var(--light-orange);
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+
+    .no-data h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--gray-900);
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .pagination .page-link {
+        border: none;
+        color: var(--primary-orange);
+        margin: 0 0.25rem;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .pagination .page-link:hover {
+        background-color: var(--orange-50);
+        color: var(--dark-orange);
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary-orange);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: var(--gray-600);
+        opacity: 0.5;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        color: white;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--gray-100);
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .toast {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(10px);
+    }
+
+    .toast-header {
+        border-bottom: none;
+        font-weight: 600;
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .slide-in {
+        animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem 0;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        .tab-navigation {
+            flex-direction: column;
+            gap: 0.25rem;
+            width: 100%;
+        }
+        
+        .tab-btn {
+            min-width: auto;
+        }
+        
+        .search-section {
+            padding: 1.5rem;
+        }
+        
+        .table-container {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .custom-table {
+            min-width: 800px;
+        }
+        
+        .student-info {
+            gap: 0.75rem;
+        }
+        
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+    }
+
+    .btn-action-info {
+     background-color: var(--primary-orange);
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-action-info:hover {
+     background-color: var(--primary-orange);
+    color: #fff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Toast Container -->
+<div class="toast-container"></div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="page-title">
+                <i class="fas fa-money-bill-wave"></i>
+                Payment Dues Management
+            </h1>
+            <a href="{% url 'enquiry:export_payment_due' due_type %}" class="export-btn">
+                <i class="fas fa-file-export me-2"></i>
+                Export CSV
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container fade-in">
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <a href="{% url 'enquiry:today_payment_due' %}" class="tab-btn {% if due_type == 'today' %}active{% endif %}">
+            <i class="fas fa-calendar-day"></i>
+            Today's Due
+        </a>
+        <a href="{% url 'enquiry:past_payment_due' %}" class="tab-btn {% if due_type == 'past' %}active{% endif %}">
+            <i class="fas fa-history"></i>
+            Past Due
+        </a>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section1 slide-in">
+        <h4 class="search-title">
+            <i class="fas fa-search"></i>
+            Search & Filter
+        </h4>
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-user-tie"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control" 
+                           name="search_counsellor" 
+                           placeholder="Search by counsellor name" 
+                           value="{{ search_counsellor }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>
+                    Search
+                </button>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'enquiry:today_payment_due' %}" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-redo me-2"></i>
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Data Card -->
+    <div class="data-card fade-in">
+        <div class="card-header-custom">
+            {% if due_type == 'today' %}
+            <h5 class="card-title">
+                <i class="fas fa-calendar-day"></i>
+                Today's Payment Due ({{ today|date:"d M, Y" }})
+            </h5>
+            <span class="count-badge badge-today">
+                {{ page_obj.paginator.count }} Students
+            </span>
+            {% else %}
+            <h5 class="card-title">
+                <i class="fas fa-history"></i>
+                Past Payment Due (Before {{ today|date:"d M, Y" }})
+            </h5>
+            <span class="count-badge badge-past">
+                {{ page_obj.paginator.count }} Students
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="table-container">
+            {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="20%">Student</th>
+                            <th width="12%">Counsellor</th>
+                            <th width="12%">Course</th>
+                            <th width="8%">Total Fees</th>
+                            <th width="8%">Paid</th>
+                            <th width="8%">Balance</th>
+                            {% if due_type == 'past' %}
+                            <th width="10%">Due Date</th>
+                            {% endif %}
+                            <th width="{% if due_type == 'past' %}17%{% else %}22%{% endif %}">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in page_obj %}
+                        <tr class="slide-in" 
+                            style="animation-delay: {{ forloop.counter0|floatformat:1 }}00ms"
+                            data-id="{{ student.id }}" 
+                            data-name="{{ student.name }}" 
+                            data-balance="{{ student.fees_balance }}" 
+                            data-due-date="{{ student.due_date|date:'Y-m-d' }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <div class="student-info">
+                                    <div class="student-avatar" style="background: {% cycle 'linear-gradient(135deg, #667eea, #764ba2)' 'linear-gradient(135deg, #f093fb, #f5576c)' 'linear-gradient(135deg, #4facfe, #00f2fe)' 'linear-gradient(135deg, #43e97b, #38f9d7)' 'linear-gradient(135deg, #fa709a, #fee140)' %}">
+                                        {{ student.name|slice:":1" }}
+                                    </div>
+                                    <div class="student-details">
+                                        <h6>{{ student.name }}</h6>
+                                        <p class="text-muted">{{ student.mobile }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-medium">{{ student.counsellor.name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ student.get_subject_display }}</span>
+                            </td>
+                            <td>
+                                <span class="amount">₹{{ student.target_fees|floatformat:0 }}</span>
+                            </td>
+                            <td>
+                                <span class="amount amount-success">₹{{ student.fees_paid|floatformat:0 }}</span>
+                            </td>
+                            <td>
+                                <span class="amount amount-danger">₹{{ student.fees_balance|floatformat:0 }}</span>
+                            </td>
+                            {% if due_type == 'past' %}
+                            <td>
+                                <span class="due-badge due-badge-danger">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ student.due_date|date:"d M, Y" }}
+                                </span>
+                            </td>
+                            {% endif %}
+                            <td>
+                                <div class="action-buttons">
+                                   <a href="{% url 'enquiry:enquiry_details' student.id %}" 
+   class="btn-action btn-action-outline" 
+   title="View Details">
+    <i class="fas fa-eye"></i>
+</a>
+                                    <button class="btn-action btn-action-outline update-payment-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#updatePaymentModal"
+                                            data-id="{{ student.id }}" 
+                                            data-name="{{ student.name }}" 
+                                            data-balance="{{ student.fees_balance }}"
+                                            title="Update Payment">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </button>
+                                    <button class="btn-action btn-action-outline update-date-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#updateDueDateModal"
+                                            data-id="{{ student.id }}" 
+                                            data-name="{{ student.name }}" 
+                                            data-due-date="{{ student.due_date|date:'Y-m-d' }}"
+                                            title="Update Due Date">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-data">
+                <div class="no-data-icon">
+                    {% if due_type == 'today' %}
+                    <i class="fas fa-coins"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle"></i>
+                    {% endif %}
+                </div>
+                <h5>
+                    {% if due_type == 'today' %}
+                    No payment dues for today
+                    {% else %}
+                    No past payment dues
+                    {% endif %}
+                </h5>
+                <p class="text-muted">
+                    {% if due_type == 'today' %}
+                    There are no students with payment due today.
+                    {% else %}
+                    There are no students with overdue payments.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination-container">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if search_counsellor %}&search_counsellor={{ search_counsellor }}{% endif %}" aria-label="First">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_counsellor %}&search_counsellor={{ search_counsellor }}{% endif %}" aria-label="Previous">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_counsellor %}&search_counsellor={{ search_counsellor }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_counsellor %}&search_counsellor={{ search_counsellor }}{% endif %}" aria-label="Next">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_counsellor %}&search_counsellor={{ search_counsellor }}{% endif %}" aria-label="Last">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Update Payment Modal -->
+<!-- Update Payment Modal -->
+<div class="modal fade" id="updatePaymentModal" tabindex="-1" aria-labelledby="updatePaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updatePaymentModalLabel">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Update Payment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updatePaymentForm">
+                    <input type="hidden" id="payment_enquiry_id">
+
+                    <!-- Balance Fees Display -->
+                    <div class="mb-3">
+                        <label for="balanceFees" class="form-label fw-semibold">Balance Fees</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="text" class="form-control" id="balanceFees" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Payment Amount Input -->
+                    <div class="mb-3">
+                        <label for="paymentAmount" class="form-label fw-semibold">Payment Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="paymentAmount" min="1" step="1" required>
+                        </div>
+                        <div class="form-text text-muted">Enter the amount received from the student</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitPayment">
+                    <i class="fas fa-check me-2"></i>
+                    Update Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Due Date Modal -->
+<div class="modal fade" id="updateDueDateModal" tabindex="-1" aria-labelledby="updateDueDateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateDueDateModalLabel">
+                    <i class="fas fa-calendar-alt"></i>
+                    Update Due Date
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateDueDateForm">
+                    <input type="hidden" id="duedate_student_id">
+                    <div class="mb-3">
+                        <label for="dueDateStudentName" class="form-label fw-semibold">Student Name</label>
+                        <input type="text" class="form-control" id="dueDateStudentName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="currentDueDate" class="form-label fw-semibold">Current Due Date</label>
+                        <input type="text" class="form-control" id="currentDueDate" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newDueDate" class="form-label fw-semibold">New Due Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="text" class="form-control datepicker" id="newDueDate" placeholder="Select a date" required>
+                        </div>
+                        <div class="form-text text-muted">Select a new due date for payment</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitDueDate">
+                    <i class="fas fa-check me-2"></i>
+                    Update Due Date
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize modals
+    const paymentModal = new bootstrap.Modal(document.getElementById('updatePaymentModal'));
+    const dateModal = new bootstrap.Modal(document.getElementById('updateDueDateModal'));
+    
+    // Initialize datepicker
+    flatpickr('.datepicker', {
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        allowInput: true,
+        theme: "material_orange"
+    });
+
+    // Payment Modal Handlers
+    const updatePaymentBtns = document.querySelectorAll('.update-payment-btn');
+    updatePaymentBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const studentId = this.dataset.id;
+            const balance = this.dataset.balance;
+
+            document.getElementById('payment_enquiry_id').value = studentId;
+            document.getElementById('balanceFees').value = parseFloat(balance).toFixed(0);
+            document.getElementById('paymentAmount').value = '';
+            paymentModal.show();
+
+            setTimeout(() => document.getElementById('paymentAmount').focus(), 300);
+        });
+    });
+
+    // Due Date Modal Handlers
+    const updateDateBtns = document.querySelectorAll('.update-date-btn');
+    updateDateBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const studentId = this.dataset.id;
+            const studentName = this.dataset.name;
+            const dueDate = this.dataset.dueDate;
+            
+            document.getElementById('duedate_student_id').value = studentId;
+            document.getElementById('dueDateStudentName').value = studentName;
+            document.getElementById('currentDueDate').value = formatDateForDisplay(dueDate);
+            document.getElementById('newDueDate').value = '';
+            dateModal.show();
+        });
+    });
+
+    // Modal Cleanup Handlers
+    [paymentModal, dateModal].forEach(modal => {
+        modal._element.addEventListener('hidden.bs.modal', () => {
+            // Remove backdrop elements
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Reset body styling
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+        });
+    });
+
+    // Submit Payment
+    document.getElementById('submitPayment').addEventListener('click', function() {
+        const enquiryId = document.getElementById('payment_enquiry_id').value;
+        const paymentAmountInput = document.getElementById('paymentAmount');
+        const paymentAmount = paymentAmountInput.value;
+        const balanceFees = parseFloat(document.getElementById('balanceFees').value);
+
+        if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
+            showToast('Validation Error', 'Please enter a valid payment amount', 'error');
+            return;
+        }
+
+        if (parseFloat(paymentAmount) > balanceFees) {
+            showToast('Validation Error', 'Payment amount cannot exceed balance fees', 'error');
+            return;
+        }
+
+        const submitBtn = this;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        submitBtn.disabled = true;
+
+        fetch('{% url "enquiry:update_payment" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `enquiry_id=${encodeURIComponent(enquiryId)}&payment_amount=${encodeURIComponent(paymentAmount)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updatePaymentInTable(enquiryId, data);
+                showToast('Success', 'Payment updated successfully!', 'success');
+                paymentModal.hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('Error', data.message || 'Failed to update payment', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Network Error', 'Please check your connection and try again', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Submit Due Date
+    document.getElementById('submitDueDate').addEventListener('click', function() {
+        const studentId = document.getElementById('duedate_student_id').value;
+        const newDueDate = document.getElementById('newDueDate').value;
+        
+        if (!newDueDate) {
+            showToast('Validation Error', 'Please select a new due date', 'error');
+            return;
+        }
+        
+        const submitBtn = this;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+        submitBtn.disabled = true;
+        
+        fetch('{% url "enquiry:update_due_date" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `student_id=${studentId}&new_due_date=${newDueDate}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDueDateInTable(studentId, newDueDate);
+                showToast('Success', 'Due date updated successfully!', 'success');
+                dateModal.hide();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('Error', data.message || 'Failed to update due date', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Network Error', 'Please check your connection and try again', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Helper Functions
+    function updatePaymentInTable(enquiryId, data) {
+        const row = document.querySelector(`tr[data-id="${enquiryId}"]`);
+        if (row) {
+            const balanceCell = row.querySelector('td:nth-child(7) .amount-danger');
+            const paidCell = row.querySelector('td:nth-child(6) .amount-success');
+            
+            if (balanceCell && paidCell) {
+                balanceCell.textContent = `₹${parseFloat(data.new_balance).toFixed(0)}`;
+                paidCell.textContent = `₹${parseFloat(data.new_paid).toFixed(0)}`;
+                row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                setTimeout(() => row.style.backgroundColor = '', 2000);
+            }
+        }
+    }
+
+    function updateDueDateInTable(studentId, newDueDate) {
+        const row = document.querySelector(`tr[data-id="${studentId}"]`);
+        if (row) {
+            const dueDateCell = row.querySelector('.due-badge');
+            if (dueDateCell) {
+                dueDateCell.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${formatDateForDisplay(newDueDate)}`;
+            }
+            row.dataset.dueDate = newDueDate;
+            row.style.backgroundColor = 'rgba(255, 127, 0, 0.1)';
+            setTimeout(() => row.style.backgroundColor = '', 2000);
+        }
+    }
+
+    function showToast(title, message, type = 'info') {
+        const toastContainer = document.querySelector('.toast-container');
+        const toastId = 'toast-' + Date.now();
+        
+        const typeConfig = {
+            success: { bg: 'bg-success', icon: 'fa-check-circle' },
+            error: { bg: 'bg-danger', icon: 'fa-exclamation-circle' },
+            warning: { bg: 'bg-warning', icon: 'fa-exclamation-triangle' },
+            info: { bg: 'bg-info', icon: 'fa-info-circle' }
+        };
+        
+        const config = typeConfig[type] || typeConfig.info;
+        
+        const toastHTML = `
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                <div class="toast-header ${config.bg} text-white">
+                    <i class="fas ${config.icon} me-2"></i>
+                    <strong class="me-auto">${title}</strong>
+                    <small>Just now</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        new bootstrap.Toast(document.getElementById(toastId)).show();
+        
+        document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function formatDateForDisplay(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: '2-digit' 
+        });
+    }
+
+    // Table interactions
+    document.querySelectorAll('.custom-table tbody tr').forEach(row => {
+        row.addEventListener('mouseenter', () => {
+            row.style.transform = 'scale(1.02)';
+            row.style.zIndex = '1';
+        });
+        row.addEventListener('mouseleave', () => {
+            row.style.transform = '';
+            row.style.zIndex = '';
+        });
+    });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,764 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Counsellor Summary{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts: Modern trending fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- DataTables with styling -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<!-- Custom CSS -->
+<style>
+    :root {
+        --primary-orange: #ff7a00;
+        --light-orange: #fff0e6;
+        --dark-orange: #e05f00;
+        --white: #ffffff;
+        --light-gray: #f7f7f7;
+        --text-dark: #333333;
+        --text-gray: #666666;
+        --accent-blue: #3498db;
+        --accent-green: #2ecc71;
+        --accent-red: #e74c3c;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--light-gray);
+        color: var(--text-dark);
+    }
+    
+    .app-wrapper {
+        padding: 30px;
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        border-radius: 12px;
+        padding: 20px 25px;
+        box-shadow: 0 6px 16px rgba(255, 122, 0, 0.15);
+    }
+    
+    .dashboard-title {
+        font-weight: 600;
+        font-size: 26px;
+        color: white;
+        margin: 0;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .dashboard-title i {
+        margin-right: 10px;
+    }
+    
+    .btn-orange {
+        background-color: white;
+        border-color: white;
+        color: var(--primary-orange);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 8px;
+    }
+    
+    .btn-orange:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-outline-orange {
+        color: var(--primary-orange);
+        border-color: var(--primary-orange);
+        background-color: transparent;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-orange:hover {
+        background-color: var(--primary-orange);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(255, 122, 0, 0.2);
+    }
+    
+    .filter-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        border: none;
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .data-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .data-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+        color: white;
+        padding: 18px 24px;
+        border: none;
+    }
+    
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .card-body {
+        padding: 24px;
+    }
+    
+    .form-control {
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.15);
+    }
+    
+    label {
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: var(--text-gray);
+        font-weight: 500;
+    }
+    
+    .form-group {
+        margin-right: 15px;
+    }
+    
+    table.dataTable {
+        border-collapse: collapse;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    table.dataTable thead th {
+        background-color: var(--light-orange);
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 14px 15px;
+        border-bottom: 2px solid var(--primary-orange);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    table.dataTable tbody td {
+        padding: 14px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+        vertical-align: middle;
+        transition: all 0.2s ease;
+    }
+    
+    table.dataTable tbody tr {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    table.dataTable tbody tr:hover {
+        background-color: rgba(255, 122, 0, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .counsellor-name {
+        font-weight: 600;
+        color: var(--primary-orange);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .counsellor-name:hover {
+        color: var(--dark-orange);
+        text-decoration: underline;
+    }
+    
+    .dataTables_wrapper .dataTables_info, 
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 15px;
+        font-size: 14px;
+        padding: 10px 0;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary-orange);
+        color: white !important;
+        border: 1px solid var(--primary-orange);
+        border-radius: 4px;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: var(--light-orange);
+        color: var(--primary-orange) !important;
+        border: 1px solid var(--light-orange);
+    }
+    
+    .dataTables_filter input {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .dataTables_filter input:focus {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.15);
+        outline: none;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .status-joined {
+        background-color: #e6fff0;
+        color: #00a037;
+    }
+    
+    .status-pending {
+        background-color: #fff9e6;
+        color: #c19000;
+    }
+    
+    .status-dropout {
+        background-color: #ffebeb;
+        color: #d30000;
+    }
+    
+    .fees-collected {
+        font-weight: 600;
+        color: #00a037;
+    }
+    
+    .fees-pending {
+        font-weight: 600;
+        color: #d30000;
+    }
+    
+    .loading-spinner {
+        display: none;
+        margin: 0 auto;
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 122, 0, 0.2);
+        border-radius: 50%;
+        border-top-color: var(--primary-orange);
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+    
+    .stat-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-orange), var(--dark-orange));
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+    
+    .stat-icon {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: var(--primary-orange);
+        background: var(--light-orange);
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+        background: var(--primary-orange);
+        color: white;
+    }
+    
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-wrapper">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header fade-in">
+        <h1 class="dashboard-title"><i class="fas fa-chart-line"></i> Monthly Summary by Counsellor</h1>
+        <div>
+            <a href="{% url 'enquiry:download_monthly_summary_by_counsellor_excel' %}?month={{ selected_month }}&status={{ status_filter }}"
+            class="btn btn-orange">
+                <i class="fas fa-file-excel"></i> Download Excel
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview fade-in">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-value" id="total-students">{{ stats|length }}</div>
+            <div class="stat-label">Total Counsellors</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+            <div class="stat-value" id="total-joined">0</div>
+            <div class="stat-label">Total Joined</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-user-clock"></i></div>
+            <div class="stat-value" id="total-pending">0</div>
+            <div class="stat-label">Total Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-user-minus"></i></div>
+            <div class="stat-value" id="total-dropout">0</div>
+            <div class="stat-label">Total Dropouts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="stat-value" id="total-fees">₹0</div>
+            <div class="stat-label">Total Fees Collected</div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="filter-card mb-4 fade-in">
+        <form id="filter-form" method="get" class="d-flex flex-wrap align-items-end gap-3">
+            <div class="form-group">
+                <label for="month" class="fw-semibold"><i class="fas fa-calendar-alt"></i> Select Month:</label>
+                <select id="month" name="month" class="form-control rounded-md">
+                    <option value="">All</option>
+                    {% for value, label in month_choices %}
+                        <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="status" class="fw-semibold"><i class="fas fa-filter"></i> Status:</label>
+                <select id="status" name="status" class="form-control rounded-md">
+                    <option value="">All</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="joined" {% if status_filter == 'joined' %}selected{% endif %}>Joined</option>
+                    <option value="dropout" {% if status_filter == 'dropout' %}selected{% endif %}>Dropout</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-orange" id="filter-btn">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+                <button type="button" id="reset-btn" class="btn btn-outline-orange ms-2">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Container -->
+    <div class="data-card fade-in">
+        <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-table"></i> Summary by Counsellor</h2>
+            <div class="table-controls">
+                <button id="refresh-btn" class="btn btn-sm btn-outline-orange">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+        <div class="card-body position-relative">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay" style="display: none;">
+                <div class="loading-spinner">
+                    <div class="spinner-border text-orange" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading data...</p>
+                </div>
+            </div>
+            
+            <!-- Data Table -->
+            <div id="data-table-wrapper" class="data-table-wrapper">
+                <table id="counsellor-table" class="dataTable stripe hover">
+                    <thead>
+                        <tr>
+                            <th>Counsellor</th>
+                            <th>Total Students</th>
+                            <th>Joined</th>
+                            <th>Pending</th>
+                            <th>Dropout</th>
+                            <th>Fees Collected</th>
+                            <th>Pending Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        {% for stat in stats %}
+                        <tr data-counsellor-id="{{ stat.counsellor_id }}" class="table-row">
+                            <td class="counsellor-cell">
+                                {% if stat.counsellor.id and current_year and current_month %}
+                                    <a href="{% url 'enquiry:counsellor_monthly_details' counsellor_id=stat.counsellor.id year=current_year month=current_month %}" 
+                                       class="counsellor-name text-decoration-none">
+                                        <i class="fas fa-user-tie me-1"></i>
+                                        {{ stat.counsellor.name }}
+                                    </a>
+                                {% else %}
+                                    <span class="counsellor-name">
+                                        <i class="fas fa-user-tie me-1"></i>
+                                        {{ stat.counsellor.name }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">{{ stat.total_students }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="status-badge status-joined">{{ stat.joined }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="status-badge status-pending">{{ stat.pending }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="status-badge status-dropout">{{ stat.dropout }}</span>
+                            </td>
+                            <td class="fees-collected text-end">
+                                <span class="fee-amount">₹{{ stat.fees_paid|intcomma }}</span>
+                            </td>
+                            <td class="fees-pending text-end">
+                                <span class="fee-amount text-danger">₹{{ stat.fees_balance|intcomma }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr id="no-data-row">
+                            <td colspan="7" class="text-center py-4">
+                                <div class="no-data-message">
+                                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No data found</h5>
+                                    <p class="text-muted">Try adjusting your filters to see results.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="alert alert-danger" style="display: none;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="error-text">An error occurred while loading data.</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<!-- Chart.js for potential graphing features -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable with features
+        let table = initializeDataTable();
+        
+        // Calculate and update stats on page load
+        updateSummaryStats();
+        
+        // Function to initialize DataTable
+        function initializeDataTable() {
+            // Destroy existing table if it exists
+            if ($.fn.DataTable.isDataTable('#counsellor-table')) {
+                $('#counsellor-table').DataTable().destroy();
+            }
+            
+            return $('#counsellor-table').DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                dom: '<"top"lf>rt<"bottom"ip>',
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search counsellors...",
+                    zeroRecords: "No counsellors found",
+                    info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
+                    infoEmpty: "Showing 0 to 0 of 0 counsellors",
+                    infoFiltered: "(filtered from _MAX_ total counsellors)"
+                },
+                initComplete: function() {
+                    // Add custom filter styling
+                    $('.dataTables_filter input').addClass('form-control');
+                    $('.dataTables_length select').addClass('form-control');
+                }
+            });
+        }
+        
+        // Function to update the summary stats
+        function updateSummaryStats() {
+            let totalJoined = 0;
+            let totalPending = 0;
+            let totalDropout = 0;
+            let totalFees = 0;
+            
+            $('#counsellor-table tbody tr').each(function() {
+                const joined = parseInt($(this).find('td:eq(2)').text().trim()) || 0;
+                const pending = parseInt($(this).find('td:eq(3)').text().trim()) || 0;
+                const dropout = parseInt($(this).find('td:eq(4)').text().trim()) || 0;
+                
+                // Extract fees (removing ₹ and commas)
+                const feesText = $(this).find('td:eq(5)').text().trim().replace('₹', '').replace(/,/g, '');
+                const fees = parseInt(feesText) || 0;
+                
+                totalJoined += joined;
+                totalPending += pending;
+                totalDropout += dropout;
+                totalFees += fees;
+            });
+            
+            // Format numbers with commas
+            const formattedFees = new Intl.NumberFormat('en-IN', {
+                maximumFractionDigits: 0
+            }).format(totalFees);
+            
+            // Update the stat cards with animation
+            animateCounter($('#total-joined'), totalJoined);
+            animateCounter($('#total-pending'), totalPending);
+            animateCounter($('#total-dropout'), totalDropout);
+            animateCounter($('#total-fees'), '₹' + formattedFees, true);
+        }
+        
+        // Function to animate counting up
+        function animateCounter($element, targetValue, isText = false) {
+            const start = 0;
+            const duration = 1500; // Longer animation for better effect
+            const startTime = new Date().getTime();
+            const endTime = startTime + duration;
+            
+            const runAnimation = () => {
+                const now = new Date().getTime();
+                const remaining = Math.max((endTime - now) / duration, 0);
+                const value = Math.round(targetValue - (remaining * targetValue));
+                
+                if (isText) {
+                    if (typeof targetValue === 'string' && targetValue.includes('₹')) {
+                        const numVal = parseInt(targetValue.replace('₹', '').replace(/,/g, ''));
+                        const currentVal = Math.round(numVal - (remaining * numVal));
+                        const formattedVal = new Intl.NumberFormat('en-IN', {
+                            maximumFractionDigits: 0
+                        }).format(currentVal);
+                        $element.text('₹' + formattedVal);
+                    } else {
+                        $element.text(value);
+                    }
+                } else {
+                    $element.text(value);
+                }
+                
+                if (remaining > 0) {
+                    requestAnimationFrame(runAnimation);
+                }
+            };
+            
+            runAnimation();
+        }
+        
+        // AJAX Filter Form Submission
+        $('#filter-form').on('submit', function(e) {
+            e.preventDefault();
+            updateTableWithAjax();
+        });
+        
+        // Reset button functionality
+        $('#reset-btn').on('click', function() {
+            $('#month').val('');
+            $('#status').val('');
+            updateTableWithAjax();
+        });
+        
+        // Filter change events for auto-update
+        $('#month, #status').on('change', function() {
+            updateTableWithAjax();
+        });
+        
+        // Function to update table with AJAX
+        function updateTableWithAjax() {
+            const month = $('#month').val();
+            const status = $('#status').val();
+            
+            // Store current filter state to compare if data is actually changing
+            const currentState = {
+                month: month,
+                status: status
+            };
+            
+            // Get previous state from data attribute or create empty object
+            const previousState = $('#filter-form').data('previousState') || {};
+            
+            // Check if filters have actually changed
+            const filtersChanged = (
+                previousState.month !== currentState.month || 
+                previousState.status !== currentState.status
+            );
+            
+            // Store current state for next comparison
+            $('#filter-form').data('previousState', currentState);
+            
+            // Update URL for better sharing and bookmarking
+            const url = new URL(window.location);
+            if (month) url.searchParams.set('month', month);
+            else url.searchParams.delete('month');
+            
+            if (status) url.searchParams.set('status', status);
+            else url.searchParams.delete('status');
+            
+            window.history.pushState({}, '', url);
+            
+            // If filters haven't changed, no need to reload data
+            if (!filtersChanged) {
+                return;
+            }
+            
+            // Only show loading spinner if we're actually fetching new data
+           
+            
+            // AJAX request
+            $.ajax({
+                url: window.location.pathname,
+                data: {
+                    month: month,
+                    status: status
+                },
+                success: function(response) {
+                    // Extract the table HTML from the response
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(response, 'text/html');
+                    const newTableHtml = $(htmlDoc).find('#counsellor-table').html();
+                    
+                    // Update the table content
+                    $('#counsellor-table').html(newTableHtml);
+                    
+                    // Reinitialize DataTable
+                    table = initializeDataTable();
+                    
+                    // Update stats
+                    updateSummaryStats();
+                    
+                    // Show table with fade-in effect
+                    $('#loading-spinner').fadeOut(300, function() {
+                        $('#data-table-wrapper').fadeIn(300);
+                    });
+                },
+                error: function() {
+                    alert('An error occurred while fetching data. Please try again.');
+                    $('#loading-spinner').hide();
+                    $('#data-table-wrapper').show();
+                }
+            });
+        }
+        
+        // Counsellor click event (alternative to href link)
+        $(document).on('click', '.counsellor-name', function(e) {
+            // The link will already navigate to the URL in the href attribute
+            // This is just added animation for smoother UX
+            $(this).closest('tr').addClass('selected-row');
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

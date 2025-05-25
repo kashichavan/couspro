@@ -4,109 +4,487 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Enquiry Portal{% endblock %}</title>
-
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Custom Styles -->
-    <style>
+
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
         :root {
             --primary-orange: #ff7f00;
-            --dark-orange: #c25700;
+            --dark-orange: #e05d00;
             --light-orange: #ffae42;
+            --very-light-orange: #fff5e6;
+            --white: #ffffff;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
         }
         
+        body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--gray-100);
+    font-size: 15px; /* Increased from default (~16px) */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+        
+        /* Enhanced Navbar - FIXED */
         .navbar {
             background: linear-gradient(135deg, var(--dark-orange), var(--primary-orange));
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            padding: 0.8rem 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 0.75rem 0;
+            border-bottom: 3px solid var(--light-orange);
+        }
+        
+        .navbar .container-fluid {
+            max-width: 100%;
+            padding: 0 1.5rem;
         }
         
         .navbar-brand {
-            color: #fff !important;
+            color: var(--white) !important;
             font-weight: 700;
             font-size: 1.5rem;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            padding: 0.5rem 0;
+            margin-right: 2rem;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            color: var(--white) !important;
         }
         
         .navbar-brand i {
             margin-right: 8px;
-            color: #fff;
+            color: var(--white);
+            filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.2));
+        }
+        
+        /* Navigation Links - FIXED */
+        .navbar-nav {
+            align-items: center;
         }
         
         .nav-link {
-            color: #fff !important;
+            color: var(--white) !important;
             font-weight: 500;
-            margin: 0 10px;
+            font-size: 0.95rem;
+            margin: 0 0.25rem;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: 6px;
             transition: all 0.3s ease;
             position: relative;
+            white-space: nowrap;
         }
         
         .nav-link:hover {
-            color: #fff !important;
-            transform: translateY(-2px);
+            background-color: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+            color: var(--white) !important;
         }
         
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: #fff;
-            transition: width 0.3s ease;
+        .nav-link i {
+            margin-right: 5px;
+            transition: transform 0.3s ease;
+            width: 14px;
+            text-align: center;
         }
         
-        .nav-link:hover::after {
-            width: 100%;
+        .nav-link:hover i {
+            transform: scale(1.1);
         }
         
+        /* Dropdown Menus - IMPROVED */
         .dropdown-menu {
             border: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background-color: var(--white);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-top: 3px solid var(--light-orange);
+            min-width: 200px;
         }
         
         .dropdown-item {
             color: var(--dark-orange);
-            transition: all 0.2s ease;
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+            border-radius: 5px;
+            margin-bottom: 2px;
+            transition: all 0.25s ease;
+            font-size: 0.9rem;
+        }
+        
+        .dropdown-item i {
+            margin-right: 8px;
+            transition: transform 0.2s ease;
+            width: 16px;
+            text-align: center;
         }
         
         .dropdown-item:hover {
             background-color: var(--primary-orange);
-            color: white !important;
+            color: var(--white) !important;
+            transform: translateX(3px);
         }
         
-        .navbar-toggler {
-            border-color: rgba(255,255,255,0.5);
+        .dropdown-item:hover i {
+            transform: scale(1.1);
         }
         
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        .dropdown-divider {
+            border-top: 1px solid var(--light-orange);
+            opacity: 0.3;
+            margin: 0.5rem 0;
+        }
+        
+        /* Search Form - FIXED */
+        .search-section {
+            margin: 0 1rem;
+        }
+        
+        .search-form {
+            min-width: 250px;
+        }
+        
+        .search-form .input-group {
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .search-form .form-control {
+            border: none;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            background-color: rgba(255,255,255,0.95);
         }
         
         .search-form .form-control:focus {
-            border-color: var(--primary-orange);
-            box-shadow: 0 0 0 0.25rem rgba(255,127,0,0.25);
+            border: none;
+            box-shadow: none;
+            background-color: var(--white);
         }
         
-        .btn-outline-light {
-            border-color: var(--primary-orange);
+        .search-form .btn {
+            border: none;
+            background-color: var(--white);
             color: var(--primary-orange);
+            padding: 0.6rem 1rem;
+            transition: all 0.3s ease;
         }
         
-        .btn-outline-light:hover {
+        .search-form .btn:hover {
+            background-color: var(--light-orange);
+            color: var(--white);
+        }
+        
+        /* User Section - FIXED */
+        .user-section {
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-profile-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-greeting {
+            color: var(--white);
+            font-weight: 600;
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+        
+        .user-role {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.75rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .user-avatar {
+            color: var(--white);
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .user-avatar:hover {
+            color: var(--light-orange);
+            transform: scale(1.1);
+        }
+        
+        /* Fix dropdown toggle */
+        .dropdown-toggle::after {
+            display: none !important;
+        }
+        
+        .user-dropdown .dropdown-toggle {
+            border: none;
+            background: none;
+            box-shadow: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-dropdown .dropdown-toggle:focus {
+            box-shadow: none;
+        }
+        
+        /* Mobile Toggler */
+        .navbar-toggler {
+            border: 2px solid rgba(255,255,255,0.8);
+            padding: 0.4rem 0.6rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        /* Main content wrapper */
+        .main-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 0;
+        }
+        
+        .content-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin: 0 1.5rem;
+            flex: 1;
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Page header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .page-header h2 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+        }
+        
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background: linear-gradient(45deg, var(--primary-orange), var(--light-orange));
+            color: var(--white);
+            font-weight: 600;
+            border-bottom: none;
+            padding: 1rem 1.25rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(45deg, var(--dark-orange), var(--primary-orange));
+            border: none;
+            border-radius: 6px;
+            padding: 0.6rem 1.25rem;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(255,127,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--primary-orange), var(--light-orange));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255,127,0,0.3);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-orange);
+            border: 2px solid var(--primary-orange);
+            border-radius: 6px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
             background-color: var(--primary-orange);
-            color: white;
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255,127,0,0.2);
         }
         
+        /* Footer */
         footer {
-            background-color: #fff5e6;
+            background: linear-gradient(to right, var(--very-light-orange), var(--white));
             color: var(--dark-orange);
+            padding: 1rem 0;
+            border-top: 2px solid rgba(255,127,0,0.1);
+            font-weight: 500;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            margin-top: auto;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .search-form {
+                min-width: 200px;
+            }
+            
+            .user-greeting {
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .navbar .container-fluid {
+                padding: 0 1rem;
+            }
+            
+            .content-container {
+                margin: 0 1rem;
+                padding: 1.5rem;
+            }
+            
+            .search-section {
+                margin: 1rem 0;
+                order: 3;
+                width: 100%;
+            }
+            
+            .search-form {
+                width: 100%;
+                min-width: auto;
+            }
+            
+            .user-section {
+                border-left: none;
+                border-top: 1px solid rgba(255,255,255,0.2);
+                padding-left: 0;
+                padding-top: 1rem;
+                margin-left: 0;
+                margin-top: 1rem;
+                order: 4;
+            }
+            
+            .user-profile-dropdown {
+                justify-content: space-between;
+            }
+            
+            .user-details {
+                text-align: left;
+            }
+            
+            .navbar-nav .nav-item {
+                margin: 0.25rem 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+                margin-right: 1rem;
+            }
+            
+            .content-container {
+                padding: 1rem;
+                margin: 0 0.5rem;
+            }
+            
+            .page-header {
+                padding: 1rem;
+            }
+            
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar .container-fluid {
+                padding: 0 0.75rem;
+            }
+            
+            .user-greeting {
+                font-size: 0.8rem;
+            }
+            
+            .user-role {
+                font-size: 0.7rem;
+            }
+        }
+        
+        /* Animation for hover effects */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse-on-hover:hover {
+            animation: pulse 1s infinite;
         }
     </style>
 
@@ -114,11 +492,11 @@
     {% endblock %}
 </head>
 <body>
-    <!-- Orange Theme Navigation Bar -->
+    <!-- Enhanced Orange Theme Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-search-location"></i>EnquiryPortal
+        <div class="container-fluid">
+            <a class="navbar-brand pulse-on-hover" href="{% url 'enquiry:dashboard' %}">
+                <i class="fas fa-search-location"></i>JEnquiry
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -126,21 +504,37 @@
             </button>
             
             <div class="collapse navbar-collapse" id="mainNav">
+                {% if user.is_authenticated %}
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home"></i>Home</a>
+                        <a class="nav-link" href="{% url 'enquiry:dashboard' %}"><i class="fas fa-home"></i> Home</a>
                     </li>
                     
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'enquiry:enquary_list' %}">
-                            <i class="fas fa-list"></i>Enquiries
+                    <!-- Enquiries -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-list"></i> Enquiries
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'enquiry:enquary_list' %}">
+                                <i class="fas fa-clipboard-list"></i> All Enquiries
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:add_enquiry' %}">
+                                <i class="fas fa-plus-circle"></i> Add Enquiry
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:bulk_enquiry_upload' %}">
+                                <i class="fas fa-file-upload"></i> Bulk Upload
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:download_dummy_template' %}">
+                                <i class="fas fa-file-download"></i> Download Template
+                            </a></li>
+                        </ul>
                     </li>
                     
                     <!-- Reports Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-chart-bar"></i>Reports
+                            <i class="fas fa-chart-bar"></i> Reports
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'enquiry:today_followups' %}">
@@ -155,44 +549,151 @@
                             <li><a class="dropdown-item" href="{% url 'enquiry:pending_enquiries' %}">
                                 <i class="fas fa-clock"></i> Pending Enquiries
                             </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:monthly_student_list' %}">
+                                <i class="fas fa-users"></i> Monthly Students
+                            </a></li>
+                            <li class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:monthly_summary_dashboard' %}">
+                                <i class="fas fa-chart-pie"></i> Monthly Summary
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:monthly_summary_by_counsellor' %}">
+                                <i class="fas fa-user-tie"></i> Counsellor Summary
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:daywise_summary' %}">
+                                <i class="fas fa-user-tie"></i> Day-Wise Summary
+                            </a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Payment Due Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-money-bill-wave"></i> Payments
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'enquiry:today_payment_due' %}">
+                                <i class="fas fa-calendar-day"></i> Today's Due
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'enquiry:past_payment_due' %}">
+                                <i class="fas fa-history"></i> Past Due
+                            </a></li>
                         </ul>
                     </li>
                     
                     <!-- Management Dropdown -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-users-cog"></i>Management
+                            <i class="fas fa-users-cog"></i> Management
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'enquiry:add_counsellor' %}">
                                 <i class="fas fa-user-plus"></i> Add Counsellor
                             </a></li>
+                            {% if user.is_superuser or user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'accounts:approval_list' %}">
+                                <i class="fas fa-user-check"></i> Approve Counsellors
+                            </a></li>
+                            {% endif %}
                         </ul>
                     </li>
                 </ul>
                 
-                <!-- Search Form -->
-                <form class="d-flex search-form">
+                <!-- Enhanced Search Form -->
+                <form class="d-flex search-form search-section" action="{% url 'enquiry:enquary_list' %}" method="get">
                     <div class="input-group">
-                        <input type="search" class="form-control" placeholder="Search enquiries..." 
+                        <input type="search" name="search" class="form-control" placeholder="Search enquiries..." 
                                aria-label="Search">
-                        <button class="btn btn-outline-light" type="submit">
+                        <button class="btn" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </form>
+                
+                <!-- Fixed User Profile Dropdown -->
+                <div class="user-section">
+                    <div class="user-menu">
+                        <div class="dropdown user-dropdown">
+                            <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" 
+                                    aria-expanded="false">
+                                <div class="user-profile-dropdown">
+                                    <div class="user-details">
+                                        <p class="user-greeting">
+                                           Hello, {{ user.first_name|default:user.email }}!
+
+                                        </p>
+                                        <p class="user-role">
+                                            {% if user.is_superuser %}
+                                                Super Admin
+                                            {% elif user.is_staff %}
+                                                Admin
+                                            {% else %}
+                                                Counsellor
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="user-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'accounts:password_change' %}">
+                                        <i class="fas fa-key"></i> Change Password
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-user-edit"></i> Edit Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Login/Register links for non-authenticated users -->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:counselor_register' %}">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid">
-        {% block content %}
-        {% endblock %}
+    <!-- Main Content Container - IMPROVED -->
+    <div class="main-content-wrapper">
+        <div class="container-fluid px-4">
+            <div class="content-container">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
     </div>
 
-    <!-- Footer Section -->
-    <footer class="text-center p-4">
-        <p class="m-0">&copy; 2025 EnquiryPortal. All rights reserved.</p>
+    <!-- Enhanced Footer Section -->
+    <footer class="text-center p-3">
+        <div class="container">
+            <p class="m-0">&copy; 2025 EnquiryPortal. All rights reserved.</p>
+        </div>
     </footer>
 
     <!-- Scripts -->

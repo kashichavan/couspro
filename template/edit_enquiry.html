@@ -1,0 +1,636 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Enquiry | EnquiryPortal{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Import trending fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    /* Base styles */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+    
+    /* Enhanced container and card styles */
+    .container {
+        max-width: 1200px;
+    }
+    
+    .enquiry-edit-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        background: #fff;
+    }
+    
+    .card-header {
+        background: linear-gradient(45deg, var(--primary-orange), #ff9b50);
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        padding: 1.5rem;
+        border: none;
+    }
+    
+    /* Form section styling */
+    .form-section {
+        margin-bottom: 30px;
+        border-radius: 12px;
+        background-color: #ffffff;
+        padding: 25px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+        border-left: 5px solid transparent;
+    }
+    
+    .form-section:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    
+    .section-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: var(--dark-orange);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-orange), var(--light-orange));
+        border-radius: 5px;
+    }
+    
+    /* Form control styling */
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.15);
+        border-color: var(--primary-orange);
+    }
+    
+    label {
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+    
+    /* Button styling */
+    .btn {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(45deg, var(--primary-orange), #ff9b50);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 10px rgba(255, 149, 0, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 149, 0, 0.4);
+    }
+    
+    .btn-outline-primary {
+        border: 2px solid var(--primary-orange);
+        color: var(--primary-orange);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-orange);
+        color: white;
+    }
+    
+    /* Status badges */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 30px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        margin-left: 10px;
+        font-family: 'Poppins', sans-serif;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .status-processing {
+        background-color: #cff4fc;
+        color: #055160;
+    }
+    
+    .status-joined {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .status-dropped {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+    
+    /* Timeline styling */
+    .timeline {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto 40px;
+    }
+    
+    .timeline::after {
+        content: '';
+        position: absolute;
+        width: 4px;
+        background: linear-gradient(to bottom, var(--light-orange), var(--primary-orange));
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -2px;
+        border-radius: 5px;
+    }
+    
+    .timeline-item {
+        padding: 10px 40px;
+        position: relative;
+        width: 50%;
+    }
+    
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(45deg, var(--primary-orange), #ff9b50);
+        top: 15px;
+        right: -10px;
+        border-radius: 50%;
+        z-index: 1;
+        box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
+    }
+    
+    .timeline-content {
+        padding: 20px;
+        background-color: white;
+        position: relative;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-content:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    /* Required field styling */
+    .required-field label::after {
+        content: " *";
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    /* Fees section */
+    .fees-section {
+        border-left: 4px solid var(--light-orange);
+        padding-left: 20px;
+        transition: all 0.3s ease;
+        background-color: #fff9f0;
+    }
+    
+    .fees-info {
+        background-color: var(--very-light-orange);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px dashed var(--light-orange);
+    }
+    
+    /* Animation for status change */
+    @keyframes highlight {
+        0% { background-color: var(--very-light-orange); }
+        50% { background-color: rgba(255, 174, 66, 0.3); }
+        100% { background-color: var(--very-light-orange); }
+    }
+    
+    .highlight {
+        animation: highlight 1s ease;
+    }
+    
+    /* Helper classes */
+    .help-text {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin-top: 8px;
+        font-style: italic;
+    }
+    
+    .error-feedback {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+        .timeline::after {
+            left: 31px;
+        }
+        
+        .timeline-item {
+            width: 100%;
+            padding-left: 70px;
+            padding-right: 25px;
+        }
+        
+        .timeline-right {
+            left: 0%;
+        }
+        
+        .timeline-item::before {
+            left: 60px;
+            border-width: 10px 10px 10px 0;
+            border-color: transparent var(--white) transparent transparent;
+        }
+        
+        .timeline-left::after, .timeline-right::after {
+            left: 24px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-actions div {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header with Current Status -->
+    <div class="mb-5 text-center">
+        <h1 class="display-5 mb-3">Edit Enquiry</h1>
+        <p class="lead mb-4">Update enquiry information for <strong>{{ enquiry.name }}</strong></p>
+        
+        <div class="d-inline-block mt-3 p-2 px-4 bg-white rounded-pill shadow-sm">
+            <span class="d-inline-flex align-items-center">
+                <i class="fas fa-circle me-2" style="font-size: 12px; color: 
+                {% if enquiry.status == 'joined' %}#28a745
+                {% elif enquiry.status == 'dropped' %}#dc3545
+                {% elif enquiry.status == 'pending' %}#ffc107
+                {% else %}#17a2b8{% endif %}"></i>
+                Current Status:
+                <span class="status-badge {% if enquiry.status == 'processing' %}status-processing
+                                        {% elif enquiry.status == 'joined' %}status-joined
+                                        {% elif enquiry.status == 'dropped' %}status-dropped
+                                        {% else %}status-pending{% endif %}">
+                    {{ enquiry.get_status_display }}
+                </span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show rounded-pill shadow-sm" role="alert">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Main Form Card -->
+    <div class="enquiry-edit-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i>Enquiry Details</h3>
+                <span><i class="fas fa-fingerprint me-1"></i>ID: {{ enquiry.id }}</span>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" id="enquiryForm">
+                {% csrf_token %}
+
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h4 class="section-title"><i class="fas fa-address-card me-2"></i>Personal Information</h4>
+                    <div class="row g-4">
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="error-feedback">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.mobile.id_for_label }}" class="form-label">{{ form.mobile.label }}</label>
+                            {{ form.mobile }}
+                            {% if form.mobile.errors %}
+                                <div class="error-feedback">{{ form.mobile.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text"><i class="fas fa-info-circle me-1"></i>10-digit Indian mobile number</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.parent_number.id_for_label }}" class="form-label">{{ form.parent_number.label }}</label>
+                            {{ form.parent_number }}
+                            {% if form.parent_number.errors %}
+                                <div class="error-feedback">{{ form.parent_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enquiry Details Section -->
+                <div class="form-section">
+                    <h4 class="section-title"><i class="fas fa-clipboard-list me-2"></i>Enquiry Details</h4>
+                    <div class="row g-4">
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <div class="error-feedback">{{ form.subject.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">{{ form.subject.help_text }}</div>
+                        </div>
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
+                            {{ form.enquiry_type }}
+                            {% if form.enquiry_type.errors %}
+                                <div class="error-feedback">{{ form.enquiry_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.enquiry_date.id_for_label }}" class="form-label">{{ form.enquiry_date.label }}</label>
+                            {{ form.enquiry_date }}
+                            {% if form.enquiry_date.errors %}
+                                <div class="error-feedback">{{ form.enquiry_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.followup_date.id_for_label }}" class="form-label">{{ form.followup_date.label }}</label>
+                            {{ form.followup_date }}
+                            {% if form.followup_date.errors %}
+                                <div class="error-feedback">{{ form.followup_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status & Assignment Section -->
+                <div class="form-section">
+                    <h4 class="section-title"><i class="fas fa-tasks me-2"></i>Status & Assignment</h4>
+                    <div class="row g-4">
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="error-feedback">{{ form.status.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.counsellor.id_for_label }}" class="form-label">{{ form.counsellor.label }}</label>
+                            {{ form.counsellor }}
+                            {% if form.counsellor.errors %}
+                                <div class="error-feedback">{{ form.counsellor.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">{{ form.counsellor.help_text }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Section - Hidden Initially and Only Shown When Status is "Joined" -->
+                <div id="feesSection" class="form-section fees-section" style="display: {% if enquiry.status == 'joined' %}block{% else %}none{% endif %};">
+                    <h4 class="section-title"><i class="fas fa-money-bill-wave me-2"></i>Payment Information</h4>
+                    
+                    <div class="fees-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-info-circle me-2"></i>Fee details are required when status is "Joined"</span>
+                            <span class="badge bg-light text-dark p-2 rounded-pill">Current Balance: ₹{{ enquiry.fees_balance|default:"0" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-4 required-field">
+                            <label for="{{ form.target_fees.id_for_label }}" class="form-label">{{ form.target_fees.label }}</label>
+                            {{ form.target_fees }}
+                            {% if form.target_fees.errors %}
+                                <div class="error-feedback">{{ form.target_fees.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">{{ form.target_fees.help_text }}</div>
+                        </div>
+                        <div class="col-md-4 required-field" id="feesPaidSection" style="display: {% if enquiry.status == 'joined' %}block{% else %}none{% endif %};">
+                            <label for="{{ form.fees_paid.id_for_label }}" class="form-label">{{ form.fees_paid.label }}</label>
+                            {{ form.fees_paid }}
+                            {% if form.fees_paid.errors %}
+                                <div class="error-feedback">{{ form.fees_paid.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">{{ form.fees_paid.help_text }}</div>
+                        </div>
+                        <div class="col-md-4 required-field">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">{{ form.due_date.label }}</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}
+                                <div class="error-feedback">{{ form.due_date.errors.0 }}</div>
+                            {% endif %}
+                            <div class="help-text">{{ form.due_date.help_text }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-5">
+                    <a href="{% url 'enquiry:enquary_list' %}" class="btn btn-outline-primary px-4 py-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                    <div>
+                        <button type="reset" class="btn btn-outline-secondary me-3 px-4 py-2">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary px-4 py-2">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle fees section based on status
+        const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+        const feesSection = document.getElementById('feesSection');
+        const feesPaidSection = document.getElementById('feesPaidSection');
+        
+        // Function to toggle fees section
+        function toggleFeesSection() {
+            if (statusSelect.value === 'joined') {
+                // Show both main fees section and fees paid section
+                feesSection.style.display = 'block';
+                feesPaidSection.style.display = 'block';
+                
+                // Make fee fields required
+                document.getElementById('{{ form.target_fees.id_for_label }}').setAttribute('required', '');
+                document.getElementById('{{ form.fees_paid.id_for_label }}').setAttribute('required', '');
+                document.getElementById('{{ form.due_date.id_for_label }}').setAttribute('required', '');
+                
+                // Add highlight animation
+                feesSection.classList.add('highlight');
+                setTimeout(() => {
+                    feesSection.classList.remove('highlight');
+                }, 1000);
+            } else {
+                // Hide both main fees section and fees paid section
+                feesSection.style.display = 'none';
+                feesPaidSection.style.display = 'none';
+                
+                // Make fee fields optional
+                document.getElementById('{{ form.target_fees.id_for_label }}').removeAttribute('required');
+                document.getElementById('{{ form.fees_paid.id_for_label }}').removeAttribute('required');
+                document.getElementById('{{ form.due_date.id_for_label }}').removeAttribute('required');
+            }
+        }
+        
+        // Initial call
+        toggleFeesSection();
+        
+        // Add event listener
+        statusSelect.addEventListener('change', toggleFeesSection);
+        
+        // Enhance date fields with date validation
+        const enquiryDate = document.getElementById('{{ form.enquiry_date.id_for_label }}');
+        const dueDate = document.getElementById('{{ form.due_date.id_for_label }}');
+        
+        dueDate.addEventListener('change', function() {
+            if (enquiryDate.value && dueDate.value) {
+                const enquiryDateObj = new Date(enquiryDate.value);
+                const dueDateObj = new Date(dueDate.value);
+                
+                if (dueDateObj < enquiryDateObj) {
+                    alert('Due date cannot be earlier than enquiry date.');
+                    dueDate.value = '';
+                }
+            }
+        });
+        
+        // Fees validation
+        const targetFees = document.getElementById('{{ form.target_fees.id_for_label }}');
+        const feesPaid = document.getElementById('{{ form.fees_paid.id_for_label }}');
+        
+        feesPaid.addEventListener('change', function() {
+            if (targetFees.value && feesPaid.value) {
+                if (parseFloat(feesPaid.value) > parseFloat(targetFees.value)) {
+                    alert('Fees paid cannot exceed target fees.');
+                    feesPaid.value = targetFees.value;
+                }
+            }
+        });
+        
+        // Mobile number validation with visual feedback
+        const mobileInput = document.getElementById('{{ form.mobile.id_for_label }}');
+        const parentMobileInput = document.getElementById('{{ form.parent_number.id_for_label }}');
+        
+        function validateMobileNumber(input) {
+            const indianMobilePattern = /^(\+91[\-\s]?)?[6-9]\d{9}$/;
+            
+            if (input.value && !indianMobilePattern.test(input.value)) {
+                input.classList.add('is-invalid');
+                return false;
+            } else {
+                input.classList.remove('is-invalid');
+                if (input.value) {
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-valid');
+                }
+                return true;
+            }
+        }
+        
+        mobileInput.addEventListener('blur', function() {
+            validateMobileNumber(this);
+        });
+        
+        parentMobileInput.addEventListener('blur', function() {
+            if (this.value) {
+                validateMobileNumber(this);
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        });
+        
+        // Form submission validation
+        document.getElementById('enquiryForm').addEventListener('submit', function(event) {
+            let isValid = true;
+            
+            // Validate mobile numbers
+            if (!validateMobileNumber(mobileInput)) {
+                isValid = false;
+            }
+            
+            if (parentMobileInput.value && !validateMobileNumber(parentMobileInput)) {
+                isValid = false;
+            }
+            
+            // Validate fees section if status is joined
+            if (statusSelect.value === 'joined') {
+                if (!targetFees.value || !feesPaid.value || !dueDate.value) {
+                    alert('All payment fields are required when status is "Joined".');
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

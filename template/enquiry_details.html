@@ -1,1044 +1,1099 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
 
 {% block title %}Enquiry Details - {{ enquiry.name }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-    --primary: #FF7730;
-    --primary-light: #FFE0D1;
-    --primary-dark: #E35A17;
-    --white: #FFFFFF;
-    --light-gray: #F8F9FA;
-    --medium-gray: #E9ECEF;
-    --text-dark: #2D3748;
-    --text-muted: #718096;
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-    --transition: all 0.3s ease;
-    --radius: 12px;
-}
-
-body {
-    background-color: #F5F7FA;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-}
-
-.enquiry-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 20px;
-}
-
-/* Header and Navigation */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 1rem 1.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.breadcrumb-nav {
-    display: flex;
-    align-items: center;
-}
-
-.back-button {
-    background-color: var(--primary);
-    color: var(--white);
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    transition: var(--transition);
-    text-decoration: none;
-    box-shadow: var(--shadow-sm);
-}
-
-.back-button:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    color: var(--white);
-}
-
-.page-title {
-    font-weight: 700;
-    color: var(--text-dark);
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.8rem;
-}
-
-.action-btn {
-    padding: 0.6rem 1rem;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    transition: var(--transition);
-    font-weight: 600;
-    font-size: 0.9rem;
-    border: none;
-}
-
-.primary-btn {
-    background-color: var(--primary);
-    color: var(--white);
-}
-
-.primary-btn:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-    color: var(--white);
-}
-
-.outline-btn {
-    background-color: transparent;
-    border: 2px solid var(--primary);
-    color: var(--primary);
-}
-
-.outline-btn:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-/* Main Content Grid */
-.content-grid {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 1.5rem;
-}
-
-@media (max-width: 992px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Cards */
-.card {
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-    transition: var(--transition);
-}
-
-.card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-3px);
-}
-
-.card-header {
-    padding: 1.2rem 1.5rem;
-    border-bottom: 1px solid var(--medium-gray);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-header-primary {
-    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
-    color: var(--white);
-    border-bottom: none;
-}
-
-.card-title {
-    font-weight: 700;
-    margin: 0;
-    font-size: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.card-icon {
-    background: rgba(255,255,255,0.2);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-/* Status Badge */
-.status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    cursor: pointer;
-}
-
-.status-pending { 
-    background: #FFF3CD; 
-    color: #856404; 
-}
-
-.status-joined { 
-    background: #D4EDDA; 
-    color: #155724; 
-}
-
-.status-dropout { 
-    background: #F8D7DA; 
-    color: #721C24; 
-}
-
-/* Profile Card */
-.profile-card {
-    text-align: center;
-    padding: 1.5rem;
-}
-
-.profile-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 0 auto 1rem;
-    background: var(--primary-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    color: var(--primary);
-}
-
-.profile-name {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.3rem;
-    color: var(--text-dark);
-}
-
-.profile-contact {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin: 1rem 0;
-}
-
-.contact-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    justify-content: center;
-    color: var(--text-muted);
-}
-
-/* Detail List */
-.detail-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.detail-item {
-    padding: 1rem;
-    border-bottom: 1px solid var(--medium-gray);
-    display: flex;
-    align-items: center;
-}
-
-.detail-item:last-child {
-    border-bottom: none;
-}
-
-.detail-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--primary-light);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
-    margin-right: 1rem;
-    flex-shrink: 0;
-}
-
-.detail-content {
-    flex-grow: 1;
-}
-
-.detail-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0.2rem;
-}
-
-.detail-value {
-    font-weight: 600;
-    color: var(--text-dark);
-}
-
-/* Timeline */
-.timeline {
-    position: relative;
-    padding-left: 2rem;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--primary-light);
-}
-
-.timeline-item {
-    position: relative;
-    padding-bottom: 1.5rem;
-}
-
-.timeline-item:last-child {
-    padding-bottom: 0;
-}
-
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -2rem;
-    top: 0;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--primary);
-    border: 2px solid var(--white);
-    box-shadow: var(--shadow-sm);
-}
-
-.timeline-date {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 0.3rem;
-}
-
-/* Comment Section */
-.comment-card {
-    background: var(--light-gray);
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    margin-bottom: 1rem;
-    border-left: 3px solid var(--primary);
-    transition: var(--transition);
-}
-
-.comment-card:hover {
-    box-shadow: var(--shadow-sm);
-}
-
-.comment-meta {
-    display: flex;
-    justify-content: space-between;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 0.8rem;
-}
-
-.comment-author {
-    font-weight: 600;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.comment-date {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.comment-text {
-    color: var(--text-dark);
-    line-height: 1.6;
-    margin: 0;
-}
-
-.comment-input {
-    width: 100%;
-    padding: 1rem;
-    border: 2px solid #E2E8F0;
-    border-radius: var(--radius);
-    margin-bottom: 1rem;
-    resize: none;
-    transition: var(--transition);
-}
-
-.comment-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-.submit-button {
-    background: var(--primary);
-    color: var(--white);
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: var(--radius);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.submit-button:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-/* Modals */
-.modal-content {
-    border-radius: var(--radius);
-    overflow: hidden;
-}
-
-.modal-header {
-    background: var(--primary);
-    color: var(--white);
-    border-bottom: none;
-    padding: 1.2rem 1.5rem;
-}
-
-.modal-title {
-    font-weight: 600;
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
-.modal-footer {
-    border-top: none;
-    padding: 1rem 1.5rem 1.5rem;
-}
-
-/* Toast Notifications */
-.toast {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    min-width: 300px;
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    display: none;
-    overflow: hidden;
-}
-
-.toast-body {
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.toast-body::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    background: var(--primary);
-}
-
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Scrollbar styling */
-.custom-scrollbar {
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: var(--light-gray);
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--primary-light);
-    border-radius: 3px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+    /* Custom styles not in base.html */
+    body {
+        font-family: 'Poppins', sans-serif;
     }
     
-    .action-buttons {
-        width: 100%;
-        justify-content: space-between;
+    .profile-header {
+        background: linear-gradient(135deg, var(--dark-orange), var(--primary-orange));
+        color: white;
+        padding: 30px 20px;
+        border-radius: 10px 10px 0 0;
+        position: relative;
     }
     
-    .detail-item {
-        flex-direction: column;
-        align-items: flex-start;
+    .profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        background-color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        color: var(--primary-orange);
     }
     
-    .detail-icon {
-        margin-bottom: 0.5rem;
+    .profile-info {
+        margin-left: 20px;
     }
     
-    .comment-meta {
-        flex-direction: column;
-        gap: 0.3rem;
+    .student-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
     }
-}
+    
+    .student-mobile {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .status-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 8px 15px;
+        border-radius: 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.8rem;
+    }
+    
+    .status-joined {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .status-dropout {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .info-row {
+        border-bottom: 1px solid #eee;
+        padding: 12px 0;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #555;
+    }
+    
+
+.comment-box {
+        background: #f9f9fb;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .comment-box:hover {
+        background-color: #ffffff;
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .comment-date {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    .edit-comment {
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .edit-comment:hover {
+        background-color: #f1f1f1;
+        transform: scale(1.05);
+    }
+
+    .comment-content {
+        color: #333;
+        font-weight: 400;
+        margin-top: 0.25rem;
+        word-wrap: break-word;
+    }
+    
+    .payment-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    
+    .payment-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+    
+    /* Toast styling */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+    
+    .toast {
+        min-width: 250px;
+    }
+    
+    .toast-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    .toast-error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .profile-picture {
+            margin-bottom: 15px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .profile-info {
+            margin-left: 0;
+        }
+        
+        .status-badge {
+            position: static;
+            margin-top: 15px;
+            display: inline-block;
+        }
+    }
+
+    .fa-phone-alt {
+        transform: rotate(100deg);
+    }
+
+    /* Additional CSS styles to improve the appearance of the enquiry detail page */
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="enquiry-container">
-    <!-- Header with Navigation -->
-    <div class="page-header" data-aos="fade-down">
-        <div class="breadcrumb-nav">
-            <a href="{% url 'enquiry:enquary_list' %}" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </a>
-            <h1 class="page-title ms-3">Enquiry: {{ enquiry.name }}</h1>
+<div class="container py-4">
+    <!-- Toast container for notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+    
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'enquiry:dashboard' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'enquiry:enquary_list' %}">Enquiries</a></li>
+                    <li class="breadcrumb-item active">{{ enquiry.name }}</li>
+                </ol>
+            </nav>
         </div>
         
-        <div class="action-buttons">
-            <button class="action-btn outline-btn" data-bs-toggle="modal" data-bs-target="#editStatusModal">
-                <i class="fas fa-tag"></i>
-                Change Status
-            </button>
-            
-            <button class="action-btn primary-btn" data-bs-toggle="modal" data-bs-target="#editFollowupModal">
-                <i class="fas fa-calendar-alt"></i>
-                {% if enquiry.followup_date %}Update Follow-up{% else %}Schedule Follow-up{% endif %}
-            </button>
-        </div>
     </div>
-
-    <!-- Main Content Grid -->
-    <div class="content-grid">
-        <!-- Left Column - Main Content -->
-        <div class="main-content">
-            <!-- Course Details Card -->
-            <div class="card" data-aos="fade-up">
-                <div class="card-header card-header-primary">
-                    <h2 class="card-title">
-                        <div class="card-icon">
-                            <i class="fas fa-book"></i>
+    
+    <!-- Student Profile Section -->
+    <div class="card mb-4">
+        <div class="profile-header d-flex align-items-center p-3">
+            <div class="profile-picture me-3">
+                <i class="fas fa-user fa-2x"></i>
+            </div>
+            <div class="profile-info">
+                <h1 class="student-name">{{ enquiry.name }}</h1>
+                <div class="student-mobile">
+                    <i class="fas fa-phone-alt me-2"></i>{{ enquiry.mobile }}
+                    <a href="tel:{{ enquiry.mobile }}" class="btn btn-sm btn-light ms-2">
+                        <i class="fas fa-phone"></i> Call
+                    </a>
+                    <a href="https://wa.me/91{{ enquiry.mobile }}" target="_blank" class="btn btn-sm btn-light ms-2">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="{% url 'enquiry:edit_enquiry' enquiry.id %}" class="btn btn-sm btn-light ms-2" title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+                </div>
+            </div>
+            <div class="status-badge ms-auto px-3 py-2 rounded status-{{ enquiry.status|lower }}">
+                {{ enquiry.status }}
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <!-- Student Information -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="fas fa-info-circle me-2"></i>Student Information
                         </div>
-                        Course Details
-                    </h2>
-                    <span class="status-badge status-{{ enquiry.status|lower }}">
-                        <i class="fas fa-circle" style="font-size: 0.7rem;"></i>
-                        {{ enquiry.get_status_display }}
-                    </span>
+                        <div class="card-body">
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Subject</div>
+                                <div class="col-md-8">{{ enquiry.get_subject_display }}</div>
+                            </div>
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Counsellor</div>
+                                <div class="col-md-8">{{ enquiry.counsellor.name }}</div>
+                            </div>
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Enquiry Type</div>
+                                <div class="col-md-8">{{ enquiry.get_enquiry_type_display }}</div>
+                            </div>
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Enquiry Date</div>
+                                <div class="col-md-8">{{ enquiry.enquiry_date|default:"Not specified" }}</div>
+                            </div>
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Follow-up Date</div>
+                                <div class="col-md-8">
+                                    <span id="followup-date-display">{{ enquiry.followup_date|default:"Not scheduled" }}</span>
+                                    <button class="btn btn-sm btn-light ms-2" data-bs-toggle="modal" data-bs-target="#updateFollowupModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Created On</div>
+                                <div class="col-md-8">{{ enquiry.created_at|date:"F d, Y" }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="card-body">
-                    <ul class="detail-list">
-                        <li class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                            <div class="detail-content">
-                                <div class="detail-label">Subject</div>
-                                <div class="detail-value">{{ enquiry.get_subject_display }}</div>
-                            </div>
-                        </li>
-                        <li class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-language"></i>
-                            </div>
-                            <div class="detail-content">
-                                <div class="detail-label">Medium</div>
-                                <div class="detail-value">{{ enquiry.get_medium_display }} Medium</div>
-                            </div>
-                        </li>
-                        <li class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-user-tie"></i>
-                            </div>
-                            <div class="detail-content">
-                                <div class="detail-label">Counsellor</div>
-                                <div class="detail-value">{{ enquiry.counsellor.name }}</div>
-                            </div>
-                        </li>
-                        <li class="detail-item">
-                            <div class="detail-icon">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                            <div class="detail-content">
-                                <div class="detail-label">Follow-up Date</div>
-                                <div class="detail-value">
-                                    {% if enquiry.followup_date %}
-                                        {{ enquiry.followup_date|date:"M d, Y" }}
+                <!-- Payment Information -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <i class="fas fa-money-bill-wave me-2"></i>Payment Information
+                        </div>
+                        <div class="card-body">
+                            <div class="payment-info mb-3">
+                                <!-- Payment Status Badge -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">Payment Progress</h5>
+                                    {% if enquiry.is_fully_paid %}
+                                        <span class="badge bg-success">Paid in Full</span>
                                     {% else %}
-                                        Not scheduled
+                                        <span class="badge bg-warning text-dark">Pending</span>
                                     {% endif %}
                                 </div>
+
+                                <!-- Progress Bar -->
+                                {% if enquiry.target_fees %}
+                                <div class="progress mb-3" style="height: 20px;">
+                                    <div class="progress-bar bg-info"
+                                        role="progressbar"
+                                        style="width: {{ enquiry.fees_paid_percentage|default:0|floatformat:0 }}%;"
+                                        aria-valuenow="{{ enquiry.fees_paid_percentage|default:0|floatformat:0 }}"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100">
+                                        {{ enquiry.fees_paid_percentage|floatformat:0 }}%
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Payment Fields -->
+                                <div class="row text-center">
+                                    <div class="col-md-4 mb-2">
+                                        <div class="text-muted small">Target Fees</div>
+                                        <div class="fw-bold">
+                                            {% if enquiry.target_fees %}
+                                                ₹{{ enquiry.target_fees }}
+                                            {% else %}
+                                                Not set
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="text-muted small">Fees Paid</div>
+                                        <div class="fw-bold" id="fees-paid-display">₹{{ enquiry.fees_paid|default:0 }}</div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="text-muted small">Balance</div>
+                                        <div class="fw-bold" id="fees-balance-display">
+                                            {% if enquiry.fees_balance is not None %}
+                                                ₹{{ enquiry.fees_balance }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Due Date -->
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-muted small">Payment Due Date</div>
+                                        <div>
+                                            <span id="payment-due-display">
+                                                {% if enquiry.due_date %}
+                                                    {{ enquiry.due_date }}
+                                                {% else %}
+                                                    Not set
+                                                {% endif %}
+                                            </span>
+                                            <button class="btn btn-sm btn-outline-secondary ms-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#updateDueDateModal">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </li>
-                    </ul>
+
+                            <!-- Add Payment Button -->
+                            <div class="d-grid">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                                    <i class="fas fa-plus-circle me-2"></i>Add Payment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Comments Card -->
-            <div class="card" data-aos="fade-up" data-aos-delay="100">
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Comments Section -->
+        <div class="col-md-12">
+            <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-comments" style="color: var(--primary);"></i>
-                        Discussion & Updates
-                    </h2>
-                    <span class="comment-count status-badge" style="background: var(--primary-light); color: var(--primary);">
-                        {{ comments|length }} Comments
-                    </span>
+                    <i class="fas fa-comments me-2"></i>Comments & Follow-ups
                 </div>
-                
                 <div class="card-body">
-                    <div class="custom-scrollbar">
-                        {% if comments %}
-                            {% for comment in comments %}
-                            <div class="comment-card" data-aos="fade-up" data-aos-delay="50">
-                                <div class="comment-meta">
-                                    <span class="comment-author">
-                                        <i class="fas fa-user-circle"></i>
-                                        {{ comment.created_by }}
-                                    </span>
-                                    <span class="comment-date">
-                                        <i class="far fa-clock"></i>
-                                        {{ comment.created_at|date:"M d, Y H:i" }}
-                                    </span>
-                                </div>
-                                <p class="comment-text">{{ comment.comment }}</p>
+                    <!-- Add Comment Form -->
+                    <div class="mb-4">
+                        <form id="comment-form">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="comment-text" rows="3" placeholder="Add a comment or note about this enquiry..."></textarea>
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-4" data-aos="fade-in">
-                                <i class="fas fa-comments" style="font-size: 3rem; color: #E2E8F0; margin-bottom: 1rem;"></i>
-                                <p style="color: var(--text-muted);">No comments yet. Be the first to add one!</p>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Add Comment
+                                </button>
                             </div>
-                        {% endif %}
+                        </form>
                     </div>
                     
-                    <form class="comment-form mt-3" id="commentForm" data-aos="fade-up">
-                        <textarea class="comment-input" 
-                                id="newComment" 
-                                rows="3"
-                                placeholder="Add your comment here..."
-                                required></textarea>
-                        <button type="submit" class="submit-button">
-                            <i class="fas fa-paper-plane"></i>
-                            Post Comment
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Right Column - Profile & Timeline -->
-        <div class="sidebar">
-            <!-- Profile Card -->
-            <div class="card" data-aos="fade-left">
-                <div class="card-body profile-card">
-                    <div class="profile-image">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <h3 class="profile-name">{{ enquiry.name }}</h3>
-                    <div class="profile-contact">
-                        <span class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            {{ enquiry.mobile }}
-                        </span>
-                        {% if enquiry.email %}
-                        <span class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            {{ enquiry.email }}
-                        </span>
-                        {% endif %}
-                    </div>
-                    <button class="action-btn primary-btn w-100">
-                        <i class="fas fa-phone-alt"></i>
-                        Contact
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Timeline Card -->
-            <div class="card" data-aos="fade-left" data-aos-delay="100">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <i class="fas fa-history" style="color: var(--primary);"></i>
-                        Activity Timeline
-                    </h2>
-                </div>
-                
-                <div class="card-body">
-                    <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-date">
-                                <i class="far fa-calendar"></i>
-                                {{ enquiry.created_at|date:"M d, Y H:i" }}
-                            </div>
-                            <div class="timeline-content">
-                                <strong>Enquiry Created</strong>
-                                <p>New enquiry registered by {{ enquiry.counsellor.name }}</p>
-                            </div>
-                        </div>
-                        
-                        {% if enquiry.followup_date %}
-                        <div class="timeline-item">
-                            <div class="timeline-date">
-                                <i class="far fa-calendar-check"></i>
-                                {{ enquiry.followup_date|date:"M d, Y" }}
-                            </div>
-                            <div class="timeline-content">
-                                <strong>Follow-up Scheduled</strong>
-                                <p>Next follow-up date has been set</p>
-                            </div>
-                        </div>
-                        {% endif %}
-                        
+                    <!-- Comments List -->
+                    <div id="comments-list">
                         {% if comments %}
-                        <div class="timeline-item">
-                            <div class="timeline-date">
-                                <i class="far fa-comment"></i>
-                                {{ comments.last.created_at|date:"M d, Y H:i" }}
+                            {% for comment in comments %}
+                                <div class="comment-box mb-2">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="comment-date">
+            <i class="far fa-calendar-alt me-1"></i>{{ comment.created_at|date:"F d, Y" }}
+            <i class="far fa-clock ms-2 me-1"></i>{{ comment.created_at|date:"h:i a" }}
+        </div>
+        <button class="edit-comment edit-comment" data-comment-id="{{ comment.id }}">
+            <i class="fas fa-edit"></i>
+        </button>
+    </div>
+    <div class="comment-content mt-1">
+        {{ comment.comment }}
+    </div>
+</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-comment-slash fa-3x mb-3"></i>
+                                <p>No comments yet. Add the first comment!</p>
                             </div>
-                            <div class="timeline-content">
-                                <strong>Latest Comment</strong>
-                                <p>By {{ comments.last.created_by }}</p>
-                            </div>
-                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="action-buttons d-flex flex-wrap justify-content-between">
+                <div>
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateStatusModal">
+                        <i class="fas fa-exchange-alt me-2"></i>Update Status
+                    </button>
+                    <a href="{% url 'enquiry:enquary_list' %}" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'enquiry:edit_enquiry' enquiry.id %}" class="btn btn-sm btn-warning me-1" title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Edit Follow-up Modal -->
-<div class="modal fade" id="editFollowupModal" tabindex="-1">
+<!-- Add Payment Modal -->
+<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    Update Follow-up Date
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="addPaymentModalLabel">Add Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <label for="followupDateInput" class="form-label">Select new follow-up date:</label>
-                <input type="date" class="form-control" id="followupDateInput" 
-                       value="{{ enquiry.followup_date|date:'Y-m-d' }}">
+                <form id="payment-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="payment-amount" class="form-label">Payment Amount (₹)</label>
+                        <input type="number" class="form-control" id="payment-amount" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="payment-mode" class="form-label">Payment Mode</label>
+                        <select class="form-select" id="payment-mode" required>
+                            <option value="cash">Cash</option>
+                            <option value="upi">UPI</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="card">Card</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="payment-note" class="form-label">Note (Optional)</label>
+                        <textarea class="form-control" id="payment-note" rows="2"></textarea>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="submit-button" id="saveFollowup">
-                    <i class="fas fa-save me-1"></i>
-                    Save Changes
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-payment-btn">Save Payment</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Edit Status Modal -->
-<div class="modal fade" id="editStatusModal" tabindex="-1">
+<!-- Update Follow-up Modal -->
+<div class="modal fade" id="updateFollowupModal" tabindex="-1" aria-labelledby="updateFollowupModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-tag me-2"></i>
-                    Change Status
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="updateFollowupModalLabel">Update Follow-up Date</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex flex-column gap-2">
-                    <button class="status-badge status-pending w-100 p-3 mb-2" data-status="pending">
-                        <i class="fas fa-hourglass me-2"></i>
-                        Pending
-                    </button>
-                    <button class="status-badge status-joined w-100 p-3 mb-2" data-status="joined">
-                        <i class="fas fa-check-circle me-2"></i>
-                        Joined
-                    </button>
-                    <button class="status-badge status-dropout w-100 p-3" data-status="dropout">
-                        <i class="fas fa-times-circle me-2"></i>
-                        Dropout
-                    </button>
-                </div>
+                <form id="followup-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="followup-date" class="form-label">Follow-up Date</label>
+                        <input type="date" class="form-control" id="followup-date" value="{{ enquiry.followup_date|date:'Y-m-d' }}">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-followup-btn">Update Follow-up Date</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Toast Notification -->
-<div class="toast" id="toast">
-    <div class="toast-body"></div>
+<!-- Update Due Date Modal -->
+<div class="modal fade" id="updateDueDateModal" tabindex="-1" aria-labelledby="updateDueDateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateDueDateModalLabel">Update Due Date</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="due-date-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="due-date" class="form-label">Due Date</label>
+                        <input type="date" class="form-control" id="due-date" value="{{ enquiry.due_date|date:'Y-m-d' }}">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-due-date-btn">Update Due Date</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="status-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="status-select" class="form-label">Status</label>
+                        <select class="form-select" id="status-select">
+                            <option value="joined" {% if enquiry.status == 'joined' %}selected{% endif %}>Joined</option>
+                            <option value="pending" {% if enquiry.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="dropout" {% if enquiry.status == 'dropout' %}selected{% endif %}>Dropout</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status-note" class="form-label">Note (Optional)</label>
+                        <textarea class="form-control" id="status-note" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-status-btn">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteEnquiryModal" tabindex="-1" aria-labelledby="deleteEnquiryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEnquiryModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this enquiry for <strong>{{ enquiry.name }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+                <form id="delete-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="enquiry_id" value="{{ enquiry.id }}" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete Permanently</button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add animation library
-    const animationScript = document.createElement('script');
-    animationScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js';
-    document.head.appendChild(animationScript);
-    
-    // Add animation stylesheet
-    const animationStyle = document.createElement('link');
-    animationStyle.rel = 'stylesheet';
-    animationStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css';
-    document.head.appendChild(animationStyle);
-    
-    // Initialize animations after script loads
-    animationScript.onload = function() {
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 50
+$(document).ready(function() {
+    'use strict';
+
+    // Safely get enquiry ID from Django template
+    var enquiryId = "{{ enquiry.id|escapejs }}";
+    var csrfToken = $('[name=csrfmiddlewaretoken]').val();
+
+    // Toast notification system
+    function showToast(message, type = 'success') {
+        const toastId = 'toast-' + Date.now();
+        const toastHTML = `
+            <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        $('#toastContainer').append(toastHTML);
+        const toastElement = new bootstrap.Toast($('#' + toastId)[0], { delay: 3000, autohide: true });
+        toastElement.show();
+        
+        // Cleanup when hidden
+        $('#' + toastId).on('hidden.bs.toast', function () {
+            $(this).remove();
         });
-    };
-
-    // Toast notification function
-    const showToast = (message, type = 'info') => {
-        const toast = document.getElementById('toast');
-        const toastBody = toast.querySelector('.toast-body');
-        
-        // Clear previous content
-        toastBody.innerHTML = '';
-        
-        // Add icon based on type
-        let icon = 'info-circle';
-        if (type === 'success') icon = 'check-circle';
-        if (type === 'error') icon = 'exclamation-circle';
-        
-        // Create icon element
-        const iconElement = document.createElement('i');
-        iconElement.className = `fas fa-${icon}`;
-        iconElement.style.color = type === 'success' ? '#28a745' : 
-                                  type === 'error' ? '#dc3545' : 
-                                  '#17a2b8';
-        
-        // Create message element
-        const messageElement = document.createElement('span');
-        messageElement.textContent = message;
-        
-        // Append to toast body
-        toastBody.appendChild(iconElement);
-        toastBody.appendChild(messageElement);
-        
-        // Show toast with animation
-        toast.style.display = 'block';
-        toast.style.animation = 'slideIn 0.3s ease forwards';
-        
-        // Hide after delay
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transition = 'opacity 0.3s ease';
-            setTimeout(() => {
-                toast.style.display = 'none';
-                toast.style.opacity = '1';
-            }, 300);
-        }, 3000);
-    };
-
-    // Comment Form Handling
-    document.getElementById('commentForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const comment = document.getElementById('newComment').value;
-        const submitButton = e.target.querySelector('button[type="submit"]');
-        
-        // Disable button and show loading state
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
-        
-        try {
-            const response = await fetch('{% url "enquiry:add_comment" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    enquiry_id: '{{ enquiry.id }}',
-                    comment: comment
-                })
-            });
-
-            if (response.ok) {
-                showToast('Comment added successfully!', 'success');
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('Failed to add comment', 'error');
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
-            }
-        } catch (error) {
-            showToast('Network error occurred', 'error');
-            submitButton.disabled = false;
-            submitButton.innerHTML = '<i class="fas fa-paper-plane"></i> Post Comment';
-        }
-    });
-
-    // Follow-up Date Handling
-    document.getElementById('saveFollowup').addEventListener('click', async () => {
-        const newDate = document.getElementById('followupDateInput').value;
-        const saveButton = document.getElementById('saveFollowup');
-        
-        // Disable button and show loading state
-        saveButton.disabled = true;
-        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        
-        try {
-            const response = await fetch('{% url "enquiry:update_followup_date" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    enquiry_id: '{{ enquiry.id }}',
-                    followup_date: newDate
-                })
-            });
-
-            if (response.ok) {
-                showToast('Follow-up date updated successfully!', 'success');
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('Failed to update follow-up date', 'error');
-                saveButton.disabled = false;
-                saveButton.innerHTML = '<i class="fas fa-save me-1"></i> Save Changes';
-            }
-        } catch (error) {
-            showToast('Network error occurred', 'error');
-            saveButton.disabled = false;
-            saveButton.innerHTML = '<i class="fas fa-save me-1"></i> Save Changes';
-        }
-    });
-
-    // Status Update Handling
-    document.querySelectorAll('.status-badge[data-status]').forEach(badge => {
-        badge.addEventListener('click', async () => {
-            const newStatus = badge.dataset.status;
-            const statusText = badge.textContent.trim();
-            
-            try {
-                const response = await fetch('{% url "enquiry:update_status" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({
-                        enquiry_id: '{{ enquiry.id }}',
-                        new_status: newStatus
-                    })
-                });
-
-                if (response.ok) {
-                    showToast(`Status updated to ${statusText}!`, 'success');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showToast('Failed to update status', 'error');
-                }
-            } catch (error) {
-                showToast('Network error occurred', 'error');
-            }
-        });
-    });
-    
-    // Additional functionality for better UX
-    const handleContactButton = () => {
-        const phoneNumber = '{{ enquiry.mobile }}';
-        window.location.href = `tel:${phoneNumber}`;
-    };
-    
-    // Add click event to contact button if it exists
-    const contactButton = document.querySelector('.action-btn.primary-btn.w-100');
-    if (contactButton) {
-        contactButton.addEventListener('click', handleContactButton);
     }
-    
-    // Add hover effects to timeline items
-    document.querySelectorAll('.timeline-item').forEach(item => {
-        item.addEventListener('mouseenter', () => {
-            item.style.transform = 'translateX(5px)';
-            item.style.transition = 'transform 0.3s ease';
-        });
-        
-        item.addEventListener('mouseleave', () => {
-            item.style.transform = 'translateX(0)';
+
+    // Add Comment
+    $('#comment-form').on('submit', function(e) {
+        e.preventDefault();
+        const commentText = $('#comment-text').val().trim();
+        if (!commentText) return;
+
+        $.ajax({
+            url: '{% url "enquiry:add_comment" %}',
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            data: {
+                enquiry_id: enquiryId,
+                comment: commentText
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.status === 'success') {
+                    $('#comment-text').val('');
+                    
+                    // Refresh comments list
+                    loadComments();
+                    
+                    showToast('Comment added successfully');
+                    // Reload the page
+                location.reload();
+                } else {
+                    showToast('Failed to add comment: ' + data.message, 'danger');
+                }
+            },
+            error: function(xhr, status, error) {
+                showToast('An error occurred while adding the comment', 'danger');
+                console.error('Error:', error, xhr.responseText);
+            }
         });
     });
-    
-    // Add visual feedback to detail items
-    document.querySelectorAll('.detail-item').forEach(item => {
-        item.addEventListener('mouseenter', () => {
-            item.style.backgroundColor = 'var(--light-gray)';
-            item.style.transition = 'background-color 0.3s ease';
+
+    // Function to load comments
+    function loadComments() {
+        $.ajax({
+            url: '{% url "enquiry:get_comments" %}',
+            method: 'GET',
+            data: {
+                enquiry_id: enquiryId
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.comments && Array.isArray(data.comments)) {
+                    renderComments(data.comments);
+                } else if (typeof data === 'string') {
+                    $('#comments-list').html(data);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading comments:', error, xhr.responseText);
+            }
+        });
+    }
+
+    // Render comments from JSON data with improved styling
+    function renderComments(comments) {
+        if (comments.length === 0) {
+            $('#comments-list').html(`
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-comment-slash fa-3x mb-3"></i>
+                    <p>No comments yet. Add the first comment!</p>
+                </div>
+            `);
+            return;
+        }
+
+        let commentsHTML = '';
+        comments.forEach(function(comment) {
+            const date = new Date(comment.created_at);
+            const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            
+            commentsHTML += `
+                <div class="comment-box p-3 mb-3 border rounded bg-light">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="comment-date text-muted">
+                            <i class="far fa-calendar-alt me-1"></i>${formattedDate}
+                            <i class="far fa-clock ms-2 me-1"></i>${formattedTime}
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary edit-comment" data-comment-id="${comment.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="comment-content">${comment.comment}</div>
+                </div>
+            `;
         });
         
-        item.addEventListener('mouseleave', () => {
-            item.style.backgroundColor = 'transparent';
+        $('#comments-list').html(commentsHTML);
+    }
+
+    // Save Payment
+    $('#save-payment-btn').on('click', function() {
+        const paymentAmount = $('#payment-amount').val().trim();
+        const paymentMode = $('#payment-mode').val();
+        const paymentNote = $('#payment-note').val().trim();
+
+        if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
+            showToast('Please enter a valid payment amount', 'danger');
+            return;
+        }
+
+        $.ajax({
+            url: '{% url "enquiry:update_payment" %}',
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            data: {
+                enquiry_id: enquiryId,
+                payment_amount: paymentAmount,
+                payment_mode: paymentMode,
+                payment_note: paymentNote
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    // Close modal and reset form
+                    const modal = bootstrap.Modal.getInstance($('#addPaymentModal'));
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        $('#addPaymentModal').modal('hide');
+                    }
+                    $('#payment-form')[0].reset();
+                    
+                    // Update payment information on page
+                    $('#fees-paid-display').text('₹' + data.fees_paid.toFixed(2));
+                    if (data.fees_balance !== null) {
+                        $('#fees-balance-display').text('₹' + data.fees_balance.toFixed(2));
+                    }
+                    
+                    // Update progress bar if available
+                    if (data.fees_paid_percentage !== undefined) {
+                        $('.progress-bar').css('width', data.fees_paid_percentage + '%');
+                        $('.progress-bar').attr('aria-valuenow', data.fees_paid_percentage);
+                        $('.progress-bar').text(Math.round(data.fees_paid_percentage) + '%');
+                    }
+                    
+                    showToast('Payment added successfully');
+                    
+                    // Add payment as comment if note exists
+                    if (paymentNote) {
+                        $.ajax({
+                            url: '{% url "enquiry:add_comment" %}',
+                            method: 'POST',
+                            headers: { 'X-CSRFToken': csrfToken },
+                            data: {
+                                enquiry_id: enquiryId,
+                                comment: `Payment of ₹${paymentAmount} (${paymentMode}): ${paymentNote}`
+                            },
+                            success: function() {
+                                loadComments();
+                                // Reload the page
+                location.reload();
+                            }
+                        });
+                    } else {
+                        // Add a standard payment comment
+                        $.ajax({
+                            url: '{% url "enquiry:add_comment" %}',
+                            method: 'POST',
+                            headers: { 'X-CSRFToken': csrfToken },
+                            data: {
+                                enquiry_id: enquiryId,
+                                comment: `Payment of ₹${paymentAmount} received via ${paymentMode}.`
+                            },
+                            success: function() {
+                                loadComments();
+                                // Reload the page
+                location.reload();
+                            }
+                        });
+                    }
+                } else {
+                    showToast('Failed to update payment: ' + (data.error || 'Unknown error'), 'danger');
+                }
+            },
+            error: function(xhr, status, error) {
+                showToast('An error occurred while updating payment', 'danger');
+                console.error('Error:', error, xhr.responseText);
+            }
         });
     });
+
+ 
+    // Update Status
+$('#save-status-btn').on('click', function() {
+    const newStatus = $('#status-select').val();
+    const statusNote = $('#status-note').val().trim();
+
+    $.ajax({
+        url: '{% url "enquiry:update_status" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        data: {
+            enquiry_id: enquiryId,
+            new_status: newStatus
+        },
+        dataType: 'json',
+        success: function(data) {
+            if (data.status === 'success') {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance($('#updateStatusModal')[0]);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    $('#updateStatusModal').modal('hide');
+                }
+                $('#status-note').val('');
+
+                showToast('Enquiry status updated successfully');
+
+                // Reload the page
+                location.reload();
+            } else {
+                showToast('Failed to update status: ' + (data.message || 'Unknown error'), 'danger');
+            }
+        },
+        error: function(xhr, status, error) {
+            showToast('An error occurred while updating status', 'danger');
+            console.error('Error:', error, xhr.responseText);
+        }
+    });
+});
+
+// Update Follow-up Date
+$('#save-followup-btn').on('click', function () {
+    const followupDate = $('#followup-date').val();
+
+    if (!followupDate) {
+        showToast('Please select a follow-up date', 'warning');
+        return;
+    }
+
+    $.ajax({
+        url: '{% url "enquiry:update_followup_date" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        data: {
+            enquiry_id: enquiryId,
+            followup_date: followupDate
+        },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                const modal = bootstrap.Modal.getInstance($('#updateFollowupModal')[0]);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    $('#updateFollowupModal').modal('hide');
+                }
+
+                showToast('Follow-up date updated successfully');
+
+                // Reload the page
+                location.reload();
+            } else {
+                showToast('Failed to update follow-up date: ' + (data.message || 'Unknown error'), 'danger');
+            }
+        },
+        error: function (xhr, status, error) {
+            showToast('An error occurred while updating follow-up date', 'danger');
+            console.error('Error:', error, xhr.responseText);
+        }
+    });
+});
+   
+// Update Due Date - FIXED
+$('#save-due-date-btn').on('click', function () {
+    const dueDate = $('#due-date').val();
+
+    $.ajax({
+        url: '{% url "enquiry:update_due_date" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        data: {
+            student_id: enquiryId,         // ✅ match view key
+            new_due_date: dueDate          // ✅ match view key
+        },
+        dataType: 'json',
+        success: function (data) {
+            if (data.success) {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance($('#updateDueDateModal')[0]);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    $('#updateDueDateModal').modal('hide');
+                }
+
+                // Update displayed date
+                $('#payment-due-display').text(data.new_due_date || dueDate || 'Not set');
+
+                showToast('Payment due date updated successfully');
+
+                // Add comment about due date change
+                $.ajax({
+                    url: '{% url "enquiry:add_comment" %}',
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    data: {
+                        enquiry_id: enquiryId,
+                        comment: `Payment due date updated to ${data.new_due_date || dueDate || 'Not set'}`
+                    },
+                    success: function () {
+                        loadComments();
+                    }
+                });
+            } else {
+                showToast('Failed to update due date: ' + (data.message || 'Unknown error'), 'danger');
+            }
+        },
+        error: function (xhr, status, error) {
+            showToast('An error occurred while updating due date', 'danger');
+            console.error('Error:', error, xhr.responseText);
+        }
+    });
+});
+
+
+    // Delete Enquiry
+    $('#confirm-delete-btn').on('click', function() {
+        $.ajax({
+            url: '',  // Make sure this URL is correct
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            data: {
+                enquiry_id: enquiryId
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.status === 'success') {
+                    showToast('Enquiry deleted successfully');
+                    
+                    // Redirect to enquiry list after short delay
+                    setTimeout(function() {
+                        window.location.href = '{% url "enquiry:enquary_list" %}';
+                    }, 1500);
+                } else {
+                    showToast('Failed to delete enquiry: ' + (data.message || 'Unknown error'), 'danger');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance($('#deleteEnquiryModal'));
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        $('#deleteEnquiryModal').modal('hide');
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                showToast('An error occurred while deleting the enquiry', 'danger');
+                console.error('Error:', error, xhr.responseText);
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance($('#deleteEnquiryModal'));
+                if (modal) {
+                    modal.hide();
+                } else {
+                    $('#deleteEnquiryModal').modal('hide');
+                }
+            }
+        });
+    });
+
+    // Edit comment functionality (delegate event handler for dynamically loaded comments)
+    $(document).on('click', '.edit-comment', function() {
+        const commentId = $(this).data('comment-id');
+        const commentBox = $(this).closest('.comment-box');
+        const commentContent = commentBox.find('.comment-content').text();
+        
+        // Replace comment with editable textarea
+        commentBox.find('.comment-content').html(`
+            <div class="edit-comment-form">
+                <textarea class="form-control mb-2">${commentContent}</textarea>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-sm btn-secondary cancel-edit me-2">Cancel</button>
+                    <button class="btn btn-sm btn-primary save-comment" data-comment-id="${commentId}">Save</button>
+                </div>
+            </div>
+        `);
+        
+        // Focus on the textarea
+        commentBox.find('textarea').focus();
+    });
+
+    // Cancel comment edit
+    $(document).on('click', '.cancel-edit', function() {
+        loadComments(); // Reload all comments to restore original state
+    });
+
+    // Save edited comment
+    $(document).on('click', '.save-comment', function() {
+        const commentId = $(this).data('comment-id');
+        const newComment = $(this).closest('.edit-comment-form').find('textarea').val().trim();
+        
+        if (!newComment) return;
+        
+        $.ajax({
+            url: '{% url "enquiry:update_comment" %}',  // Make sure this URL is correct
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            data: {
+                comment_id: commentId,
+                comment: newComment
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.status === 'success') {
+                    showToast('Comment updated successfully');
+                    loadComments();
+                } else {
+                    showToast('Failed to update comment: ' + (data.message || 'Unknown error'), 'danger');
+                }
+            },
+            error: function(xhr, status, error) {
+                showToast('An error occurred while updating the comment', 'danger');
+                console.error('Error:', error, xhr.responseText);
+            }
+        });
+    });
+
+    // Add CSS styles for comments
+    $('<style>')
+        .prop('type', 'text/css')
+        .html(`
+            .comment-box {
+                background-color: #f8f9fa;
+                border-left: 4px solid #6c757d !important;
+                transition: all 0.3s ease;
+            }
+            .comment-box:hover {
+                background-color: #e9ecef;
+            }
+            .comment-date {
+                font-size: 0.85rem;
+                color: #6c757d;
+            }
+            .comment-content {
+                white-space: pre-line;
+                padding: 8px 0;
+            }
+            .status-joined {
+                background-color: #28a745;
+                color: white;
+            }
+            .status-pending {
+                background-color: #ffc107;
+                color: #212529;
+            }
+            .status-dropout {
+                background-color: #dc3545;
+                color: white;
+            }
+        `)
+        .appendTo('head');
+
+    // Initialize: Load comments when page loads
+    loadComments();
 });
 </script>
 {% endblock %}
+

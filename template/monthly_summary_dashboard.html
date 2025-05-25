@@ -1,0 +1,373 @@
+
+{% extends "base.html" %}
+{% load humanize %}
+{% block content %}
+<style>
+  * Import Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Global styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #fffaf5; /* Light creamy white background */
+}
+
+.app-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Header styles */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ff8c42, #ff5f2e); /* Stronger orange gradient */
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3);
+}
+
+.dashboard-title {
+  color: white;
+  font-weight: 600;
+  margin: 0;
+  font-size: 1.8rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #ff8c42, #ff5f2e);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(255, 140, 66, 0.3);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #ff5f2e, #ff4500);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 140, 66, 0.4);
+}
+
+/* Filter card styles */
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.1);
+  background: white;
+  transition: all 0.3s ease;
+  border: none;
+  animation: slideInUp 0.5s ease-in-out;
+  border-top: 3px solid #ff8c42;
+}
+
+.card:hover {
+  box-shadow: 0 10px 20px rgba(255, 140, 66, 0.15);
+  transform: translateY(-5px);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.form-control {
+  border-radius: 5px;
+  border: 1px solid #ffe0cc;
+  padding: 0.5rem 1rem;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  background-color: #fff9f5;
+}
+
+.form-control:focus {
+  border-color: #ff8c42;
+  box-shadow: 0 0 0 0.2rem rgba(255, 140, 66, 0.25);
+  background-color: white;
+}
+
+select.form-control {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff8c42' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 2rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff8c42, #ff5f2e);
+  border: none;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  border-radius: 5px;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(255, 140, 66, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #ff5f2e, #ff4500);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 140, 66, 0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #ff8c42;
+  color: #ff8c42;
+  font-weight: 500;
+}
+
+.btn-outline:hover {
+  background-color: rgba(255, 140, 66, 0.1);
+  color: #ff5f2e;
+}
+
+/* Data table styles */
+.data-card {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.1);
+  margin-top: 2rem;
+  animation: slideInUp 0.7s ease-in-out;
+  background-color: white;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #ff8c42, #ff5f2e);
+  padding: 1rem 1.5rem;
+  border-bottom: none;
+}
+
+.card-title {
+  color: white;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.data-table-wrapper {
+  overflow-x: auto;
+  padding: 0.5rem;
+}
+
+table.dataTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1rem 0;
+}
+
+table.dataTable thead th {
+  background-color: #fff3e6; /* Light orange bg for headers */
+  color: #ff5f2e; /* Darker orange for header text */
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid #ff8c42;
+  position: sticky;
+  top: 0;
+}
+
+table.dataTable tbody tr {
+  transition: all 0.2s ease;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: rgba(255, 140, 66, 0.05);
+}
+
+table.dataTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #ffe0cc; /* Light orange border */
+  vertical-align: middle;
+}
+
+table.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Stats highlight */
+table.dataTable td:nth-child(3),
+table.dataTable td:nth-child(6) {
+  color: #ff5f2e; /* Highlight important columns */
+  font-weight: 500;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dashboard-header .btn-success {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  form.d-flex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  form.d-flex label, 
+  form.d-flex select,
+  form.d-flex button,
+  form.d-flex a {
+    width: 100%;
+  }
+  
+  table.dataTable {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-wrapper {
+    padding: 1rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  table.dataTable {
+    font-size: 0.8rem;
+  }
+  
+  table.dataTable th,
+  table.dataTable td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+</style>
+
+<div class="app-wrapper">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Monthly Summary</h1>
+        <a href="{% url 'enquiry:download_monthly_summary_excel' %}?month={{ selected_month }}&status={{ status_filter }}"
+           class="btn btn-success btn-sm">
+            <i class="fas fa-file-excel"></i> Download Excel
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="d-flex flex-wrap align-items-center gap-3">
+                <label for="month" class="fw-semibold">Select Month:</label>
+                <select id="month" name="month" class="form-control rounded-md">
+                    <option value="">All</option>
+                    {% for item in stats %}
+                        <option value="{{ item.month }}" {% if item.month == selected_month %}selected{% endif %}>
+                            {{ item.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="status" class="fw-semibold">Status:</label>
+                <select id="status" name="status" class="form-control rounded-md">
+                    <option value="">All</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="joined" {% if status_filter == 'joined' %}selected{% endif %}>Joined</option>
+                    <option value="dropout" {% if status_filter == 'dropout' %}selected{% endif %}>Dropout</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'enquiry:monthly_summary_dashboard' %}" class="btn btn-outline btn-sm">Reset</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="data-card">
+        <div class="card-header">
+            <h2 class="card-title">Monthly Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="data-table-wrapper">
+                <table class="dataTable stripe hover">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Total Students</th>
+                            <th>Joined</th>
+                            <th>Pending</th>
+                            <th>Dropout</th>
+                            <th>Fees Collected</th>
+                            <th>Pending Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.label }}</td>
+                            <td>{{ stat.total_students }}</td>
+                            <td>{{ stat.joined }}</td>
+                            <td>{{ stat.pending }}</td>
+                            <td>{{ stat.dropout }}</td>
+                            <td>₹{{ stat.fees_paid|intcomma }}</td>
+                            <td>₹{{ stat.fees_balance|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No data found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add row animation on load
+    const tableRows = document.querySelectorAll('.dataTable tbody tr');
+    tableRows.forEach((row, index) => {
+      row.style.animation = `fadeIn 0.3s ease-in-out ${0.1 + index * 0.05}s both`;
+      row.style.opacity = '0';
+    });
+    
+    // Enhance select boxes
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+      select.addEventListener('change', function() {
+        this.classList.add('border-primary');
+        setTimeout(() => {
+          this.classList.remove('border-primary');
+        }, 500);
+      });
+    });
+  });
+</script>
+{% endblock %}

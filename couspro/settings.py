@@ -25,8 +25,9 @@ SECRET_KEY = 'django-insecure-v!b7i#)d73^8rxyquw@u-@#mvr^eih$g+*%y1(64ymdh^+zpv#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Application definition
 
@@ -37,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
     'enquiry',
+     'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -124,3 +127,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'kashinathc067@gmail.com'
+EMAIL_HOST_PASSWORD = 'sapb vkcq slnw pomt'
+DEFAULT_FROM_EMAIL = 'kashinathc067@gmail.com'
+
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+LOGIN_REDIRECT_URL = 'enquiry:dashboard'  # Redirect after login
+LOGIN_URL = 'accounts:login'  # URL to redirect to when login is required
+LOGOUT_REDIRECT_URL = '/' 
+

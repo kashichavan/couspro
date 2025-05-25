@@ -113,6 +113,10 @@ a:hover {
   margin-bottom: 2rem;
 }
 
+.fa-phone-alt{
+  transform: rotate(100deg);
+}
+
 .stat-card {
   background: linear-gradient(145deg, var(--primary), var(--primary-dark));
   color: var(--white);
@@ -905,13 +909,15 @@ body.dark-mode .performance-bar {
   visibility: visible;
   opacity: 1;
 }
+
+
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Welcome Banner -->
 <section class="welcome-banner" data-aos="fade-up">
-    <h1>Welcome to EnquiryPortal Dashboard</h1>
+    <h1>Welcome to Jspider-JNTU Enquiry</h1>
     <p>Manage your enquiries efficiently with our comprehensive dashboard. Track follow-ups, view statistics, and manage your leads all in one place.</p>
     <div class="welcome-actions">
         <a href="{% url 'enquiry:add_enquiry' %}" class="btn">Add New Enquiry</a>
@@ -1025,8 +1031,8 @@ body.dark-mode .performance-bar {
                         {% for enquiry in recent_enquiries %}
                         <tr>
                             <td><a href="{% url 'enquiry:enquiry_details' enquiry.id %}">{{ enquiry.name }}</a></td>
-                            <td>{{ enquiry.course }}</td>
-                            <td>{{ enquiry.phone }}</td>
+                            <td>{{ enquiry.subject }}</td>
+                            <td>{{ enquiry.mobile }}</td>
                             <td>{{ enquiry.followup_date }}</td>
                             <td>
                                 {% if enquiry.status == 'pending' %}
@@ -1051,6 +1057,10 @@ body.dark-mode .performance-bar {
         <div class="mini-calendar">
             <div class="calendar-header">
                 <h3 class="calendar-title" id="calendar-month-year">{{ month_name }} {{ current_year }}</h3>
+                <div class="calendar-nav">
+                    <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                    <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+                </div>
             </div>
         
             <div id="calendar-container">
@@ -1075,248 +1085,57 @@ body.dark-mode .performance-bar {
             </div>
         
             <div style="margin-top: 1.5rem;">
-                <h4>Upcoming Follow-ups</h4>
-                <div class="activity-feed">
-                    {% for followup in upcoming_followups %}
-                        <div class="activity-item">
-                            <div class="activity-icon"><i class="fas fa-phone-alt"></i></div>
-                                <div class="activity-content">
-                                    <div class="activity-title">
-                                        <a href="{% url 'enquiry:enquiry_details' followup.id %}">
-                                            {{ followup.name }}
-                                        </a> - {{ followup.course }}
-                                    </div>
-                                    <div class="activity-time">{{ followup.followup_date }}</div>
-                                </div>
-                              
-                            
-                            
-                        </div>
-                    {% empty %}
-                        <p>No upcoming follow-ups.</p>
-                    {% endfor %}
+    <h4 id="followups-title">Upcoming Follow-ups</h4>
+    <div id="followups-container" class="activity-feed">
+        {% for followup in upcoming_followups %}
+            <div class="activity-item">
+                <div class="activity-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="activity-content">
+                    <div class="activity-title">
+                        {% if followup.id %}
+                            <a href="{% url 'enquiry:enquiry_details' followup.id %}">
+                                {{ followup.name }}
+                            </a>
+                        {% else %}
+                            {{ followup.name }}
+                        {% endif %}
+                        - {{ followup.subject|default:"N/A" }}
+                    </div>
+                    <div class="activity-time">{{ followup.followup_date }}</div>
                 </div>
             </div>
-        </div>
-        
-        
+        {% empty %}
+            <p>No upcoming follow-ups.</p>
+        {% endfor %}
     </div>
 </div>
 
-<!-- Conversion Trends -->
-<section class="dashboard-section" data-aos="fade-up" data-aos-delay="400">
-    <div class="section-title">
-        <h2>Conversion Statistics</h2>
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
-        <div class="chart-container">
-            <h3 class="chart-title">Status Distribution</h3>
-            <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; display: flex; justify-content: space-around; align-items: flex-end;">
-                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
-                        <div style="background: var(--warning); width: 50px; height: {{ pending_percentage }}px; border-radius: 5px 5px 0 0;"></div>
-                        <div style="margin-top: 10px; text-align: center;">
-                            <div>Pending</div>
-                            <div style="font-weight: bold;">{{ pending_count }}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
-                        <div style="background: var(--success); width: 50px; height: {{ joined_percentage }}px; border-radius: 5px 5px 0 0;"></div>
-                        <div style="margin-top: 10px; text-align: center;">
-                            <div>Joined</div>
-                            <div style="font-weight: bold;">{{ joined_count }}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; width: 80px;">
-                        <div style="background: var(--danger); width: 50px; height: {{ dropout_percentage }}px; border-radius: 5px 5px 0 0;"></div>
-                        <div style="margin-top: 10px; text-align: center;">
-                            <div>Dropout</div>
-                            <div style="font-weight: bold;">{{ dropout_count }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="chart-container">
-            <h3 class="chart-title">Conversion Rate by Course</h3>
-            <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
-                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center;">
-                    {% for course in course_stats %}
-                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                        <div style="width: 100px; min-width: 100px; margin-right: 10px;">{{ course.name }}</div>
-                        <div style="flex: 1; background-color: #f0f0f0; height: 20px; border-radius: 10px; overflow: hidden;">
-                            <div style="width: {{ course.conversion_rate }}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 10px;"></div>
-                        </div>
-                        <div style="margin-left: 10px; font-weight: bold;">{{ course.conversion_rate }}%</div>
-                    </div>
-                    {% empty %}
-                    <div style="text-align: center;">No course data available.</div>
-                    {% endfor %}
-                </div>
-            </div>
         </div>
     </div>
-</section>
-
-
-<!-- Counselor Performance -->
-<section class="dashboard-section" data-aos="fade-up" data-aos-delay="600">
-    <div class="section-title">
-        <h2>Counselor Performance</h2>
-    </div>
-    
-    <div class="chart-container">
-        <h3 class="chart-title">Top Performing Counselors</h3>
-        <div class="table-responsive">
-            <table class="enquiry-table">
-                <thead>
-                    <tr>
-                        <th>Counselor</th>
-                        <th>Total Enquiries</th>
-                        <th>Conversions</th>
-                        <th>Conversion Rate</th>
-                        <th>Performance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for counselor in counselor_performance %}
-                    <tr>
-                        <td>{{ counselor.name }}</td>
-                        <td>{{ counselor.total_enquiries }}</td>
-                        <td>{{ counselor.conversions }}</td>
-                        <td>{{ counselor.conversion_rate }}%</td>
-                        <td>
-                            <div style="width: 100%; background-color: #f0f0f0; height: 10px; border-radius: 5px; overflow: hidden;">
-                                <div style="width: {{ counselor.conversion_rate }}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 5px;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" style="text-align: center;">No counselor data available.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
-<!-- Monthly Trend -->
-<section class="dashboard-section" data-aos="fade-up" data-aos-delay="700">
-    <div class="section-title">
-        <h2>Monthly Trends</h2>
-    </div>
-    
-    <div class="chart-container">
-        <h3 class="chart-title">Enquiry & Conversion Trends</h3>
-        <div style="height: 300px; display: flex; flex-direction: column; justify-content: flex-end;">
-            <div style="display: flex; height: 250px; align-items: flex-end; position: relative;">
-                <!-- Y-axis labels -->
-                <div style="position: absolute; height: 100%; left: -40px; display: flex; flex-direction: column; justify-content: space-between; text-align: right;">
-                    <div>50</div>
-                    <div>40</div>
-                    <div>30</div>
-                    <div>20</div>
-                    <div>10</div>
-                    <div>0</div>
-                </div>
-                
-                <!-- X-axis grid lines -->
-                <div style="position: absolute; width: 100%; height: 100%; left: 0; display: flex; flex-direction: column; justify-content: space-between; z-index: 0;">
-                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
-                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
-                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
-                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
-                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.05);"></div>
-                    <div style="width: 100%; height: 1px; background-color: rgba(0,0,0,0.1);"></div>
-                </div>
-                
-                <!-- Bars -->
-                <div style="flex: 1; display: flex; justify-content: space-around; z-index: 1;">
-                    {% for month in monthly_stats %}
-                    <div style="display: flex; flex-direction: column; align-items: center; width: 60px;">
-                        <div style="display: flex; height: 200px; width: 60px; justify-content: center; align-items: flex-end;">
-                            <!-- Enquiry bar -->
-                            <div style="width: 20px; height: {{ month.total_height }}px; background: var(--primary); border-radius: 2px 2px 0 0; margin-right: 2px;"></div>
-                            <!-- Conversion bar -->
-                            <div style="width: 20px; height: {{ month.conversion_height }}px; background: var(--success); border-radius: 2px 2px 0 0;"></div>
-                        </div>
-                        <div style="margin-top: 10px; font-size: 0.8rem;">{{ month.name }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <!-- Legend -->
-            <div style="display: flex; justify-content: center; margin-top: 20px;">
-                <div style="display: flex; align-items: center; margin-right: 20px;">
-                    <div style="width: 15px; height: 15px; background-color: var(--primary); margin-right: 10px; border-radius: 3px;"></div>
-                    <div>Total Enquiries</div>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <div style="width: 15px; height: 15px; background-color: var(--success); margin-right: 10px; border-radius: 3px;"></div>
-                    <div>Conversions</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Recent Activities Log -->
-<section class="dashboard-section" data-aos="fade-up" data-aos-delay="800">
-    <div class="section-title">
-        <h2>Recent Activities</h2>
-    </div>
-    
-    <div class="chart-container">
-        <h3 class="chart-title">Activity Log</h3>
-        <div class="activity-feed">
-            {% for activity in recent_activities %}
-            <div class="activity-item">
-                <div class="activity-icon">
-                    {% if activity.type == 'enquiry' %}
-                    <i class="fas fa-user-plus"></i>
-                    {% elif activity.type == 'followup' %}
-                    <i class="fas fa-phone-alt"></i>
-                    {% elif activity.type == 'status' %}
-                    <i class="fas fa-exchange-alt"></i>
-                    {% elif activity.type == 'counselor' %}
-                    <i class="fas fa-user-tie"></i>
-                    {% else %}
-                    <i class="fas fa-clipboard-check"></i>
-                    {% endif %}
-                </div>
-                <div class="activity-content">
-                    <div class="activity-title">{{ activity.message }}</div>
-                    <div class="activity-time">{{ activity.timestamp }}</div>
-                </div>
-            </div>
-            {% empty %}
-            <p>No recent activities found.</p>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Calendar functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const prevMonthBtn = document.getElementById('prev-month');
-        const nextMonthBtn = document.getElementById('next-month');
-        const calendarTitle = document.getElementById('calendar-month-year');
-        const followupsContainer = document.getElementById('followups-container');
-        
-        let currentDate = new Date();
-        let currentMonth = currentDate.getMonth();
-        let currentYear = currentDate.getFullYear();
-        
-        // Event listeners for month navigation
+document.addEventListener('DOMContentLoaded', function() {
+    const prevMonthBtn = document.getElementById('prev-month');
+    const nextMonthBtn = document.getElementById('next-month');
+    const calendarTitle = document.getElementById('calendar-month-year');
+    const followupsContainer = document.getElementById('followups-container');
+    const followupsTitle = document.getElementById('followups-title');
+
+    // Base URLs generated by Django
+    const calendarDataUrl = "{% url 'enquiry:get_calendar_data' %}";
+    const followupsUrl = "{% url 'enquiry:get_followups' %}";
+    const enquiryDetailsBaseUrl = "{% url 'enquiry:enquiry_details' '0' %}".replace('0/', '');  // will append ID in JS
+
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+
+    updateCalendar();
+
+    if (prevMonthBtn && nextMonthBtn) {
         prevMonthBtn.addEventListener('click', function() {
             currentMonth--;
             if (currentMonth < 0) {
@@ -1325,7 +1144,7 @@ body.dark-mode .performance-bar {
             }
             updateCalendar();
         });
-        
+
         nextMonthBtn.addEventListener('click', function() {
             currentMonth++;
             if (currentMonth > 11) {
@@ -1334,124 +1153,139 @@ body.dark-mode .performance-bar {
             }
             updateCalendar();
         });
-        
-        // Function to update calendar
-        function updateCalendar() {
-            // Display loading state
-            const calendarContainer = document.getElementById('calendar-container');
-            calendarContainer.innerHTML = '<div class="calendar-loading">Loading calendar...</div>';
-            
-            // Display loading state for followups
-            followupsContainer.innerHTML = '<div class="followups-loading">Loading follow-ups...</div>';
-            
-            // Update calendar title
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"];
-            calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-            
-            // AJAX call to fetch calendar data
-            fetch(`/api/calendar-data/?month=${currentMonth + 1}&year=${currentYear}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Render calendar grid
-                    let calendarHTML = `
-                        <div class="calendar-grid">
-                            <div class="calendar-day-name">Sun</div>
-                            <div class="calendar-day-name">Mon</div>
-                            <div class="calendar-day-name">Tue</div>
-                            <div class="calendar-day-name">Wed</div>
-                            <div class="calendar-day-name">Thu</div>
-                            <div class="calendar-day-name">Fri</div>
-                            <div class="calendar-day-name">Sat</div>
+    }
+
+    function addClickEventsToDays() {
+        document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
+            day.addEventListener('click', function() {
+                document.querySelectorAll('.calendar-day').forEach(d => {
+                    d.classList.remove('selected');
+                });
+                this.classList.add('selected');
+
+                const date = this.getAttribute('data-date');
+                loadFollowups(date);
+            });
+        });
+    }
+
+    function updateCalendar() {
+        const calendarContainer = document.getElementById('calendar-container');
+        calendarContainer.innerHTML = '<div class="loading">Loading calendar...</div>';
+
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"];
+        calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+        fetch(`${calendarDataUrl}?month=${currentMonth + 1}&year=${currentYear}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
+            })
+            .then(data => {
+                let calendarHTML = `
+                    <div class="calendar-grid">
+                        <div class="calendar-day-name">Sun</div>
+                        <div class="calendar-day-name">Mon</div>
+                        <div class="calendar-day-name">Tue</div>
+                        <div class="calendar-day-name">Wed</div>
+                        <div class="calendar-day-name">Thu</div>
+                        <div class="calendar-day-name">Fri</div>
+                        <div class="calendar-day-name">Sat</div>
+                `;
+
+                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                for (let i = 0; i < firstDay; i++) {
+                    calendarHTML += `<div class="calendar-day empty"></div>`;
+                }
+
+                const today = new Date();
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const isToday = today.getDate() === day &&
+                                    today.getMonth() === currentMonth &&
+                                    today.getFullYear() === currentYear;
+
+                    const hasEvents = data.followup_dates.includes(day);
+                    const formattedDay = String(day).padStart(2, '0');
+                    const formattedMonth = String(currentMonth + 1).padStart(2, '0');
+
+                    calendarHTML += `
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}" 
+                             data-date="${currentYear}-${formattedMonth}-${formattedDay}">
+                            ${day}
+                        </div>
                     `;
-                    
-                    // Add empty days at the beginning
-                    for (let i = 0; i < data.first_day_of_month; i++) {
-                        calendarHTML += `<div class="calendar-day empty"></div>`;
-                    }
-                    
-                    // Add days of the month
-                    const today = new Date();
-                    for (let day = 1; day <= data.days_in_month; day++) {
-                        const isToday = today.getDate() === day && 
-                                       today.getMonth() === currentMonth && 
-                                       today.getFullYear() === currentYear;
-                        
-                        const hasEvents = data.followup_dates.includes(day);
-                        
-                        calendarHTML += `
-                            <div class="calendar-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}" 
-                                 data-date="${currentYear}-${currentMonth + 1}-${day}">
-                                ${day}
+                }
+
+                calendarHTML += `</div>`;
+                calendarContainer.innerHTML = calendarHTML;
+                addClickEventsToDays();
+
+                const formattedMonth = String(currentMonth + 1).padStart(2, '0');
+                loadFollowups(`${currentYear}-${formattedMonth}`);
+            })
+            .catch(error => {
+                console.error('Calendar error:', error);
+                calendarContainer.innerHTML = '<div class="error">Error loading calendar.</div>';
+            });
+    }
+
+    function loadFollowups(date) {
+        followupsContainer.innerHTML = '<div class="loading">Loading follow-ups...</div>';
+
+        if (date.split('-').length === 3) {
+            const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            followupsTitle.textContent = `Follow-ups for ${formattedDate}`;
+        } else {
+            followupsTitle.textContent = 'Month Follow-ups';
+        }
+
+        fetch(`${followupsUrl}?date=${date}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
+            })
+            .then(data => {
+                let followupsHTML = '';
+
+                if (data.followups && data.followups.length > 0) {
+                    data.followups.forEach(followup => {
+                        const course = followup.course || 'N/A';
+                        const enquiryUrl = `${enquiryDetailsBaseUrl}${followup.id}/`;
+
+                        followupsHTML += `
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-phone-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">
+                                        <a href="${enquiryUrl}">${followup.name}</a> - ${course}
+                                    </div>
+                                    <div class="activity-time">${followup.followup_date}</div>
+                                </div>
                             </div>
                         `;
-                    }
-                    
-                    calendarHTML += `</div>`;
-                    calendarContainer.innerHTML = calendarHTML;
-                    
-                    // Add click event to calendar days
-                    document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
-                        day.addEventListener('click', function() {
-                            const date = this.getAttribute('data-date');
-                            loadFollowups(date);
-                        });
                     });
-                    
-                    // Load followups for the current month
-                    loadFollowups(`${currentYear}-${currentMonth + 1}`);
-                })
-                .catch(error => {
-                    console.error('Error fetching calendar data:', error);
-                    calendarContainer.innerHTML = '<div class="calendar-loading">Error loading calendar</div>';
-                });
-        }
-        
-        // Function to load followups for a specific date
-        function loadFollowups(date) {
-            // Display loading state
-            followupsContainer.innerHTML = '<div class="followups-loading">Loading follow-ups...</div>';
-            
-            // AJAX call to fetch followups
-            fetch(`/api/followups/?date=${date}`)
-                .then(response => response.json())
-                .then(data => {
-                    let followupsHTML = '';
-                    
-                    if (data.followups.length > 0) {
-                        data.followups.forEach(followup => {
-                            followupsHTML += `
-                                <div class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="fas fa-phone-alt"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title">${followup.name} - ${followup.course}</div>
-                                        <div class="activity-time">${followup.followup_date}</div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        followupsHTML = '<p>No follow-ups scheduled for this date.</p>';
-                    }
-                    
-                    followupsContainer.innerHTML = followupsHTML;
-                })
-                .catch(error => {
-                    console.error('Error fetching followups:', error);
-                    followupsContainer.innerHTML = '<div class="followups-loading">Error loading follow-ups</div>';
-                });
-        }
-        
-        // Initialize calendar
-        updateCalendar();
-        
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            once: true
-        });
-    });
+                } else {
+                    followupsHTML = '<p>No follow-ups scheduled for this date.</p>';
+                }
+
+                followupsContainer.innerHTML = followupsHTML;
+            })
+            .catch(error => {
+                console.error('Follow-up error:', error);
+                followupsContainer.innerHTML = '<div class="error">Error loading follow-ups.</div>';
+            });
+    }
+});
 </script>
 {% endblock %}
+
+

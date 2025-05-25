@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block title %}Add New Enquiry{% endblock %}
-
 {% block extra_css %}
 <style>
   :root {
@@ -11,12 +9,10 @@
     --dark-blue: rgb(39, 63, 79);
     --black: rgb(0, 0, 0);
   }
-
   body {
     background-color: var(--off-white);
     font-family: 'Poppins', sans-serif;
   }
-
   .enquiry-container {
     background-color: white;
     border-radius: 15px;
@@ -28,7 +24,6 @@
     overflow: hidden;
     transition: all 0.3s ease;
   }
-
   .enquiry-container::before {
     content: "";
     position: absolute;
@@ -41,16 +36,13 @@
     transform-origin: top;
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-
   .enquiry-container:hover::before {
     transform: scaleY(1);
   }
-
   .enquiry-container:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 35px rgba(39, 63, 79, 0.15);
   }
-
   .form-title {
     color: var(--dark-blue);
     margin-bottom: 1.5rem;
@@ -61,7 +53,6 @@
     position: relative;
     display: inline-block;
   }
-
   .form-title::after {
     content: "";
     position: absolute;
@@ -72,13 +63,11 @@
     background: var(--orange);
     animation: pulse 2s infinite;
   }
-
   @keyframes pulse {
     0% { opacity: 0.5; width: 0; }
     50% { opacity: 1; width: 50%; }
     100% { opacity: 0.5; width: 100%; }
   }
-
   .form-control, .form-select {
     border: 2px solid rgba(39, 63, 79, 0.1);
     border-radius: 8px;
@@ -86,12 +75,10 @@
     transition: all 0.3s ease;
     font-size: 1rem;
   }
-
   .form-control:focus, .form-select:focus {
     border-color: var(--orange);
     box-shadow: 0 0 0 0.25rem rgba(254, 119, 67, 0.25);
   }
-
   .form-label {
     color: var(--dark-blue);
     font-weight: 600;
@@ -99,17 +86,14 @@
     transition: all 0.3s ease;
     display: block;
   }
-
   .form-control:focus + .form-label,
   .form-control:not(:placeholder-shown) + .form-label {
     color: var(--orange);
   }
-
   .form-group {
     margin-bottom: 1.5rem;
     position: relative;
   }
-
   .btn-submit {
     background-color: var(--orange);
     border: none;
@@ -123,7 +107,6 @@
     overflow: hidden;
     z-index: 1;
   }
-
   .btn-submit::before {
     content: "";
     position: absolute;
@@ -139,17 +122,14 @@
     transition: all 0.5s ease;
     z-index: -1;
   }
-
   .btn-submit:hover::before {
     left: 100%;
   }
-
   .btn-submit:hover {
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(254, 119, 67, 0.4);
     background-color: rgb(244, 109, 57);
   }
-
   .help-text {
     font-size: 0.85rem;
     color: var(--dark-blue);
@@ -157,32 +137,28 @@
     margin-top: 0.25rem;
     font-style: italic;
   }
-
   /* Form field animations */
   .form-group {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInUp 0.5s forwards;
   }
-
   @keyframes fadeInUp {
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-
   .form-group:nth-child(1) { animation-delay: 0.1s; }
   .form-group:nth-child(2) { animation-delay: 0.2s; }
   .form-group:nth-child(3) { animation-delay: 0.3s; }
   .form-group:nth-child(4) { animation-delay: 0.4s; }
   .form-group:nth-child(5) { animation-delay: 0.5s; }
   .form-group:nth-child(6) { animation-delay: 0.6s; }
-
+  .form-group:nth-child(7) { animation-delay: 0.7s; }
   .form-floating {
     position: relative;
   }
-  
   /* Dropdown specific styling */
   .form-select {
     appearance: none;
@@ -193,45 +169,36 @@
     padding-right: 2.5rem !important;
     transition: all 0.3s ease;
   }
-  
   /* Course-specific styling */
   .form-select option[value="java_full_stack"] {
     background-color: rgba(248, 152, 32, 0.1);
   }
-  
   .form-select option[value="python_full_stack"] {
     background-color: rgba(48, 105, 152, 0.1);
   }
-  
   .java-selected {
     background-image: linear-gradient(to right, rgba(248, 152, 32, 0.1), transparent) !important;
   }
-  
   .python-selected {
     background-image: linear-gradient(to right, rgba(48, 105, 152, 0.1), transparent) !important;
   }
-  
   .form-select:focus {
     box-shadow: 0 0 0 0.25rem rgba(254, 119, 67, 0.25);
     border-color: var(--orange);
   }
-  
   /* Dropdown animation */
   @keyframes selectPulse {
     0% { border-color: rgba(254, 119, 67, 0.2); }
     50% { border-color: rgba(254, 119, 67, 0.8); }
     100% { border-color: rgba(254, 119, 67, 0.2); }
   }
-  
   .form-select:hover {
     animation: selectPulse 1.5s infinite;
   }
-
   /* Input field highlight effect */
   .highlight-container {
     position: relative;
   }
-
   .highlight-container::after {
     content: "";
     position: absolute;
@@ -242,12 +209,10 @@
     background: var(--orange);
     transition: all 0.3s ease;
   }
-
   .highlight-container:focus-within::after {
     width: 100%;
     left: 0;
   }
-
   /* Card with pattern */
   .pattern-background {
     position: absolute;
@@ -264,15 +229,69 @@
     z-index: 0;
     border-bottom-left-radius: 100%;
   }
-
   .invalid-feedback {
     color: #dc3545;
     font-size: 0.875rem;
     margin-top: 0.25rem;
   }
+  /* Fees section styling */
+  #fees-section {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: rgba(254, 119, 67, 0.05);
+    border-left: 4px solid var(--orange);
+    border-radius: 8px;
+    display: none;
+  }
+  #fees-section .form-group {
+    margin-bottom: 1rem;
+  }
+  #fees-section h5 {
+    color: var(--dark-blue);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  /* Modal styling */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-box {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* Mobile number warning */
+  .mobile-warning {
+    display: none;
+    color: var(--orange);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding: 8px 12px;
+    background-color: rgba(254, 119, 67, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid var(--orange);
+    font-weight: 500;
+  }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
@@ -280,105 +299,105 @@
       <div class="enquiry-container">
         <div class="pattern-background"></div>
         <h2 class="form-title mb-4">New Enquiry</h2>
-        
-        <p class="lead mb-4">Please fill in the form below to submit a new enquiry. Our counsellors will reach out to you soon.</p>
-        
-        <form method="POST" class="enquiry-form">
+        <p class="lead mb-4">Please fill in the form below. Our counsellors will contact you soon.</p>
+
+        <form method="POST" class="enquiry-form needs-validation" novalidate>
           {% csrf_token %}
-          
+          <input type="hidden" id="bypass_mobile_check" name="bypass_mobile_check" value="false">
           <div class="row">
             <div class="col-md-6">
-              <div class="form-group highlight-container">
-                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+              <div class="mb-3">
+                {{ form.name.label_tag }}
                 {{ form.name }}
-                {% if form.name.help_text %}
-                <div class="help-text">{{ form.name.help_text }}</div>
-                {% endif %}
-                {% if form.name.errors %}
-                <div class="invalid-feedback">{{ form.name.errors }}</div>
-                {% endif %}
+                <div class="invalid-feedback">{{ form.name.errors.as_text }}</div>
               </div>
             </div>
-            
             <div class="col-md-6">
-              <div class="form-group highlight-container">
-                <label for="{{ form.mobile.id_for_label }}" class="form-label">{{ form.mobile.label }}</label>
+              <div class="mb-3">
+                {{ form.mobile.label_tag }}
                 {{ form.mobile }}
-                {% if form.mobile.help_text %}
-                <div class="help-text">{{ form.mobile.help_text }}</div>
-                {% endif %}
-                {% if form.mobile.errors %}
-                <div class="invalid-feedback">{{ form.mobile.errors }}</div>
-                {% endif %}
+                <div class="invalid-feedback">{{ form.mobile.errors.as_text }}</div>
+                <div id="mobile-warning" class="mobile-warning"></div>
               </div>
             </div>
           </div>
-          
-          <div class="form-group highlight-container">
-            <label for="{{ form.subject.id_for_label }}" class="form-label">Select Course</label>
+
+          <div class="mb-3">
+            {{ form.parent_number.label_tag }}
+            {{ form.parent_number }}
+            <div class="invalid-feedback">{{ form.parent_number.errors.as_text }}</div>
+            <small class="help-text">Optional field - leave blank if not available</small>
+          </div>
+
+          <div class="mb-3">
+            {{ form.subject.label_tag }}
             {{ form.subject }}
-            {% if form.subject.help_text %}
-            <div class="help-text">{{ form.subject.help_text }}</div>
-            {% endif %}
-            {% if form.subject.errors %}
-            <div class="invalid-feedback">{{ form.subject.errors }}</div>
-            {% endif %}
+            <div class="invalid-feedback">{{ form.subject.errors.as_text }}</div>
           </div>
-          
-          <div class="form-group highlight-container">
-            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
+
+          <div class="mb-3">
+            {{ form.enquiry_type.label_tag }}
             {{ form.enquiry_type }}
-            {% if form.enquiry_type.help_text %}
-            <div class="help-text">{{ form.enquiry_type.help_text }}</div>
-            {% endif %}
-            {% if form.enquiry_type.errors %}
-            <div class="invalid-feedback">{{ form.enquiry_type.errors }}</div>
-            {% endif %}
+            <div class="invalid-feedback">{{ form.enquiry_type.errors.as_text }}</div>
           </div>
-          
+
           <div class="row">
             <div class="col-md-6">
-              <div class="form-group highlight-container">
-                <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+              <div class="mb-3">
+                {{ form.status.label_tag }}
                 {{ form.status }}
-                {% if form.status.help_text %}
-                <div class="help-text">{{ form.status.help_text }}</div>
-                {% endif %}
-                {% if form.status.errors %}
-                <div class="invalid-feedback">{{ form.status.errors }}</div>
-                {% endif %}
+                <div class="invalid-feedback">{{ form.status.errors.as_text }}</div>
               </div>
             </div>
-            
             <div class="col-md-6">
-              <div class="form-group highlight-container">
-                <label for="{{ form.followup_date.id_for_label }}" class="form-label">{{ form.followup_date.label }}</label>
+              <div class="mb-3">
+                {{ form.followup_date.label_tag }}
                 {{ form.followup_date }}
-                {% if form.followup_date.help_text %}
-                <div class="help-text">{{ form.followup_date.help_text }}</div>
-                {% endif %}
-                {% if form.followup_date.errors %}
-                <div class="invalid-feedback">{{ form.followup_date.errors }}</div>
-                {% endif %}
+                <div class="invalid-feedback">{{ form.followup_date.errors.as_text }}</div>
               </div>
             </div>
           </div>
-          
-          <div class="form-group highlight-container">
-            <label for="{{ form.counsellor.id_for_label }}" class="form-label">{{ form.counsellor.label }}</label>
+
+          <div class="mb-3">
+            {{ form.counsellor.label_tag }}
             {{ form.counsellor }}
-            {% if form.counsellor.help_text %}
-            <div class="help-text">{{ form.counsellor.help_text }}</div>
-            {% endif %}
-            {% if form.counsellor.errors %}
-            <div class="invalid-feedback">{{ form.counsellor.errors }}</div>
-            {% endif %}
+            <div class="invalid-feedback">{{ form.counsellor.errors.as_text }}</div>
           </div>
-          
-          <div class="form-group text-center mt-4 mb-3">
-            <button type="submit" class="btn btn-submit">
-              <i class="fas fa-paper-plane me-2"></i>Submit Enquiry
-            </button>
+
+          <div class="mb-3">
+            {{ form.enquiry_date.label_tag }}
+            {{ form.enquiry_date }}
+            <div class="invalid-feedback">{{ form.enquiry_date.errors.as_text }}</div>
+          </div>
+
+          <!-- Fees Section -->
+          <div id="fees-section" style="display: none;">
+            <h5 class="mt-3">Fees Details</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  {{ form.target_fees.label_tag }}
+                  {{ form.target_fees }}
+                  <div class="invalid-feedback">{{ form.target_fees.errors.as_text }}</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  {{ form.fees_paid.label_tag }}
+                  {{ form.fees_paid }}
+                  <div class="invalid-feedback">{{ form.fees_paid.errors.as_text }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              {{ form.due_date.label_tag }}
+              {{ form.due_date }}
+              <div class="invalid-feedback">{{ form.due_date.errors.as_text }}</div>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Submit Enquiry</button>
           </div>
         </form>
       </div>
@@ -386,86 +405,173 @@
   </div>
 </div>
 
+<!-- Validation Modal -->
+<div class="modal-overlay" id="validationModal">
+  <div class="modal-box">
+    <h5>Oops! Please fix the errors before submitting.</h5>
+    <p id="modal-error-list"></p>
+    <button class="btn btn-danger" onclick="document.getElementById('validationModal').style.display='none'">Close</button>
+  </div>
+</div>
+
+<!-- Mobile Number Exists Modal -->
+<div class="modal-overlay" id="mobileExistsModal">
+  <div class="modal-box">
+    <h5>Mobile Number Already Registered</h5>
+    <p id="mobile-exists-message"></p>
+    <div class="mt-3">
+      <button class="btn btn-warning me-2" onclick="continueWithExistingNumber()">Continue Anyway</button>
+      <button class="btn btn-primary" onclick="document.getElementById('mobileExistsModal').style.display='none'">Edit Number</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Adding animation to the form container
-    const formContainer = document.querySelector('.enquiry-container');
-    formContainer.classList.add('animate__animated', 'animate__fadeIn');
-    
-    // Show selected option with animation
-    const subjectDropdown = document.querySelector('select[name="subject"]');
-    if (subjectDropdown) {
-      subjectDropdown.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        selectedOption.classList.add('selected-option');
-        
-        // Add a subtle flash effect on selection
-        this.style.backgroundColor = 'rgba(254, 119, 67, 0.1)';
-        setTimeout(() => {
-          this.style.backgroundColor = '';
-        }, 300);
-        
-        // Add special styling based on selected course
-        if (this.value === 'java_full_stack') {
-          this.classList.add('java-selected');
-          this.style.borderLeft = '3px solid #f89820'; // Java color
-        } else if (this.value === 'python_full_stack') {
-          this.classList.add('python-selected');
-          this.style.borderLeft = '3px solid #306998'; // Python color
-        } else {
-          this.classList.remove('java-selected', 'python-selected');
-          this.style.borderLeft = '';
+  document.addEventListener('DOMContentLoaded', function () {
+    const statusField = document.getElementById('id_status');
+    const feesSection = document.getElementById('fees-section');
+    const mobileField = document.getElementById('id_mobile');
+    const form = document.querySelector('.enquiry-form');
+    const modalErrorList = document.getElementById('modal-error-list');
+    const enquiryId = '{{ enquiry.id|default:"" }}';
+    let hasExistingNumber = false;
+
+    // Toggle fees section based on status
+    function toggleFeesSection() {
+      feesSection.style.display = statusField.value === 'joined' ? 'block' : 'none';
+    }
+
+    if (statusField) {
+      statusField.addEventListener('change', toggleFeesSection);
+      toggleFeesSection();
+    }
+
+    // Check if mobile number exists in database
+    function checkMobileExists(mobile) {
+      if (!mobile || mobile.length < 10) return;
+
+      // Extract only digits and get last 10 digits
+      const cleanMobile = mobile.replace(/\D/g, '').slice(-10);
+      if (cleanMobile.length !== 10) return;
+
+      fetch(`/check-mobile-exists/?mobile=${cleanMobile}&enquiry_id=${enquiryId}`)
+        .then(response => response.json())
+        .then(data => {
+          const warningDiv = document.getElementById('mobile-warning');
+          
+          if (data.exists) {
+            warningDiv.textContent = `This number is already registered for ${data.student_name}`;
+            warningDiv.style.display = 'block';
+            hasExistingNumber = true;
+          } else {
+            warningDiv.style.display = 'none';
+            hasExistingNumber = false;
+          }
+        })
+        .catch(error => console.error('Error checking mobile number:', error));
+    }
+
+    // Debounce function to avoid too many API calls
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    // Add event listener to mobile field with debounce
+    if (mobileField) {
+      const debouncedCheck = debounce(checkMobileExists, 500);
+      mobileField.addEventListener('input', () => {
+        debouncedCheck(mobileField.value);
+      });
+      
+      // Initial check if value exists
+      if (mobileField.value) {
+        checkMobileExists(mobileField.value);
+      }
+    }
+
+    // Form validation with custom modal alert
+    form.addEventListener('submit', function (e) {
+      const nameInput = document.getElementById('id_name');
+      const dateInput = document.getElementById('id_enquiry_date');
+      const mobileInput = document.getElementById('id_mobile');
+
+      const mobilePattern = /^[6-9]\d{9}$/;
+      let isValid = true;
+      let errorMessages = [];
+
+      // Name validation
+      if (!nameInput.value.trim()) {
+        nameInput.classList.add('is-invalid');
+        isValid = false;
+        errorMessages.push("Name is required");
+      }
+
+      // Enquiry Date validation
+      if (!dateInput.value) {
+        dateInput.classList.add('is-invalid');
+        isValid = false;
+        errorMessages.push("Enquiry date is required");
+      }
+
+      // Mobile validation
+      if (mobileInput) {
+        const cleanMobile = mobileInput.value.replace(/\D/g, '').slice(-10);
+        if (!mobilePattern.test(cleanMobile)) {
+          mobileInput.classList.add('is-invalid');
+          isValid = false;
+          errorMessages.push("Enter a valid 10-digit Indian mobile number");
         }
+      }
+
+      // Check for existing mobile number
+      if (hasExistingNumber) {
+        e.preventDefault();
+        // Show the mobile exists modal
+        document.getElementById('mobile-exists-message').textContent = 
+          document.getElementById('mobile-warning').textContent;
+        document.getElementById('mobileExistsModal').style.display = 'flex';
+        return false;
+      }
+
+      // Check Bootstrap native validity
+      if (!form.checkValidity() || !isValid) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Update modal content and show
+        modalErrorList.innerHTML = errorMessages.map(msg => `• ${msg}`).join('<br>');
+        document.getElementById('validationModal').style.display = 'flex';
+      }
+
+      form.classList.add('was-validated');
+    });
+
+    // Real-time mobile input feedback
+    if (mobileField) {
+      mobileField.addEventListener('input', () => {
+        const cleanMobile = mobileField.value.replace(/\D/g, '').slice(-10);
+        const valid = /^[6-9]\d{9}$/.test(cleanMobile);
+        mobileField.classList.toggle('is-valid', valid);
+        mobileField.classList.toggle('is-invalid', !valid && mobileField.value.length > 0);
       });
     }
-    
-    // Form validation visual feedback
-    const formInputs = document.querySelectorAll('.form-control, .form-select');
-    
-    formInputs.forEach(input => {
-      // Add focus effect
-      input.addEventListener('focus', function() {
-        this.closest('.highlight-container').classList.add('active');
-      });
-      
-      input.addEventListener('blur', function() {
-        this.closest('.highlight-container').classList.remove('active');
-      });
-      
-      // Validate on input
-      input.addEventListener('input', function() {
-        if (this.value.trim() !== '') {
-          this.classList.add('is-valid');
-          this.classList.remove('is-invalid');
-        } else {
-          this.classList.remove('is-valid');
-          if (this.hasAttribute('required')) {
-            this.classList.add('is-invalid');
-          }
-        }
-      });
-    });
-    
-    // Button click effect
-    const submitBtn = document.querySelector('.btn-submit');
-    submitBtn.addEventListener('click', function(e) {
-      // Add ripple effect
-      let ripple = document.createElement('span');
-      ripple.classList.add('ripple');
-      this.appendChild(ripple);
-      
-      let x = e.clientX - e.target.getBoundingClientRect().left;
-      let y = e.clientY - e.target.getBoundingClientRect().top;
-      
-      ripple.style.left = `${x}px`;
-      ripple.style.top = `${y}px`;
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    });
   });
+
+  // Function to continue with existing mobile number
+  function continueWithExistingNumber() {
+    document.getElementById('mobileExistsModal').style.display = 'none';
+    const form = document.querySelector('.enquiry-form');
+    // Set the hidden field to bypass the mobile check
+    document.getElementById('bypass_mobile_check').value = 'true';
+    // Submit the form
+    form.submit();
+  }
 </script>
-{% endblock %}
 {% endblock %}
