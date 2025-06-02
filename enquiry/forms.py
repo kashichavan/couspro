@@ -12,8 +12,6 @@ class CommentForm(forms.ModelForm):
         
 
 
-
-
 from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal
@@ -22,21 +20,7 @@ from .models import Enquiry, EducationInfo
 
 
 class EnquiryForm(forms.ModelForm):
-    # Existing college fields (optional)
-    college_name = forms.CharField(
-        max_length=150,
-        required=False,
-        label='College Name',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter college name'})
-    )
-    college_place = forms.CharField(
-        max_length=150,
-        required=False,
-        label='College Place',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter college place'})
-    )
-
-    # EducationInfo fields
+    # EducationInfo fields (including college info now)
     education_level = forms.ChoiceField(
         choices=EducationInfo.EDUCATION_LEVEL_CHOICES,
         required=True,
@@ -85,12 +69,29 @@ class EnquiryForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 78.50'})
     )
 
+    # College fields moved here:
+    college_name = forms.CharField(
+        max_length=150,
+        required=False,
+        label='College Name',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter college name'})
+    )
+    college_place = forms.CharField(
+        max_length=150,
+        required=False,
+        label='College Place',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter college place'})
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Add CSS classes correctly
         for field_name, field in self.fields.items():
             if field_name not in ['college_name', 'college_place']:
                 widget_class = 'form-select' if isinstance(field.widget, forms.Select) else 'form-control'
                 field.widget.attrs.update({'class': widget_class})
+
         self.fields['subject'].empty_label = 'Select Course'
         self.fields['enquiry_type'].empty_label = 'Select Enquiry Type'
         self.fields['status'].empty_label = 'Select Status'
@@ -105,6 +106,12 @@ class EnquiryForm(forms.ModelForm):
         self.fields['enquiry_date'].required = True
         self.fields['parent_number'].required = False
         self.fields['native_district_name'].required = False
+
+        # If instance exists, populate college_name and college_place from EducationInfo
+        if self.instance.pk and hasattr(self.instance, 'education_details') and self.instance.education_details.exists():
+            edu_info = self.instance.education_details.first()
+            self.fields['college_name'].initial = edu_info.college_name
+            self.fields['college_place'].initial = edu_info.college_place
 
     class Meta:
         model = Enquiry
@@ -186,20 +193,6 @@ class EnquiryForm(forms.ModelForm):
     def save(self, commit=True):
         enquiry_instance = super().save(commit=False)
 
-        # Handle CollegeInfo
-        college_name = self.cleaned_data.get('college_name')
-        college_place = self.cleaned_data.get('college_place')
-        college_instance = None
-        if college_name:
-            college_instance, created = CollegeInfo.objects.get_or_create(
-                college_name=college_name,
-                defaults={'college_place': college_place}
-            )
-            if not created and college_place and college_instance.college_place != college_place:
-                college_instance.college_place = college_place
-                college_instance.save()
-        enquiry_instance.college = college_instance
-
         # Fees logic
         if enquiry_instance.status != 'joined':
             enquiry_instance.target_fees = None
@@ -220,7 +213,7 @@ class EnquiryForm(forms.ModelForm):
         if commit:
             enquiry_instance.save()
 
-        # Save EducationInfo
+        # Save EducationInfo (with college info inside)
         level = self.cleaned_data.get('education_level')
         ug_degree = self.cleaned_data.get('ug_degree')
         other_ug_degree_name = self.cleaned_data.get('other_ug_degree_name')
@@ -229,6 +222,8 @@ class EnquiryForm(forms.ModelForm):
         branch = self.cleaned_data.get('branch')  # Get branch value
         year_of_passing = self.cleaned_data.get('year_of_passing')
         percentage = self.cleaned_data.get('percentage')
+        college_name = self.cleaned_data.get('college_name')
+        college_place = self.cleaned_data.get('college_place')
 
         edu_info = None
         if hasattr(enquiry_instance, 'education_details') and enquiry_instance.education_details.exists():
@@ -260,6 +255,7 @@ class EnquiryForm(forms.ModelForm):
         edu_info.save()
 
         return enquiry_instance
+
 class CounsellorForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

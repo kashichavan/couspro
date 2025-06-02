@@ -139,6 +139,8 @@ class Enquiry(models.Model):
         default='alone_walkin',
         help_text="How did the student come for enquiry?"
     )
+    
+    
 
 
 class Comment(models.Model):
