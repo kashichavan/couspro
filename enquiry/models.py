@@ -86,6 +86,11 @@ class Enquiry(models.Model):
         help_text="Specify the subject if 'Other' is selected"
     )
 
+    is_joined_batch = models.BooleanField(
+    default=False,
+    help_text="True if the student has joined a batch"
+)
+
 
     
 
@@ -351,3 +356,6 @@ class EducationInfo(models.Model):
             degree = self.other_pg_degree_name if self.pg_degree == 'other' else self.get_pg_degree_display()
 
         return f"{self.get_level_display()} - {degree} - {self.college_name} ({self.year_of_passing})"
+
+
+

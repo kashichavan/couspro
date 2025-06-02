@@ -1854,3 +1854,34 @@ def update_target_fees(request):
             }, status=500)
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+
+
+
+
+from django.views.generic import ListView
+from .models import Enquiry
+
+class InconsistentJoinedEnquiryListView(ListView):
+    model = Enquiry
+    template_name = 'inconsistent_joined_list.html'
+    context_object_name = 'enquiries'
+
+    def get_queryset(self):
+        return Enquiry.objects.filter(status='joined', is_joined_batch=False)
+
+
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from .models import Enquiry
+
+@require_POST
+def mark_joined_batch(request, pk):
+    try:
+        enquiry = Enquiry.objects.get(pk=pk, status='joined', is_joined_batch=False)
+        enquiry.is_joined_batch = True
+        enquiry.save()
+        return JsonResponse({'success': True})
+    except Enquiry.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Enquiry not found'})
