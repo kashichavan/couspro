@@ -420,12 +420,14 @@
                             {% endif %}
                         </div>
                         <div class="col-md-6 required-field">
-                            <label for="{{ form.counsellor.id_for_label }}" class="form-label">{{ form.counsellor.label }}</label>
-                            {{ form.counsellor }}
-                            {% if form.counsellor.errors %}
-                                <div class="text-danger">{{ form.counsellor.errors.0 }}</div>
-                            {% endif %}
-                        </div>
+    <label for="{{ form.counsellor.id_for_label }}" class="form-label">{{ form.counsellor.label }}</label>
+    {{ form.counsellor }}
+    <input type="hidden" name="counsellor" value="{{ form.counsellor.value }}">
+    {% if form.counsellor.errors %}
+        <div class="text-danger">{{ form.counsellor.errors.0 }}</div>
+    {% endif %}
+</div>
+
                     </div>
                 </div>
 

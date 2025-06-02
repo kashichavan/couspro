@@ -607,6 +607,32 @@
     {% endblock %}
 </head>
 <body>
+   
+
+    {% if messages %}
+  <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055; margin-top: 60px;">
+    {% for message in messages %}
+      <div class="toast show text-white border-0 mb-2"
+           role="alert" aria-live="assertive" aria-atomic="true"
+           style="min-width: 300px;
+                  background-color:
+                    {% if message.tags == 'success' %}#28a745
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}#dc3545
+                    {% elif message.tags == 'warning' %}#ffc107
+                    {% else %}#0d6efd{% endif %};">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
+
     <!-- Enhanced Orange Theme Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
@@ -873,8 +899,13 @@ function refreshMarqueeData() {
         })
         .catch(error => console.log('Marquee refresh failed:', error));
 }
+ document.addEventListener('DOMContentLoaded', function () {
+    var toasts = document.querySelectorAll('.toast');
+    toasts.forEach(function (toastEl) {
+      new bootstrap.Toast(toastEl, { delay: 4000 }).show();
+    });
+  });
 
-// Refresh every 5 minutes (optional)
 // setInterval(refreshMarqueeData, 300000);
 </script>
     {% block extra_js %}
