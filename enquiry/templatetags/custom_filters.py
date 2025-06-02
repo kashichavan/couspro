@@ -63,3 +63,15 @@ def split_month(value):
         parts = value.split('-')
         return {'year': parts[0], 'month': parts[1]}
     return None
+
+
+from django import template
+
+register = template.Library()
+
+@register.filter
+def mul(value, arg):
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return ''

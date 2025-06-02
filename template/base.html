@@ -715,6 +715,9 @@
                             <i class="fas fa-money-bill-wave"></i> Payments
                         </a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'enquiry:inconsistent_joined' %}">
+                                <i class="fas fa-calendar-day"></i> Today's Due
+                            </a></li>
                             <li><a class="dropdown-item" href="{% url 'enquiry:today_payment_due' %}">
                                 <i class="fas fa-calendar-day"></i> Today's Due
                             </a></li>

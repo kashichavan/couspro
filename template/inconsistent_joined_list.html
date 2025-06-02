@@ -1,200 +1,174 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% load custom_filters %}
+
+{% block title %}Waiting For New Batch{% endblock %}
+
+
+
 
 {% block extra_css %}
 <!-- DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
-
-<!-- Trending Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
 <style>
-    /* Custom DataTables Styling with Orange Gradient Theme */
-    .dataTables_wrapper {
-        font-family: 'Inter', 'Poppins', sans-serif;
-    }
-    
-    /* Header Styling */
-    .page-title {
-        font-family: 'Space Grotesk', 'Inter', sans-serif;
-        font-weight: 700;
-        font-size: 2.5rem;
-        background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-align: center;
-        margin-bottom: 2rem;
-        text-shadow: 0 2px 4px rgba(255, 127, 0, 0.1);
-    }
-    
-    .page-subtitle {
-        text-align: center;
-        color: #666;
-        font-size: 1.1rem;
-        margin-bottom: 3rem;
-        font-weight: 500;
-    }
-    
-    /* DataTable Container */
-    .table-container {
-        background: linear-gradient(135deg, #ffffff, #fef7f0);
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+    /* Modern Page Header */
+    .page-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2.5rem 0;
         border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 20px 40px rgba(255, 127, 0, 0.1);
-        border: 1px solid rgba(255, 127, 0, 0.1);
+        margin-bottom: 2rem;
         position: relative;
         overflow: hidden;
     }
     
-    .table-container::before {
+    .page-hero::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-orange), var(--light-orange), var(--primary-orange));
-        border-radius: 20px 20px 0 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.1;
     }
     
-    /* DataTable Header Styling */
-    .dataTables_length,
-    .dataTables_filter {
-        margin-bottom: 1.5rem;
+    .page-hero-content {
+        position: relative;
+        z-index: 2;
     }
     
-    .dataTables_length select,
-    .dataTables_filter input {
-        border: 2px solid rgba(255, 127, 0, 0.2);
-        border-radius: 12px;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        background: white;
+    .hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 2.8rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     
-    .dataTables_length select:focus,
-    .dataTables_filter input:focus {
-        border-color: var(--primary-orange);
-        box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
-        outline: none;
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        font-weight: 400;
     }
     
-    .dataTables_filter input {
-        background: linear-gradient(135deg, #ffffff, #fef9f5);
+    .hero-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
     }
     
-    /* Table Styling */
-    .table {
+    .stat-item {
+        background: rgba(255,255,255,0.15);
+        padding: 1rem 1.5rem;
         border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        border: none;
-        margin-bottom: 0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
     }
     
-    .table thead th {
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    /* Modern Table Container */
+    .table-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .table-header {
         background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
         color: white;
+        padding: 1.5rem 2rem;
+        border-bottom: none;
+    }
+    
+    .table-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.5rem;
         font-weight: 600;
-        font-size: 0.95rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    
+    .table-icon {
+        font-size: 1.8rem;
+        opacity: 0.9;
+    }
+
+    /* Enhanced DataTable Styling */
+    #batchTable {
+        font-family: 'Inter', sans-serif;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100% !important;
+    }
+    
+    #batchTable thead th {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        color: #495057;
+        font-weight: 600;
         text-transform: uppercase;
+        font-size: 0.75rem;
         letter-spacing: 0.5px;
         padding: 1.2rem 1rem;
-        border: none;
+        border-bottom: 2px solid var(--primary-orange);
         position: relative;
-        font-family: 'Space Grotesk', sans-serif;
     }
     
-    .table thead th::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: rgba(255, 255, 255, 0.3);
+    #batchTable thead th:first-child {
+        border-top-left-radius: 0;
     }
     
-    .table tbody td {
-        padding: 1rem;
-        border: none;
-        border-bottom: 1px solid rgba(255, 127, 0, 0.1);
-        font-weight: 500;
-        color: #333;
-        vertical-align: middle;
+    #batchTable thead th:last-child {
+        border-top-right-radius: 0;
+    }
+    
+    #batchTable tbody tr {
         transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f3f4;
     }
     
-    .table tbody tr {
-        transition: all 0.3s ease;
-        background: white;
-    }
-    
-    .table tbody tr:hover {
-        background: linear-gradient(135deg, rgba(255, 127, 0, 0.05), rgba(255, 174, 66, 0.05));
+    #batchTable tbody tr:hover {
+        background: linear-gradient(135deg, rgba(255,127,0,0.05), rgba(255,174,66,0.05));
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 127, 0, 0.1);
+        box-shadow: 0 8px 25px rgba(255,127,0,0.15);
     }
     
-    .table tbody tr:nth-child(even) {
-        background: linear-gradient(135deg, #fefefe, #fef9f5);
+    #batchTable tbody td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+        font-size: 0.95rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
     }
     
-    .table tbody tr:nth-child(even):hover {
-        background: linear-gradient(135deg, rgba(255, 127, 0, 0.08), rgba(255, 174, 66, 0.08));
-    }
-    
-    /* Action Buttons */
-    .action-btn {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 25px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
+    /* Modern Status Badges */
+    .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.3rem;
-        font-family: 'Inter', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .btn-success {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        color: white;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-    }
-    
-    .btn-success:hover {
-        background: linear-gradient(135deg, #20c997, #17a2b8);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-        color: white;
-    }
-    
-    .btn-info {
-        background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
-        color: white;
-        box-shadow: 0 4px 15px rgba(255, 127, 0, 0.3);
-    }
-    
-    .btn-info:hover {
-        background: linear-gradient(135deg, var(--dark-orange), var(--primary-orange));
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 127, 0, 0.4);
-        color: white;
-    }
-    
-    /* Status Badges */
-    .status-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
         font-size: 0.8rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -202,220 +176,396 @@
     }
     
     .status-waiting {
-        background: linear-gradient(135deg, #ffc107, #ffae42);
-        color: #333;
+        background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+        color: #d63031;
+    }
+    
+    .status-joined {
+        background: linear-gradient(135deg, #a8e6cf, #7fdbda);
+        color: #00b894;
     }
     
     /* Money Display */
-    .money-amount {
-        font-weight: 700;
+    .money {
         font-family: 'Space Grotesk', monospace;
-        color: var(--primary-orange);
-        font-size: 1.05rem;
+        font-weight: 600;
+        font-size: 1rem;
     }
     
-    .negative-amount {
-        color: #dc3545;
+    .money-positive {
+        color: #00b894;
     }
     
-    .positive-amount {
-        color: #28a745;
+    .money-negative {
+        color: #e17055;
     }
     
-    /* DataTable Info and Pagination */
-    .dataTables_info {
-        font-weight: 500;
-        color: #666;
+    .money-neutral {
+        color: #636e72;
     }
     
-    .dataTables_paginate .paginate_button {
-        border: 1px solid rgba(255, 127, 0, 0.2);
+    /* Modern Action Buttons */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .action-btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-success-modern {
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,184,148,0.4);
+    }
+    
+    .btn-success-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,184,148,0.6);
+        color: white;
+    }
+    
+    .btn-info-modern {
+        background: linear-gradient(135deg, #74b9ff, #0984e3);
+        color: white;
+        box-shadow: 0 4px 15px rgba(116,185,255,0.4);
+    }
+    
+    .btn-info-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(116,185,255,0.6);
+        color: white;
+    }
+    
+    /* Loading States */
+    .btn-loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+    
+    .btn-loading .btn-text {
+        opacity: 0;
+    }
+    
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* DataTables Custom Styling */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 1.5rem;
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
         border-radius: 8px;
-        margin: 0 2px;
-        padding: 0.5rem 1rem;
+        border: 2px solid #e9ecef;
+        padding: 0.5rem;
         background: white;
-        color: var(--primary-orange);
-        font-weight: 500;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+        border-radius: 25px;
+        border: 2px solid #e9ecef;
+        padding: 0.6rem 1.2rem;
+        width: 300px;
+        background: white;
         transition: all 0.3s ease;
     }
     
-    .dataTables_paginate .paginate_button:hover {
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255,127,0,0.1);
+        outline: none;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 8px;
+        margin: 0 2px;
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        background: white;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
         background: var(--primary-orange);
         color: white;
         border-color: var(--primary-orange);
         transform: translateY(-1px);
     }
     
-    .dataTables_paginate .paginate_button.current {
-        background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary-orange);
         color: white;
         border-color: var(--primary-orange);
+    }
+    
+    /* Success Animation */
+    @keyframes fadeOut {
+        0% { opacity: 1; transform: translateX(0); }
+        50% { opacity: 0.5; transform: translateX(10px); }
+        100% { opacity: 0; transform: translateX(100px); }
+    }
+    
+    .row-removing {
+        animation: fadeOut 0.5s ease-out forwards;
     }
     
     /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 3rem;
-        color: #666;
-        font-size: 1.2rem;
-        font-weight: 500;
+        padding: 3rem 2rem;
+        color: #636e72;
     }
     
-    .empty-state i {
+    .empty-state-icon {
         font-size: 4rem;
-        color: var(--light-orange);
         margin-bottom: 1rem;
-        display: block;
+        opacity: 0.5;
     }
     
-    /* Loading Animation */
-    .loading-spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 127, 0, 0.3);
-        border-radius: 50%;
-        border-top-color: var(--primary-orange);
-        animation: spin 1s ease-in-out infinite;
+    .empty-state-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
     }
     
-    @keyframes spin {
-        to { transform: rotate(360deg); }
+    .empty-state-text {
+        font-size: 1rem;
+        opacity: 0.8;
     }
     
-    /* Responsive Improvements */
+    /* Responsive Design */
     @media (max-width: 768px) {
-        .page-title {
+        .hero-title {
             font-size: 2rem;
         }
         
+        .hero-stats {
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            padding: 0.8rem 1rem;
+        }
+        
         .table-container {
-            padding: 1rem;
             border-radius: 15px;
         }
         
-        .table thead th,
-        .table tbody td {
-            padding: 0.75rem 0.5rem;
-            font-size: 0.9rem;
+        .table-header {
+            padding: 1rem 1.5rem;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            width: 100%;
         }
         
         .action-btn {
-            padding: 0.4rem 0.8rem;
+            padding: 0.5rem 1rem;
             font-size: 0.8rem;
         }
     }
     
-    /* Custom Scrollbar */
-    .dataTables_scrollBody::-webkit-scrollbar {
-        height: 8px;
-        width: 8px;
-    }
-    
-    .dataTables_scrollBody::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .dataTables_scrollBody::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
-        border-radius: 10px;
-    }
-    
-    .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, var(--dark-orange), var(--primary-orange));
-    }
-    
-    /* Success Message Animation */
-    .success-message {
+    /* Toast Notifications */
+    .toast-container {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: linear-gradient(135deg, #28a745, #20c997);
-        color: white;
-        padding: 1rem 2rem;
-        border-radius: 15px;
-        font-weight: 600;
-        z-index: 9999;
-        box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
-        animation: successPulse 0.5s ease-in-out;
+        top: 100px;
+        right: 20px;
+        z-index: 1055;
     }
     
-    @keyframes successPulse {
-        0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    .custom-toast {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border: none;
+        overflow: hidden;
+    }
+    
+    .toast-success {
+        border-left: 5px solid #00b894;
+    }
+    
+    .toast-error {
+        border-left: 5px solid #e17055;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h1 class="page-title">🎓 Waiting For New Batch</h1>
-    <p class="page-subtitle">Students ready to join upcoming batches</p>
+<!-- Modern Page Hero -->
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="container">
+            <h1 class="hero-title">
+                <i class="fas fa-users-clock"></i>
+                Waiting For New Batch
+            </h1>
+            <p class="hero-subtitle">
+                Students ready to join upcoming batches - Track their progress and manage enrollments
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Modern Table Container -->
+<div class="table-container">
+    <div class="table-header">
+        <h3 class="table-title">
+            <i class="fas fa-graduation-cap table-icon"></i>
+            Student Batch Management
+        </h3>
+    </div>
     
-    <div class="table-container">
-        <table id="enquiryTable" class="table table-striped table-hover" style="width:100%">
+    <div class="table-responsive p-4">
+        {% if enquiries %}
+        <table id="batchTable" class="table table-hover" style="width:100%">
             <thead>
                 <tr>
-                    <th>👤 Name</th>
-                    <th>🎯 Counsellor</th>
-                    <th>💰 Target Fees</th>
-                    <th>💵 Fees Paid</th>
-                    <th>⚖️ Balance</th>
-                    <th>📊 Batch Status</th>
-                    <th>⚡ Action</th>
-                    <th>👁️ Profile</th>
+                    <th><i class="fas fa-user"></i> Student Name</th>
+                    <th><i class="fas fa-user-tie"></i> Counsellor</th>
+                    <th><i class="fas fa-phone"></i> Contact</th>
+                    <th><i class="fas fa-target"></i> Target Fees</th>
+                    <th><i class="fas fa-money-bill-wave"></i> Fees Paid</th>
+                    <th><i class="fas fa-balance-scale"></i> Balance</th>
+                    <th><i class="fas fa-flag"></i> Batch Status</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                    <th><i class="fas fa-eye"></i> Profile</th>
                 </tr>
             </thead>
             <tbody>
                 {% for enquiry in enquiries %}
-                <tr id="row-{{ enquiry.id }}">
+                <tr id="row-{{ enquiry.id }}" data-fees-paid="{{ enquiry.fees_paid|default:0 }}" data-target-fees="{{ enquiry.target_fees|default:0 }}">
                     <td>
-                        <strong>{{ enquiry.name }}</strong>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-2">
+                                {{ enquiry.name|first|upper }}
+                            </div>
+                            <strong>{{ enquiry.name }}</strong>
+                        </div>
                     </td>
                     <td>
-                        <span class="badge bg-secondary">{{ enquiry.counsellor.name }}</span>
+                        <span class="text-muted">{{ enquiry.counsellor.name }}</span>
                     </td>
                     <td>
-                        <span class="money-amount">₹{{ enquiry.target_fees|default:0|floatformat:2 }}</span>
+                        <a href="tel:{{ enquiry.mobile }}" class="text-decoration-none">
+                            <i class="fas fa-phone-alt text-success"></i>
+                            {{ enquiry.mobile }}
+                        </a>
                     </td>
                     <td>
-                        <span class="money-amount positive-amount">₹{{ enquiry.fees_paid|default:0|floatformat:2 }}</span>
+                        <span class="money money-neutral">
+                            ₹{{ enquiry.target_fees|default:0|floatformat:0 }}
+                        </span>
                     </td>
                     <td>
-                        {% with balance=enquiry.fees_balance|default:enquiry.target_fees|default:0|add:"-"|add:enquiry.fees_paid|default:0 %}
-                        <span class="money-amount {% if balance < 0 %}negative-amount{% else %}positive-amount{% endif %}">
-                            ₹{{ balance|floatformat:2 }}
+                        <span class="money money-positive">
+                            ₹{{ enquiry.fees_paid|default:0|floatformat:0 }}
+                        </span>
+                    </td>
+                    <td>
+                        {% with balance=enquiry.fees_balance|default:enquiry.target_fees|default:0|floatformat:0|add:"-"|add:enquiry.fees_paid|default:0 %}
+                        <span class="money {% if balance > 0 %}money-negative{% elif balance < 0 %}money-positive{% else %}money-neutral{% endif %}">
+                            ₹{% if enquiry.fees_balance is not None %}{{ enquiry.fees_balance|floatformat:0 }}{% else %}{{ enquiry.target_fees|default:0|add:enquiry.fees_paid|default:0|mul:-1|floatformat:0 }}{% endif %}
                         </span>
                         {% endwith %}
                     </td>
                     <td>
-                        <span class="status-badge status-waiting">{{ enquiry.is_joined_batch|default:"Waiting" }}</span>
+                        <span class="status-badge status-waiting">
+                            <i class="fas fa-clock"></i>
+                            Waiting
+                        </span>
                     </td>
                     <td>
-                        <button class="action-btn btn-success" onclick="markAsJoined({{ enquiry.id }})">
-                            <i class="fas fa-check"></i> Mark Joined
+                        <button class="action-btn btn-success-modern" onclick="markAsJoined({{ enquiry.id }}, this)">
+                            <span class="btn-text">
+                                <i class="fas fa-check"></i>
+                                Mark Joined
+                            </span>
                         </button>
                     </td>
                     <td>
-                        <a href="{% url 'enquiry:enquiry_details' enquiry.id %}" target="_blank" class="action-btn btn-info">
-                            <i class="fas fa-eye"></i> View
+                        <a href="{% url 'enquiry:enquiry_details' enquiry.id %}" target="_blank" class="action-btn btn-info-modern">
+                            <i class="fas fa-external-link-alt"></i>
+                            View Profile
                         </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8" class="empty-state">
-                        <i class="fas fa-graduation-cap"></i>
-                        <div>No students waiting for batch assignment.</div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-users-slash"></i>
+            </div>
+            <h3 class="empty-state-title">No Students Waiting</h3>
+            <p class="empty-state-text">
+                There are currently no students waiting for new batches.<br>
+                Students will appear here once they're ready to join upcoming batches.
+            </p>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<style>
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -424,153 +574,223 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    // Initialize DataTable with enhanced features
-    $('#enquiryTable').DataTable({
+    // Initialize DataTable with modern styling
+    $('#batchTable').DataTable({
         responsive: true,
-        pageLength: 25,
+        pageLength: 10,
         lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-             '<"row"<"col-sm-12"tr>>' +
-             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        order: [[0, 'asc']],
         language: {
-            search: "🔍 Search Students:",
-            lengthMenu: "Show _MENU_ students per page",
+            search: "",
+            searchPlaceholder: "🔍 Search students...",
+            lengthMenu: "Show _MENU_ entries per page",
             info: "Showing _START_ to _END_ of _TOTAL_ students",
-            infoEmpty: "No students available",
+            infoEmpty: "No students found",
             infoFiltered: "(filtered from _MAX_ total students)",
             paginate: {
                 first: "⏮️",
-                last: "⏭️",
-                next: "▶️",
-                previous: "◀️"
+                previous: "⬅️", 
+                next: "➡️",
+                last: "⏭️"
             },
-            emptyTable: "No students waiting for batch assignment"
+            emptyTable: "No students waiting for new batch"
         },
-        order: [[0, 'asc']],
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
         columnDefs: [
-            {
-                targets: [6, 7], // Action and Profile columns
+            { 
+                targets: [7, 8], 
                 orderable: false,
-                searchable: false
+                className: 'text-center'
             },
             {
-                targets: [2, 3, 4], // Money columns
+                targets: [3, 4, 5],
                 className: 'text-end'
             }
         ],
         drawCallback: function() {
-            // Add animation to newly drawn rows
-            $('#enquiryTable tbody tr').each(function(index) {
-                $(this).css('animation-delay', (index * 0.05) + 's');
-                $(this).addClass('animate__animated animate__fadeInUp');
-            });
+            // Update stats after table redraw
+            updateStats();
         }
     });
     
-    // Add loading state to buttons
-    $(document).on('click', '.action-btn', function() {
-        if (!$(this).hasClass('btn-info')) { // Don't add spinner to view buttons
-            const originalHtml = $(this).html();
-            $(this).html('<span class="loading-spinner"></span> Processing...');
-            $(this).prop('disabled', true);
-            
-            // Re-enable after 3 seconds (fallback)
-            setTimeout(() => {
-                $(this).html(originalHtml);
-                $(this).prop('disabled', false);
-            }, 3000);
-        }
-    });
+    // Initialize stats
+    updateStats();
 });
 
-function markAsJoined(enquiryId) {
-    const button = event.target.closest('button');
-    const originalHtml = button.innerHTML;
+function updateStats() {
+    let totalFees = 0;
+    let totalPaid = 0;
+    let studentCount = 0;
     
-    // Show loading state
-    button.innerHTML = '<span class="loading-spinner"></span> Processing...';
-    button.disabled = true;
+    $('#batchTable tbody tr:visible').each(function() {
+        if (!$(this).hasClass('odd') && !$(this).hasClass('even')) return;
+        
+        const feesPaid = parseFloat($(this).data('fees-paid')) || 0;
+        const targetFees = parseFloat($(this).data('target-fees')) || 0;
+        
+        totalFees += targetFees;
+        totalPaid += feesPaid;
+        studentCount++;
+    });
+    
+    const avgPayment = totalFees > 0 ? ((totalPaid / totalFees) * 100) : 0;
+    
+    // Animate the stat updates
+    animateValue('totalStudents', 0, studentCount, 1000);
+    animateValue('totalFees', 0, totalPaid, 1000, '₹');
+    animateValue('avgPayment', 0, avgPayment, 1000, '', '%');
+}
+
+function animateValue(elementId, start, end, duration, prefix = '', suffix = '') {
+    const element = document.getElementById(elementId);
+    const startTime = performance.now();
+    
+    function updateValue(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = start + (end - start) * easeOutQuart;
+        
+        if (suffix === '%') {
+            element.textContent = prefix + current.toFixed(1) + suffix;
+        } else if (prefix === '₹') {
+            element.textContent = prefix + Math.floor(current).toLocaleString('en-IN');
+        } else {
+            element.textContent = prefix + Math.floor(current) + suffix;
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateValue);
+        }
+    }
+    
+    requestAnimationFrame(updateValue);
+}
+
+function markAsJoined(enquiryId, buttonElement) {
+    // Add loading state
+    buttonElement.classList.add('btn-loading');
     
     fetch(`/enquiry/${enquiryId}/mark-joined/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': '{{ csrf_token }}',
             'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Show success message
-            showSuccessMessage('✅ Student successfully marked as joined!');
+            // Show success toast
+            showToast('Student successfully marked as joined! 🎉', 'success');
             
-            // Remove row with animation
+            // Animate row removal
             const row = document.getElementById(`row-${enquiryId}`);
             if (row) {
-                row.style.animation = 'fadeOut 0.5s ease-out forwards';
+                row.classList.add('row-removing');
                 setTimeout(() => {
-                    $('#enquiryTable').DataTable().row(row).remove().draw();
+                    // Remove from DataTable
+                    $('#batchTable').DataTable().row(row).remove().draw();
+                    updateStats();
                 }, 500);
             }
         } else {
-            // Show error message
-            showErrorMessage(data.error || '❌ Failed to update student status.');
-            // Restore button
-            button.innerHTML = originalHtml;
-            button.disabled = false;
+            showToast(data.error || 'Failed to update student status', 'error');
+            buttonElement.classList.remove('btn-loading');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showErrorMessage('❌ Network error occurred.');
-        // Restore button
-        button.innerHTML = originalHtml;
-        button.disabled = false;
+        showToast('An error occurred. Please try again.', 'error');
+        buttonElement.classList.remove('btn-loading');
     });
 }
 
-function showSuccessMessage(message) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'success-message';
-    messageDiv.textContent = message;
-    document.body.appendChild(messageDiv);
+function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toastId = 'toast-' + Date.now();
+    const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
     
-    setTimeout(() => {
-        messageDiv.style.animation = 'fadeOut 0.5s ease-out forwards';
-        setTimeout(() => messageDiv.remove(), 500);
-    }, 2000);
-}
-
-function showErrorMessage(message) {
-    // Create error toast (you can integrate with your existing toast system)
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'alert alert-danger position-fixed';
-    errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    errorDiv.innerHTML = `
-        <strong>Error!</strong> ${message}
-        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    const toastHTML = `
+        <div id="${toastId}" class="toast custom-toast toast-${type}" role="alert">
+            <div class="toast-header">
+                <i class="fas ${iconClass} me-2" style="color: ${type === 'success' ? '#00b894' : '#e17055'}"></i>
+                <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
     `;
-    document.body.appendChild(errorDiv);
     
-    setTimeout(() => errorDiv.remove(), 5000);
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+    toast.show();
+    
+    // Remove from DOM after hiding
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
 }
 
-// Add CSS for fade out animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from { opacity: 1; transform: translateY(0); }
-        to { opacity: 0; transform: translateY(-20px); }
-    }
-`;
-document.head.appendChild(style);
+// Add some interactive features
+document.addEventListener('DOMContentLoaded', function() {
+    // Add ripple effect to buttons
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255,255,255,0.5);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        .action-btn {
+            position: relative;
+            overflow: hidden;
+        }
+    `;
+    document.head.appendChild(style);
+});
 </script>
 {% endblock %}
