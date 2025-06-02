@@ -87,13 +87,7 @@ class Enquiry(models.Model):
     )
 
 
-    college = models.ForeignKey(
-        CollegeInfo,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='enquiries'
-    )
+    
 
     def clean(self):
         if self.target_fees is not None and self.fees_paid > self.target_fees:
@@ -224,3 +218,72 @@ class MonthlyTarget(models.Model):
 def auto_set_fees_paid_date(sender, instance, **kwargs):
     if instance.fees_paid > 0 and not instance.fees_paid_date:
         instance.fees_paid_date = timezone.now().date()
+        
+        
+
+
+
+class EducationInfo(models.Model):
+    EDUCATION_LEVEL_CHOICES = [
+        ('ug', 'Undergraduate'),
+        ('pg', 'Postgraduate'),
+    ]
+
+    UG_DEGREE_CHOICES = [
+        ('btech', 'B.Tech'),
+        ('be', 'B.E'),
+        ('bsc', 'B.Sc'),
+        ('bca', 'BCA'),
+        ('bcom', 'B.Com'),
+        ('ba', 'B.A'),
+        ('other', 'Other UG'),
+    ]
+
+    PG_DEGREE_CHOICES = [
+        ('mtech', 'M.Tech'),
+        ('mca', 'MCA'),
+        ('mba', 'MBA'),
+        ('msc', 'M.Sc'),
+        ('ma', 'M.A'),
+        ('other', 'Other PG'),
+    ]
+
+    enquiry = models.ForeignKey('Enquiry', on_delete=models.CASCADE, related_name='education_details')
+    level = models.CharField(max_length=2, choices=EDUCATION_LEVEL_CHOICES)
+
+    # Degree choices
+    ug_degree = models.CharField(max_length=20, choices=UG_DEGREE_CHOICES, blank=True, null=True)
+    other_ug_degree_name = models.CharField(max_length=100, blank=True, null=True)
+
+    pg_degree = models.CharField(max_length=20, choices=PG_DEGREE_CHOICES, blank=True, null=True)
+    other_pg_degree_name = models.CharField(max_length=100, blank=True, null=True)
+
+    branch = models.CharField(max_length=100, blank=True, null=True)
+    college_name = models.CharField(max_length=200)
+    college_place = models.CharField(max_length=200, blank=True, null=True)
+    year_of_passing = models.PositiveIntegerField()
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, help_text="e.g. 78.50")
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        if self.level == 'ug':
+            if not self.ug_degree:
+                raise ValidationError("UG degree must be selected for undergraduate level.")
+            if self.ug_degree == 'other' and not self.other_ug_degree_name:
+                raise ValidationError("Please specify the UG degree name when 'Other UG' is selected.")
+
+        elif self.level == 'pg':
+            if not self.pg_degree:
+                raise ValidationError("PG degree must be selected for postgraduate level.")
+            if self.pg_degree == 'other' and not self.other_pg_degree_name:
+                raise ValidationError("Please specify the PG degree name when 'Other PG' is selected.")
+
+    def __str__(self):
+        degree = ""
+        if self.level == 'ug':
+            degree = self.other_ug_degree_name if self.ug_degree == 'other' else self.get_ug_degree_display()
+        elif self.level == 'pg':
+            degree = self.other_pg_degree_name if self.pg_degree == 'other' else self.get_pg_degree_display()
+
+        return f"{self.get_level_display()} - {degree} - {self.college_name} ({self.year_of_passing})"

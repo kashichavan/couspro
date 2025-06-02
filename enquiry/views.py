@@ -306,12 +306,13 @@ class EnquiryListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Enquiry.objects.select_related('counsellor').prefetch_related('comments').all()
 
-
 from django.http import HttpResponse
 import openpyxl
 from openpyxl.styles import NamedStyle, Font, Alignment
 from openpyxl.utils import get_column_letter
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
+
 @login_required(login_url='accounts:login')
 def download_dummy_template(request):
     wb = openpyxl.Workbook()
@@ -340,29 +341,28 @@ def download_dummy_template(request):
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    # Add example data row
-    example_row = [
-        'John Doe',               # Name
-        '9876543210',             # Mobile
-        'java_full_stack',        # Subject
-        'pending',                # Status
-        'direct_telephonic',      # Enquiry Type
-        'Jane Smith',             # Counsellor Name
-        datetime.now().strftime('%d-%m-%Y'),  # Followup Date
-        datetime.now().strftime('%d-%m-%Y'),  # Enquiry Date
-        '9123456789',             # Parent Number
-        '45000.00',               # Target Fees
-        '10000.00',               # Fees Paid
-        datetime.now().strftime('%d-%m-%Y'),  # Due Date
+    # Today's date for consistent formatting
+    today = datetime.now().strftime('%d-%m-%Y')
+
+    # Add multiple example rows
+    example_rows = [
+        ['John Doe', '9876543210', 'java_full_stack', 'pending', 'direct_telephonic', 'Jane Smith', today, today, '9123456789', '45000.00', '10000.00', today],
+        ['Alice Brown', '9876500001', 'python_full_stack', 'joined', 'someone_walkin', 'Robert Wilson', today, today, '9876500012', '40000.00', '40000.00', today],
+        ['Mark Taylor', '9876500002', 'ui_ux_design', 'dropout', 'direct_telephonic', 'Emily Davis', today, today, '9876500023', '30000.00', '5000.00', today],
+        ['Sara Khan', '9876500003', 'data_science', 'pending', 'whatsapp', 'Mohit Reddy', today, today, '9876500034', '60000.00', '0.00', ''],
+        ['Amit Verma', '9876500004', 'mern_stack', 'joined', 'someone_walkin', 'Jane Smith', today, today, '9876500045', '50000.00', '25000.00', today],
+        ['Priya Patel', '9876500005', 'testing', 'joined', 'email_referral', 'Robert Wilson', today, today, '9876500056', '35000.00', '35000.00', today],
+        ['Rohan Iyer', '9876500006', 'python_full_stack', 'pending', 'walkin', 'Emily Davis', today, today, '9876500067', '40000.00', '0.00', ''],
     ]
-    ws.append(example_row)
+
+    for row in example_rows:
+        ws.append(row)
 
     # Date formatting style
     date_style = NamedStyle(name="datetime_style", number_format='DD-MM-YYYY')
-    date_columns = [7, 8, 12]  # 1-based indices for Followup, Enquiry, Due
+    date_columns = [7, 8, 12]  # Followup Date, Enquiry Date, Due Date
 
     for col_idx in date_columns:
-        col_letter = get_column_letter(col_idx)
         for row in ws.iter_rows(min_row=2, min_col=col_idx, max_col=col_idx):
             for cell in row:
                 cell.style = date_style
@@ -381,51 +381,51 @@ def download_dummy_template(request):
     wb.save(response)
     return response
 
-import openpyxl
-from openpyxl.styles import Font
-from django.http import HttpResponse
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 from datetime import datetime
+import openpyxl
+import pytz
+
 from .forms import BulkEnquiryForm
 from .models import Enquiry, Counsellor
 
 
 def parse_date(value):
+    indian_timezone = pytz.timezone('Asia/Kolkata')
     if isinstance(value, datetime):
-        return value.date()
+        return value.astimezone(indian_timezone).date()
     elif value:
         try:
-            return datetime.strptime(str(value), "%d-%m-%Y").date()
+            parsed = datetime.strptime(str(value), "%d-%m-%Y")
+            localized = indian_timezone.localize(parsed)
+            return localized.date()
         except ValueError:
             raise ValueError(f"Invalid date format: {value}")
     return None
 
+
 def normalize_choice(value, valid_choices):
-    """Normalize input value to match one of the valid choices (case-insensitive)."""
     value_cleaned = str(value).strip().lower().replace(' ', '_').replace('-', '_')
     for key in valid_choices:
         if key == value_cleaned:
             return valid_choices[key]
     raise ValueError(f"Invalid value: '{value}'")
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.db import transaction
-from django.db.models import Q
-import openpyxl
-
-from .forms import BulkEnquiryForm
-from .models import Enquiry, Counsellor
-  # Ensure these helper functions exist
 
 def bulk_enquiry_upload(request):
     if request.method == 'POST':
         form = BulkEnquiryForm(request.POST, request.FILES)
         if form.is_valid():
             try:
+                # Current IST timestamp
+                ist_now = timezone.now().astimezone(pytz.timezone('Asia/Kolkata'))
+                print("Upload initiated at IST:", ist_now.strftime("%Y-%m-%d %H:%M:%S"))
+
                 wb = openpyxl.load_workbook(request.FILES['excel_file'])
                 ws = wb.active
 
@@ -436,13 +436,12 @@ def bulk_enquiry_upload(request):
                 created_count = 0
                 updated_count = 0
                 error_rows = []
-
                 rows_to_process = []
 
-                # Step 1: Parse rows
                 for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
                     try:
-                        if not any(row): continue
+                        if not any(row):
+                            continue
 
                         name = str(row[0]).strip() if row[0] else ''
                         mobile = str(row[1]).strip() if row[1] else ''
@@ -456,8 +455,8 @@ def bulk_enquiry_upload(request):
                         subject_key = str(row[2]).strip() if row[2] else ''
                         status_key = str(row[3]).strip() if row[3] else 'pending'
                         enquiry_type_key = str(row[4]).strip() if row[4] else 'direct_telephonic'
-
                         counsellor_name = str(row[5]).strip() if row[5] else ''
+
                         if not counsellor_name:
                             raise ValueError("Counsellor name is required")
 
@@ -498,17 +497,20 @@ def bulk_enquiry_upload(request):
                         })
 
                     except Exception as e:
-                        error_rows.append(list(row) + [str(e)])
+                        error_rows.append({
+                            'row_number': row_num,
+                            'row_data': row,
+                            'error': str(e)
+                        })
 
                 if error_rows:
-                    return generate_error_response(error_rows)
+                    return render(request, 'bulk_upload_errors.html', {
+                        'form': form,
+                        'errors': error_rows
+                    })
 
-                # Step 2: Match counsellors
+                # Match counsellors
                 counsellor_names = {r['counsellor_name'].strip().lower() for r in rows_to_process}
-                if not counsellor_names:
-                    error_rows.append([None] * 12 + ["No counsellor names provided"])
-                    return generate_error_response(error_rows)
-
                 query = Q()
                 for name in counsellor_names:
                     query |= Q(name__iexact=name)
@@ -519,10 +521,16 @@ def bulk_enquiry_upload(request):
                 if missing_counsellors:
                     for row in rows_to_process:
                         if row['counsellor_name'].strip().lower() in missing_counsellors:
-                            error_rows.append(list(row['row']) + [f"Counsellor not found: {row['counsellor_name']}"])
-                    return generate_error_response(error_rows)
+                            error_rows.append({
+                                'row_number': None,
+                                'row_data': row['row'],
+                                'error': f"Counsellor not found: {row['counsellor_name']}"
+                            })
+                    return render(request, 'bulk_upload_errors.html', {
+                        'form': form,
+                        'errors': error_rows
+                    })
 
-                # Step 3: Find existing enquiries
                 mobiles_in_excel = [r['mobile'] for r in rows_to_process]
                 existing_records = Enquiry.objects.filter(mobile__in=mobiles_in_excel).values('mobile')
                 existing_mobile_set = {e['mobile'] for e in existing_records}
@@ -555,49 +563,26 @@ def bulk_enquiry_upload(request):
                         enquirys_to_create.append(Enquiry(mobile=mobile_clean, **parsed_updates))
                         created_count += 1
 
-                # Step 4: Save
                 with transaction.atomic():
                     if enquirys_to_create:
                         Enquiry.objects.bulk_create(enquirys_to_create)
-
                     if enquirys_to_update:
                         for item in enquirys_to_update:
                             Enquiry.objects.filter(mobile=item['mobile']).update(**item['updates'])
 
-                messages.success(
-                    request,
-                    f"✅ Created: {created_count}, ✏️ Updated: {updated_count}"
-                )
+                messages.success(request, f"✅ Created: {created_count}, ✏️ Updated: {updated_count}")
                 return redirect('enquiry:bulk_enquiry_upload')
 
             except Exception as e:
-                messages.error(request, f"Error processing file: {str(e)}")
+                messages.error(request, f"❌ Error processing file: {str(e)}")
 
     else:
         form = BulkEnquiryForm()
 
     return render(request, 'bulk_upload.html', {'form': form})
 
-def generate_error_response(error_rows):
-    error_wb = openpyxl.Workbook()
-    error_ws = error_wb.active
 
-    headers = [
-        'Name', 'Mobile', 'Subject', 'Status', 'Enquiry Type', 'Counsellor Name',
-        'Followup Date', 'Enquiry Date', 'Parent Number', 'Target Fees', 'Fees Paid', 'Due Date', 'Error'
-    ]
-    error_ws.append(headers)
 
-    for cell in error_ws[1]:
-        cell.font = Font(bold=True)
-
-    for err_row in error_rows:
-        error_ws.append(err_row)
-
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=failed_enquiries.xlsx'
-    error_wb.save(response)
-    return response
 @login_required(login_url='accounts:login')
 def edit_enquiry(request, pk):
     enquiry = get_object_or_404(Enquiry, pk=pk)
@@ -1471,14 +1456,19 @@ def export_enquiries_view(request):
         except ValueError:
             return HttpResponseBadRequest("Invalid date format. Please use DD-MM-YYYY.")
 
-        # Convert to timezone-aware datetimes
-        start_datetime = timezone.make_aware(datetime.datetime.combine(start_date, datetime.time.min))
-        end_datetime = timezone.make_aware(datetime.datetime.combine(end_date, datetime.time.max))
+        # Set IST timezone
+        ist = pytz.timezone('Asia/Kolkata')
+
+        # Convert to timezone-aware datetimes (start of day and end of day)
+        start_datetime = ist.localize(datetime.datetime.combine(start_date, datetime.time.min))
+        end_datetime = ist.localize(datetime.datetime.combine(end_date, datetime.time.max))
 
         # Fetch filtered Enquiries with related data
         enquiries = Enquiry.objects.filter(
             created_at__range=(start_datetime, end_datetime)
-        ).select_related('counsellor', 'college')
+        ).select_related(
+            'counsellor',
+        ).prefetch_related('education_details')
 
         # Create Excel workbook
         wb = openpyxl.Workbook()
@@ -1490,11 +1480,15 @@ def export_enquiries_view(request):
             'Counsellor', 'Created At', 'Followup Date', 'Enquiry Date',
             'Parent Number', 'Native District', 'Target Fees', 'Fees Paid',
             'Fees Balance', 'Due Date', 'Other Subject Name', 'College Name',
-            'College Location', 'Visit Type'
+            'College Location', 'Visit Type', 'Fees Paid Date',
+            'Education Level', 'UG Degree', 'PG Degree', 'Other UG Degree',
+            'Other PG Degree', 'Branch', 'Year of Passing', 'Percentage',
         ]
         ws.append(headers)
 
         for enquiry in enquiries:
+            education_info = enquiry.education_details.first() if hasattr(enquiry, 'education_details') else None
+
             row = [
                 enquiry.name,
                 enquiry.mobile,
@@ -1502,7 +1496,7 @@ def export_enquiries_view(request):
                 enquiry.get_status_display(),
                 enquiry.get_enquiry_type_display(),
                 str(enquiry.counsellor) if enquiry.counsellor else '',
-                enquiry.created_at.date(),
+                enquiry.created_at.astimezone(ist).date() if enquiry.created_at else '',
                 enquiry.followup_date,
                 enquiry.enquiry_date,
                 enquiry.parent_number,
@@ -1512,9 +1506,20 @@ def export_enquiries_view(request):
                 float(enquiry.fees_balance) if enquiry.fees_balance else None,
                 enquiry.due_date,
                 enquiry.other_subject_name,
-                enquiry.college.college_name if enquiry.college else '',
-                enquiry.college.college_place if enquiry.college else '',
+                education_info.college_name if education_info else '',
+                education_info.college_place if education_info else '',
                 enquiry.get_visit_type_display(),
+                enquiry.fees_paid_date,
+
+                # Education Info Fields
+                education_info.level if education_info else '',
+                education_info.get_ug_degree_display() if education_info and education_info.ug_degree else '',
+                education_info.get_pg_degree_display() if education_info and education_info.pg_degree else '',
+                education_info.other_ug_degree_name if education_info else '',
+                education_info.other_pg_degree_name if education_info else '',
+                education_info.branch.upper() if education_info and education_info.branch else '',
+                education_info.year_of_passing if education_info else '',
+                education_info.percentage if education_info else '',
             ]
             ws.append(row)
 
@@ -1530,12 +1535,12 @@ def export_enquiries_view(request):
         return response
 
     else:
-        # Show form with today's date pre-filled
+        # Show form with today's date pre-filled in IST
         ist = pytz.timezone('Asia/Kolkata')
         today = timezone.now().astimezone(ist).date()
 
         return render(request, 'export_enquiries_form.html', {
-            'today': today
+            'today': today.strftime("%d-%m-%Y")
         })
         
 # views.py

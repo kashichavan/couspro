@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-danger">❌ Bulk Upload Errors</h2>
+    <p class="text-muted">The following records had issues during upload:</p>
+    <table class="table table-bordered table-sm table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Row No</th>
+                <th>Input Data</th>
+                <th>Error Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in errors %}
+            <tr>
+                <td>{{ e.row_num }}</td>
+                <td>
+                    <pre>{{ e.row_data }}</pre>
+                </td>
+                <td class="text-danger">{{ e.error }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'enquiry:bulk_enquiry_upload' %}" class="btn btn-primary mt-3">← Go Back</a>
+</div>
+{% endblock %}

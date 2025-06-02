@@ -363,8 +363,8 @@
       {% csrf_token %}
       <input type="hidden" id="bypass_mobile_check" name="bypass_mobile_check" value="false">
 
+      <!-- Personal Information -->
       <div class="form-row">
-        <!-- Personal Information -->
         <div class="form-column">
           <div class="form-group">
             {{ form.name.label_tag }}
@@ -401,18 +401,14 @@
             <div class="invalid-feedback">{{ form.subject.errors.as_text }}</div>
           </div>
           
-          <!-- other_subject_name field, initially hidden -->
+          <!-- other_subject_name conditional field -->
           <div id="other-subject-name-container" style="display:none;">
             <div class="form-group">
-              <label for="id_other_subject_name" class="form-label">Please specify other subject <span class="text-danger">*</span></label>
-              <input 
-                type="text" 
-                name="other_subject_name" 
-                id="id_other_subject_name" 
-                class="form-control" 
-                placeholder="Enter other subject name"
-              >
-              <div class="invalid-feedback">This field is required when subject is Other.</div>
+              <label for="{{ form.other_subject_name.id_for_label }}" class="form-label">
+                Please specify other subject <span class="text-danger">*</span>
+              </label>
+              {{ form.other_subject_name }}
+              <div class="invalid-feedback">{{ form.other_subject_name.errors.as_text }}</div>
             </div>
           </div>
         </div>
@@ -424,7 +420,6 @@
             <div class="invalid-feedback">{{ form.enquiry_type.errors.as_text }}</div>
           </div>
         </div>
-
         
         <div class="form-column">
           <div class="form-group">
@@ -433,35 +428,34 @@
             <div class="invalid-feedback">{{ form.status.errors.as_text }}</div>
           </div>
         </div>
+      </div>
 
-        
-        <!-- Fees Section (conditionally shown) -->
-        <div class="form-column-full">
-          <div id="fees-section" style="display: none;">
-            <h5 class="mt-3">Fees Details</h5>
-            <div class="form-row">
-              <div class="form-column">
-                <div class="form-group">
-                  {{ form.target_fees.label_tag }}
-                  {{ form.target_fees }}
-                  <div class="invalid-feedback">{{ form.target_fees.errors.as_text }}</div>
-                </div>
+      <!-- Fees Section (conditionally shown) -->
+      <div class="form-column-full">
+        <div id="fees-section" style="display: none;">
+          <h5 class="mt-3">Fees Details</h5>
+          <div class="form-row">
+            <div class="form-column">
+              <div class="form-group">
+                {{ form.target_fees.label_tag }}
+                {{ form.target_fees }}
+                <div class="invalid-feedback">{{ form.target_fees.errors.as_text }}</div>
               </div>
-              
-              <div class="form-column">
-                <div class="form-group">
-                  {{ form.fees_paid.label_tag }}
-                  {{ form.fees_paid }}
-                  <div class="invalid-feedback">{{ form.fees_paid.errors.as_text }}</div>
-                </div>
+            </div>
+            
+            <div class="form-column">
+              <div class="form-group">
+                {{ form.fees_paid.label_tag }}
+                {{ form.fees_paid }}
+                <div class="invalid-feedback">{{ form.fees_paid.errors.as_text }}</div>
               </div>
-              
-              <div class="form-column">
-                <div class="form-group">
-                  {{ form.due_date.label_tag }}
-                  {{ form.due_date }}
-                  <div class="invalid-feedback">{{ form.due_date.errors.as_text }}</div>
-                </div>
+            </div>
+            
+            <div class="form-column">
+              <div class="form-group">
+                {{ form.due_date.label_tag }}
+                {{ form.due_date }}
+                <div class="invalid-feedback">{{ form.due_date.errors.as_text }}</div>
               </div>
             </div>
           </div>
@@ -495,7 +489,7 @@
         </div>
       </div>
 
-      <!-- Location Information -->
+      <!-- Location & College Info -->
       <h5 class="form-section-title">Location Information</h5>
       <div class="form-row">
         <div class="form-column">
@@ -508,45 +502,92 @@
         
         <div class="form-column">
           <div class="form-group">
-            <label for="id_college_name" class="form-label">College Name <span class="text-danger">*</span></label>
-            <input 
-              type="text" 
-              name="college_name" 
-              id="id_college_name" 
-              class="form-control{% if form.errors.college_name %} is-invalid{% endif %}" 
-              placeholder="Enter college name" 
-              value="{{ form.data.college_name|default_if_none:'' }}"
-              required
-            >
-            {% if form.errors.college_name %}
-              <div class="invalid-feedback d-block">
-                {{ form.errors.college_name.as_text }}
-              </div>
-            {% endif %}
+            {{ form.college_name.label_tag }}
+            {{ form.college_name }}
+            <div class="invalid-feedback">{{ form.college_name.errors.as_text }}</div>
           </div>
         </div>
         
         <div class="form-column">
           <div class="form-group">
-            <label for="id_college_place" class="form-label">College Location</label>
-            <input 
-              type="text" 
-              name="college_place" 
-              id="id_college_place" 
-              class="form-control{% if form.errors.college_place %} is-invalid{% endif %}" 
-              placeholder="Enter college location" 
-              value="{{ form.data.college_place|default_if_none:'' }}"
-            >
-            {% if form.errors.college_place %}
-              <div class="invalid-feedback d-block">
-                {{ form.errors.college_place.as_text }}
-              </div>
-            {% endif %}
+            {{ form.college_place.label_tag }}
+            {{ form.college_place }}
+            <div class="invalid-feedback">{{ form.college_place.errors.as_text }}</div>
           </div>
         </div>
       </div>
 
-      <!-- Visit Information -->
+      <!-- Education Level Info -->
+      <h5 class="form-section-title">Education Background</h5>
+      <div class="form-row">
+        <div class="form-column">
+          <div class="form-group">
+            {{ form.education_level.label_tag }}
+            {{ form.education_level }}
+            <div class="invalid-feedback">{{ form.education_level.errors.as_text }}</div>
+          </div>
+        </div>
+        
+        <div class="form-column">
+          <div class="form-group">
+            {{ form.ug_degree.label_tag }}
+            {{ form.ug_degree }}
+            <div class="invalid-feedback">{{ form.ug_degree.errors.as_text }}</div>
+          </div>
+          
+          <div id="other-ug-degree-container" style="display: none;">
+            <div class="form-group">
+              {{ form.other_ug_degree_name.label_tag }}
+              {{ form.other_ug_degree_name }}
+              <div class="invalid-feedback">{{ form.other_ug_degree_name.errors.as_text }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-column">
+          <div class="form-group">
+            {{ form.pg_degree.label_tag }}
+            {{ form.pg_degree }}
+            <div class="invalid-feedback">{{ form.pg_degree.errors.as_text }}</div>
+          </div>
+          
+          <div id="other-pg-degree-container" style="display: none;">
+            <div class="form-group">
+              {{ form.other_pg_degree_name.label_tag }}
+              {{ form.other_pg_degree_name }}
+              <div class="invalid-feedback">{{ form.other_pg_degree_name.errors.as_text }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-column">
+          <div class="form-group">
+            {{ form.branch.label_tag }}
+            {{ form.branch }}
+            <div class="invalid-feedback">{{ form.branch.errors.as_text }}</div>
+          </div>
+        </div>
+        
+        <div class="form-column">
+          <div class="form-group">
+            {{ form.year_of_passing.label_tag }}
+            {{ form.year_of_passing }}
+            <div class="invalid-feedback">{{ form.year_of_passing.errors.as_text }}</div>
+          </div>
+        </div>
+        
+        <div class="form-column">
+          <div class="form-group">
+            {{ form.percentage.label_tag }}
+            {{ form.percentage }}
+            <div class="invalid-feedback">{{ form.percentage.errors.as_text }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visit Type -->
       <div class="form-row">
         <div class="form-column">
           <div class="form-group">
@@ -555,7 +596,6 @@
             <div class="invalid-feedback">{{ form.visit_type.errors.as_text }}</div>
           </div>
         </div>
-        
       </div>
 
       <div class="text-center mt-4">
@@ -585,11 +625,14 @@
     </div>
   </div>
 </div>
+
 {% endblock %}
+
+
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const statusField = document.getElementById('id_status');
     const feesSection = document.getElementById('fees-section');
     const mobileField = document.getElementById('id_mobile');
@@ -600,194 +643,220 @@
 
     // Toggle fees section based on status
     function toggleFeesSection() {
-      feesSection.style.display = statusField.value === 'joined' ? 'block' : 'none';
+        if (statusField && feesSection) {
+            feesSection.style.display = statusField.value === 'joined' ? 'block' : 'none';
+        }
     }
 
     if (statusField) {
-      statusField.addEventListener('change', toggleFeesSection);
-      toggleFeesSection();
+        statusField.addEventListener('change', toggleFeesSection);
+        toggleFeesSection();
     }
 
     // Check if mobile number exists in database
     function checkMobileExists(mobile) {
-      if (!mobile || mobile.length < 10) return;
+        if (!mobile || mobile.length < 10) return;
+        const cleanMobile = mobile.replace(/\D/g, '').slice(-10);
+        if (cleanMobile.length !== 10) return;
 
-      // Extract only digits and get last 10 digits
-      const cleanMobile = mobile.replace(/\D/g, '').slice(-10);
-      if (cleanMobile.length !== 10) return;
-
-      fetch(`/check-mobile-exists/?mobile=${cleanMobile}&enquiry_id=${enquiryId}`)
-        .then(response => response.json())
-        .then(data => {
-          const warningDiv = document.getElementById('mobile-warning');
-          
-          if (data.exists) {
-            warningDiv.textContent = `This number is already registered for ${data.student_name}`;
-            warningDiv.style.display = 'block';
-            hasExistingNumber = true;
-          } else {
-            warningDiv.style.display = 'none';
-            hasExistingNumber = false;
-          }
-        })
-        .catch(error => console.error('Error checking mobile number:', error));
+        fetch(`/check-mobile-exists/?mobile=${cleanMobile}&enquiry_id=${enquiryId}`)
+            .then(response => response.json())
+            .then(data => {
+                const warningDiv = document.getElementById('mobile-warning');
+                if (data.exists) {
+                    warningDiv.textContent = `This number is already registered for ${data.student_name}`;
+                    warningDiv.style.display = 'block';
+                    hasExistingNumber = true;
+                } else {
+                    warningDiv.style.display = 'none';
+                    hasExistingNumber = false;
+                }
+            })
+            .catch(error => console.error('Error checking mobile number:', error));
     }
 
-    // Debounce function to avoid too many API calls
+    // Debounce function
     function debounce(func, wait) {
-      let timeout;
-      return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
     }
 
-    // Add event listener to mobile field with debounce
+    // Mobile field input listener
     if (mobileField) {
-      const debouncedCheck = debounce(checkMobileExists, 500);
-      mobileField.addEventListener('input', () => {
-        debouncedCheck(mobileField.value);
-      });
-      
-      // Initial check if value exists
-      if (mobileField.value) {
-        checkMobileExists(mobileField.value);
-      }
+        const debouncedCheck = debounce(checkMobileExists, 500);
+        mobileField.addEventListener('input', () => {
+            debouncedCheck(mobileField.value);
+        });
+        if (mobileField.value) {
+            checkMobileExists(mobileField.value);
+        }
     }
 
-    // Toggle other_subject_name field based on subject selection
+    // Toggle other_subject_name field
     const subjectField = document.getElementById('id_subject');
     const otherSubjectContainer = document.getElementById('other-subject-name-container');
     const otherSubjectInput = document.getElementById('id_other_subject_name');
 
     function toggleOtherSubject() {
-      if (subjectField.value.toLowerCase() === 'other') {
-        otherSubjectContainer.style.display = 'block';
-        otherSubjectInput.setAttribute('required', 'required');
-      } else {
-        otherSubjectContainer.style.display = 'none';
-        otherSubjectInput.removeAttribute('required');
-        otherSubjectInput.classList.remove('is-invalid');
-      }
+        if (subjectField && otherSubjectContainer && otherSubjectInput) {
+            if (subjectField.value.toLowerCase() === 'other') {
+                otherSubjectContainer.style.display = 'block';
+                otherSubjectInput.setAttribute('required', 'required');
+            } else {
+                otherSubjectContainer.style.display = 'none';
+                otherSubjectInput.removeAttribute('required');
+                otherSubjectInput.classList.remove('is-invalid');
+            }
+        }
     }
 
     if (subjectField) {
-      subjectField.addEventListener('change', toggleOtherSubject);
-      toggleOtherSubject(); // initial check on load
+        subjectField.addEventListener('change', toggleOtherSubject);
+        toggleOtherSubject(); // Initial check
     }
 
-    // Form validation with custom modal alert
-    form.addEventListener('submit', function (e) {
-      const nameInput = document.getElementById('id_name');
-      const dateInput = document.getElementById('id_enquiry_date');
-      const mobileInput = document.getElementById('id_mobile');
-      const collegeNameInput = document.getElementById('id_college_name');
-      const nativeDistrictInput = document.getElementById('id_native_district_name');
-      const visitTypeInput = document.getElementById('id_visit_type');
+    // UG/PG Other Degree Fields
+    const ugDegreeField = document.getElementById('id_ug_degree');
+    const pgDegreeField = document.getElementById('id_pg_degree');
+    const otherUgContainer = document.getElementById('other-ug-degree-container');
+    const otherPgContainer = document.getElementById('other-pg-degree-container');
 
-      const mobilePattern = /^[6-9]\d{9}$/;
-      let isValid = true;
-      let errorMessages = [];
-
-      // Name validation
-      if (!nameInput.value.trim()) {
-        nameInput.classList.add('is-invalid');
-        isValid = false;
-        errorMessages.push("Name is required");
-      } else {
-        nameInput.classList.remove('is-invalid');
-      }
-
-      // Enquiry Date validation
-      if (!dateInput.value) {
-        dateInput.classList.add('is-invalid');
-        isValid = false;
-        errorMessages.push("Enquiry date is required");
-      } else {
-        dateInput.classList.remove('is-invalid');
-      }
-
-      // Mobile validation
-      if (mobileInput) {
-        const cleanMobile = mobileInput.value.replace(/\D/g, '').slice(-10);
-        if (!mobilePattern.test(cleanMobile)) {
-          mobileInput.classList.add('is-invalid');
-          isValid = false;
-          errorMessages.push("Enter a valid 10-digit Indian mobile number");
-        } else {
-          mobileInput.classList.remove('is-invalid');
+    function toggleOtherUGDegree() {
+        if (ugDegreeField && otherUgContainer) {
+            otherUgContainer.style.display = ugDegreeField.value === "other" ? "block" : "none";
         }
-      }
+    }
 
-      // College Name validation (mandatory)
-      if (!collegeNameInput.value.trim()) {
-        collegeNameInput.classList.add('is-invalid');
-        isValid = false;
-        errorMessages.push("College Name is required");
-      } else {
-        collegeNameInput.classList.remove('is-invalid');
-      }
+    function toggleOtherPGDegree() {
+        if (pgDegreeField && otherPgContainer) {
+            otherPgContainer.style.display = pgDegreeField.value === "other" ? "block" : "none";
+        }
+    }
 
-      // Native District validation (mandatory)
-      if (!nativeDistrictInput.value.trim()) {
-        nativeDistrictInput.classList.add('is-invalid');
-        isValid = false;
-        errorMessages.push("Native District is required");
-      } else {
-        nativeDistrictInput.classList.remove('is-invalid');
-      }
+    if (ugDegreeField) {
+        ugDegreeField.addEventListener('change', toggleOtherUGDegree);
+        toggleOtherUGDegree();
+    }
 
-      // Visit Type validation (mandatory)
-      if (!visitTypeInput.value.trim()) {
-        visitTypeInput.classList.add('is-invalid');
-        isValid = false;
-        errorMessages.push("Visit Type is required");
-      } else {
-        visitTypeInput.classList.remove('is-invalid');
-      }
+    if (pgDegreeField) {
+        pgDegreeField.addEventListener('change', toggleOtherPGDegree);
+        toggleOtherPGDegree();
+    }
 
-      // Check for existing mobile number
-      if (hasExistingNumber) {
+    // Form Validation with Modal Alert
+    form.addEventListener('submit', function (e) {
         e.preventDefault();
-        // Show the mobile exists modal
-        document.getElementById('mobile-exists-message').textContent = 
-          document.getElementById('mobile-warning').textContent;
-        document.getElementById('mobileExistsModal').style.display = 'flex';
-        return false;
-      }
 
-      // Check Bootstrap native validity
-      if (!form.checkValidity() || !isValid) {
-        e.preventDefault();
-        e.stopPropagation();
+        const nameInput = document.getElementById('id_name');
+        const dateInput = document.getElementById('id_enquiry_date');
+        const mobileInput = document.getElementById('id_mobile');
+        const collegeNameInput = document.getElementById('id_college_name');
+        const nativeDistrictInput = document.getElementById('id_native_district_name');
+        const visitTypeInput = document.getElementById('id_visit_type');
 
-        // Update modal content and show
-        modalErrorList.innerHTML = errorMessages.map(msg => `• ${msg}`).join('<br>');
-        document.getElementById('validationModal').style.display = 'flex';
-      }
+        const mobilePattern = /^[6-9]\d{9}$/;
+        let isValid = true;
+        let errorMessages = [];
 
-      form.classList.add('was-validated');
+        // Name validation
+        if (!nameInput.value.trim()) {
+            nameInput.classList.add('is-invalid');
+            isValid = false;
+            errorMessages.push("Name is required");
+        } else {
+            nameInput.classList.remove('is-invalid');
+        }
+
+        // Enquiry Date validation
+        if (!dateInput.value) {
+            dateInput.classList.add('is-invalid');
+            isValid = false;
+            errorMessages.push("Enquiry date is required");
+        } else {
+            dateInput.classList.remove('is-invalid');
+        }
+
+        // Mobile validation
+        if (mobileInput) {
+            const cleanMobile = mobileInput.value.replace(/\D/g, '').slice(-10);
+            if (!mobilePattern.test(cleanMobile)) {
+                mobileInput.classList.add('is-invalid');
+                isValid = false;
+                errorMessages.push("Enter a valid 10-digit Indian mobile number");
+            } else {
+                mobileInput.classList.remove('is-invalid');
+            }
+        }
+
+        // College Name validation
+        if (!collegeNameInput.value.trim()) {
+            collegeNameInput.classList.add('is-invalid');
+            isValid = false;
+            errorMessages.push("College Name is required");
+        } else {
+            collegeNameInput.classList.remove('is-invalid');
+        }
+
+        // Native District validation
+        if (!nativeDistrictInput.value.trim()) {
+            nativeDistrictInput.classList.add('is-invalid');
+            isValid = false;
+            errorMessages.push("Native District is required");
+        } else {
+            nativeDistrictInput.classList.remove('is-invalid');
+        }
+
+        // Visit Type validation
+        if (!visitTypeInput.value.trim()) {
+            visitTypeInput.classList.add('is-invalid');
+            isValid = false;
+            errorMessages.push("Visit Type is required");
+        } else {
+            visitTypeInput.classList.remove('is-invalid');
+        }
+
+        // Check for existing mobile number
+        if (hasExistingNumber && document.getElementById('bypass_mobile_check').value !== 'true') {
+            e.preventDefault();
+            document.getElementById('mobile-exists-message').textContent =
+                document.getElementById('mobile-warning').textContent;
+            document.getElementById('mobileExistsModal').style.display = 'flex';
+            return false;
+        }
+
+        // Final fallback validation
+        if (!form.checkValidity() || !isValid) {
+            e.stopPropagation();
+            modalErrorList.innerHTML = errorMessages.map(msg => `• ${msg}`).join('<br>');
+            document.getElementById('validationModal').style.display = 'flex';
+        }
+
+        form.classList.add('was-validated');
+        if (isValid) {
+            form.submit();
+        }
     });
 
     // Real-time mobile input feedback
     if (mobileField) {
-      mobileField.addEventListener('input', () => {
-        const cleanMobile = mobileField.value.replace(/\D/g, '').slice(-10);
-        const valid = /^[6-9]\d{9}$/.test(cleanMobile);
-        mobileField.classList.toggle('is-valid', valid);
-        mobileField.classList.toggle('is-invalid', !valid && mobileField.value.length > 0);
-      });
+        mobileField.addEventListener('input', () => {
+            const cleanMobile = mobileField.value.replace(/\D/g, '').slice(-10);
+            const valid = /^[6-9]\d{9}$/.test(cleanMobile);
+            mobileField.classList.toggle('is-valid', valid);
+            mobileField.classList.toggle('is-invalid', !valid && mobileField.value.length > 0);
+        });
     }
-  });
+});
 
-  // Function to continue with existing mobile number
-  function continueWithExistingNumber() {
+// Function to continue with existing mobile number
+function continueWithExistingNumber() {
     document.getElementById('mobileExistsModal').style.display = 'none';
     const form = document.querySelector('.enquiry-form');
-    // Set the hidden field to bypass the mobile check
     document.getElementById('bypass_mobile_check').value = 'true';
-    // Submit the form
     form.submit();
-  }
+}
 </script>
 {% endblock %}
