@@ -1,0 +1,848 @@
+{% extends "base.html" %}
+{% block title %}Due Fees Calendar - JEnquiry Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="header-content">
+            <h2 class="header-title"><i class="fas fa-calendar-alt me-3"></i>Due Fees Calendar</h2>
+            <p class="header-subtitle">Track student payment dues with interactive calendar view</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-due-students">0</div>
+                <div class="stat-label">Students Due</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-due-amount">₹0</div>
+                <div class="stat-label">Total Due</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Calendar Section -->
+    <div class="col-lg-8">
+        <div class="card calendar-card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title">
+                        <i class="fas fa-calendar me-2"></i>Payment Due Calendar
+                    </h5>
+                    <div class="calendar-legend">
+                        <span class="legend-item">
+                            <span class="legend-dot low"></span>1-5 Students
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-dot medium"></span>6-10 Students
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-dot high"></span>10+ Students
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="due-calendar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Details Section -->
+    <div class="col-lg-4">
+        <div class="card student-details-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-users me-2"></i>Students Due on 
+                    <span id="selected-date" class="selected-date">Select Date</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="student-list-container">
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>Click on a calendar date to view students with due payments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Students Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card table-card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <h5 class="card-title">
+                        <i class="fas fa-table me-2"></i>Detailed Payment Due List
+                    </h5>
+                    <div class="table-filters">
+                        <select id="filter-counsellor" class="form-select">
+                            <option value="">All Counsellors</option>
+                        </select>
+                        <input type="text" id="search-student" class="form-control" placeholder="Search students...">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="students-table">
+                        <thead class="table-header">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Mobile</th>
+                                <th>Counsellor</th>
+                                <th>Target Fees</th>
+                                <th>Paid</th>
+                                <th>Due Amount</th>
+                                <th>Due Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body">
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="loading-spinner">
+                                        <div class="spinner"></div>
+                                        <p class="mt-3">Loading students data...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-orange: #ff6b35;
+        --secondary-orange: #ff8c42;
+        --accent-orange: #ffa726;
+        --deep-orange: #e55100;
+        --light-orange: #ffcc80;
+        --gradient-primary: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8c42 100%);
+        --gradient-secondary: linear-gradient(135deg, #ff8c42 0%, #ffa726 100%);
+        --gradient-accent: linear-gradient(135deg, #ffa726 0%, #ffcc80 100%);
+        --text-dark: #2d3748;
+        --text-light: #718096;
+        --bg-light: #fef7f0;
+        --border-color: #fed7aa;
+        --shadow-soft: 0 10px 40px rgba(255, 107, 53, 0.1);
+        --shadow-hover: 0 20px 60px rgba(255, 107, 53, 0.15);
+    }
+
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #fef7f0 0%, #ffffff 100%);
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+
+    /* Header & Stats */
+    .page-header {
+        background: var(--gradient-primary);
+        padding: 3rem 2.5rem;
+        border-radius: 24px;
+        color: white;
+        margin-bottom: 2.5rem;
+        box-shadow: var(--shadow-soft);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        z-index: 0;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .header-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .header-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 400;
+        margin: 0;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 140px;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin-top: 0.5rem;
+        font-weight: 500;
+    }
+
+    /* Cards */
+    .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+    }
+
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .card-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 2rem;
+        border-bottom: none;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .calendar-legend {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .legend-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .legend-dot.low { background: #10b981; }
+    .legend-dot.medium { background: #f59e0b; }
+    .legend-dot.high { background: #ef4444; }
+
+    /* Calendar Styling */
+    #due-calendar {
+        min-height: 600px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .fc-header-toolbar {
+        padding: 1.5rem;
+        background: var(--bg-light);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .fc-button-primary {
+        background: var(--gradient-primary) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .fc-button-primary:hover {
+        background: var(--gradient-secondary) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3) !important;
+    }
+
+    .fc-day {
+        transition: all 0.3s ease !important;
+    }
+
+    .fc-day:hover {
+        background: rgba(255, 107, 53, 0.05) !important;
+    }
+
+    .fc-day-today {
+        background: rgba(255, 107, 53, 0.1) !important;
+        border-color: var(--primary-orange) !important;
+    }
+
+    .fc-event {
+        border-radius: 8px !important;
+        border: none !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .fc-event:hover {
+        transform: scale(1.05) !important;
+    }
+
+    .fc-event.low-count {
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        color: white !important;
+    }
+
+    .fc-event.medium-count {
+        background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+        color: white !important;
+    }
+
+    .fc-event.high-count {
+        background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+        color: white !important;
+    }
+
+    /* Student Details */
+    .student-details-card {
+        max-height: 650px;
+    }
+
+    .student-details-card .card-body {
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--light-orange) transparent;
+    }
+
+    .student-details-card .card-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .student-details-card .card-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .student-details-card .card-body::-webkit-scrollbar-thumb {
+        background: var(--light-orange);
+        border-radius: 3px;
+    }
+
+    .selected-date {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-light);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--accent-orange);
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+
+    .student-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .student-item:hover {
+        background: var(--bg-light);
+        transform: translateX(12px);
+        border-left: 4px solid var(--primary-orange);
+    }
+
+    .student-name {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .student-info {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .student-info i {
+        width: 16px;
+        color: var(--accent-orange);
+    }
+
+    .student-amount {
+        font-weight: 800;
+        color: var(--deep-orange);
+        font-size: 1.3rem;
+        margin-top: 0.75rem;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Table Styling */
+    .table-filters {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .table-filters .form-control,
+    .table-filters .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .table-filters .form-control:focus,
+    .table-filters .form-select:focus {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.15);
+    }
+
+    .table-header {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    .table-header th {
+        border: none;
+        font-weight: 700;
+        padding: 1.5rem 1rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody td {
+        padding: 1.5rem 1rem;
+        vertical-align: middle;
+        border-color: var(--border-color);
+        font-weight: 500;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background: var(--bg-light);
+        transform: scale(1.01);
+        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.08);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-overdue {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .status-due-today {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+
+    .status-upcoming {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .action-btn {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+        background: var(--gradient-secondary);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        color: white;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        color: var(--primary-orange);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--light-orange);
+        border-top: 4px solid var(--primary-orange);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .header-title {
+            font-size: 2rem;
+        }
+
+        .header-stats {
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            padding: 1.5rem 1rem;
+            min-width: 120px;
+        }
+
+        .calendar-legend {
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .table-filters {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .card-header {
+            padding: 1.5rem;
+        }
+
+        .student-item {
+            padding: 1rem;
+        }
+
+        .student-item:hover {
+            transform: translateX(8px);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header-title {
+            font-size: 1.75rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+
+        .card {
+            border-radius: 16px;
+        }
+
+        .page-header {
+            border-radius: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Core elements
+    const els = {
+        calendar: document.getElementById('due-calendar'),
+        selectedDate: document.getElementById('selected-date'),
+        studentList: document.getElementById('student-list-container'),
+        tableBody: document.getElementById('students-table-body'),
+        totalStudents: document.getElementById('total-due-students'),
+        totalAmount: document.getElementById('total-due-amount'),
+        filterCounsellor: document.getElementById('filter-counsellor'),
+        searchStudent: document.getElementById('search-student')
+    };
+
+    let studentsData = [];
+    let calendar;
+
+    // Initialize
+    init();
+
+    async function init() {
+        try {
+            await loadData();
+            updateStats();
+            setupFilters();
+            renderTable();
+            initCalendar();
+            bindEvents();
+        } catch (error) {
+            showError('Failed to initialize. Please refresh the page.');
+        }
+    }
+
+    async function loadData() {
+        try {
+            const response = await fetch('{% url "enquiry:ajax_due_fees_data" %}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                }
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            studentsData = Array.isArray(data) ? data : [];
+        } catch (error) {
+            console.error('Data loading error:', error);
+            throw error;
+        }
+    }
+
+    function updateStats() {
+        const total = studentsData.length;
+        const amount = studentsData.reduce((sum, s) => sum + (parseFloat(s.fees_due) || 0), 0);
+        
+        els.totalStudents.textContent = total;
+        els.totalAmount.textContent = `₹${amount.toLocaleString('en-IN')}`;
+    }
+
+    function setupFilters() {
+        const counsellors = [...new Set(studentsData.map(s => s.counsellor).filter(Boolean))];
+        els.filterCounsellor.innerHTML = '<option value="">All Counsellors</option>';
+        counsellors.forEach(c => {
+            els.filterCounsellor.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    }
+
+    function initCalendar() {
+        const dateGroups = groupByDate();
+        const events = createCalendarEvents(dateGroups);
+
+        calendar = new FullCalendar.Calendar(els.calendar, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth'
+            },
+            events,
+            eventClick: (info) => showStudentsForDate(info.event.startStr, info.event.extendedProps.students),
+            dateClick: (info) => {
+                const students = dateGroups[info.dateStr] || [];
+                showStudentsForDate(info.dateStr, students);
+            },
+            height: 'auto'
+        });
+
+        calendar.render();
+    }
+
+    function groupByDate() {
+        return studentsData.reduce((groups, student) => {
+            const date = student.due_date;
+            if (!groups[date]) groups[date] = [];
+            groups[date].push(student);
+            return groups;
+        }, {});
+    }
+
+    function createCalendarEvents(dateGroups) {
+        return Object.entries(dateGroups).map(([date, students]) => {
+            const count = students.length;
+            const className = count > 10 ? 'high-count' : count > 5 ? 'medium-count' : 'low-count';
+            
+            return {
+                title: `${count} student${count !== 1 ? 's' : ''}`,
+                start: date,
+                className,
+                extendedProps: { students }
+            };
+        });
+    }
+
+    function showStudentsForDate(dateStr, students) {
+        els.selectedDate.textContent = new Date(dateStr).toLocaleDateString('en-IN', {
+            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        });
+
+        if (!students.length) {
+            els.studentList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-calendar-check"></i>
+                    <p>No students due on this date</p>
+                </div>
+            `;
+            return;
+        }
+
+        els.studentList.innerHTML = students.map(createStudentItem).join('');
+    }
+
+    function createStudentItem(student) {
+        const status = getPaymentStatus(student.due_date);
+        return `
+            <div class="student-item">
+                <div class="student-name">${student.name}</div>
+                <div class="student-info"><i class="fas fa-phone"></i>${student.mobile}</div>
+                <div class="student-info"><i class="fas fa-user-tie"></i>${student.counsellor}</div>
+                <div class="student-amount">₹${parseFloat(student.fees_due || 0).toLocaleString('en-IN')}</div>
+                <span class="status-badge status-${status.class} mt-2 d-inline-block">${status.text}</span>
+            </div>
+        `;
+    }
+
+    function renderTable(data = studentsData) {
+        if (!data.length) {
+            els.tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-5">No students found</td></tr>';
+            return;
+        }
+
+        els.tableBody.innerHTML = data.map(createTableRow).join('');
+    }
+
+    function createTableRow(student) {
+        const status = getPaymentStatus(student.due_date);
+        const fees = {
+            target: parseFloat(student.target_fees || 0),
+            paid: parseFloat(student.fees_paid || 0),
+            due: parseFloat(student.fees_due || 0)
+        };
+
+        return `
+            <tr>
+                <td><strong>${student.name}</strong></td>
+                <td>${student.mobile}</td>
+                <td>${student.counsellor}</td>
+                <td class="text-primary fw-bold">₹${fees.target.toLocaleString('en-IN')}</td>
+                <td class="text-success fw-bold">₹${fees.paid.toLocaleString('en-IN')}</td>
+                <td class="text-danger fw-bold">₹${fees.due.toLocaleString('en-IN')}</td>
+                <td>
+                    ${new Date(student.due_date).toLocaleDateString('en-IN')}
+                    <br><span class="status-badge status-${status.class}">${status.text}</span>
+                </td>
+                <td>
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-eye"></i>View
+                    </a>
+                </td>
+            </tr>
+        `;
+    }
+
+    function getPaymentStatus(dueDateStr) {
+        const daysUntilDue = Math.ceil((new Date(dueDateStr) - new Date()) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilDue < 0) return { class: 'overdue', text: 'Overdue' };
+        if (daysUntilDue === 0) return { class: 'due-today', text: 'Due Today' };
+        return { class: 'upcoming', text: `${daysUntilDue} days` };
+    }
+
+    function filterTable() {
+        const searchTerm = els.searchStudent.value.toLowerCase();
+        const selectedCounsellor = els.filterCounsellor.value;
+
+        const filtered = studentsData.filter(student => {
+            const matchesSearch = !searchTerm || 
+                student.name.toLowerCase().includes(searchTerm) ||
+                student.mobile.includes(searchTerm);
+            const matchesCounsellor = !selectedCounsellor || student.counsellor === selectedCounsellor;
+            return matchesSearch && matchesCounsellor;
+        });
+
+        renderTable(filtered);
+    }
+
+    function bindEvents() {
+        els.searchStudent.addEventListener('input', filterTable);
+        els.filterCounsellor.addEventListener('change', filterTable);
+    }
+
+    function showError(message) {
+        els.tableBody.innerHTML = `
+            <tr><td colspan="8" class="text-center py-5 text-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>${message}
+            </td></tr>
+        `;
+    }
+});
+</script>
+{% endblock %}

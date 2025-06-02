@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Export Enquiries - Orange Theme{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Logo & Title -->
+    <div class="text-center mb-5">
+        <div class="logo-container d-inline-flex align-items-center justify-content-center mb-3">
+            <i class="fas fa-file-export logo-icon"></i>
+            <span class="logo-text">ExportHub</span>
+        </div>
+        <h1 class="display-5 fw-bold text-gradient">Enquiry Export Portal</h1>
+        <p class="text-muted mt-2">Select date range to export enquiry data</p>
+    </div>
+
+    <!-- Export Form Card -->
+    <div class="card export-card shadow-lg border-0">
+        <div class="card-header bg-gradient text-white border-0">
+            <h3 class="mb-0">
+                <i class="fas fa-calendar-check me-2"></i>
+                Select Date Range
+            </h3>
+        </div>
+        
+        <div class="card-body p-4">
+            <form id="exportForm" method="get" class="needs-validation" novalidate>
+                <!-- Date Range Picker -->
+                <div class="date-range-picker mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="flatpickr-start" class="form-label fw-bold">
+                                <i class="fas fa-calendar-day text-orange me-2"></i>
+                                Start Date
+                            </label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       id="flatpickr-start" 
+                                       name="start_date"
+                                       class="form-control date-input" 
+                                       placeholder="Select start date"
+                                       value="{{ today|date:'d-m-Y' }}"
+                                       required>
+                                <span class="input-group-text">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </span>
+                            </div>
+                            <div class="form-text mt-2">
+                                Selected: <span id="startDisplay" class="fw-medium">Today</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="flatpickr-end" class="form-label fw-bold">
+                                <i class="fas fa-calendar-week text-orange me-2"></i>
+                                End Date
+                            </label>
+                            <div class="input-group">
+                                <input type="text" 
+                                       id="flatpickr-end"
+                                       name="end_date" 
+                                       class="form-control date-input" 
+                                       placeholder="Select end date"
+                                       value="{{ today|date:'d-m-Y' }}"
+                                       required>
+                                <span class="input-group-text">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </span>
+                            </div>
+                            <div class="form-text mt-2">
+                                Selected: <span id="endDisplay" class="fw-medium">Today</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date Range Summary -->
+                    <div class="alert alert-light mt-4 border rounded-3 d-flex align-items-center">
+                        <i class="fas fa-info-circle text-orange me-3"></i>
+                        <div id="dateSummary" class="fw-medium">
+                            Exporting data for: <span class="text-gradient">Today</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-gradient btn-lg px-4 py-3">
+                        <i class="fas fa-file-excel me-2"></i>
+                        Export to Excel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info Section -->
+        <div class="card-footer bg-light border-0 pt-0">
+            <div class="info-box mt-3">
+                <h6 class="fw-bold mb-3">
+                    <i class="fas fa-info-circle text-orange me-2"></i>
+                    Export Information
+                </h6>
+                <ul class="list-unstyled ps-4 mb-0">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Export XLSX format compatible with Excel</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Includes all enquiry details</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Automatic file naming with date range</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Max date range: 365 days</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer mt-5 text-center text-muted">
+        <p class="mb-0">© {{ today|date:"Y" }} ExportHub | Data Export System v2.5</p>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+:root {
+    --primary-orange: #ff7f00; 
+    --dark-orange: #e05d00;
+    --light-orange: #ffae42;
+    --very-light-orange: #fff5e6;
+    --white: #ffffff;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--very-light-orange);
+}
+
+/* Gradient Background */
+.gradient-bg {
+    background: linear-gradient(to right bottom, var(--very-light-orange), #fff);
+}
+
+/* Logo */
+.logo-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+    color: white;
+    font-size: 1.8rem;
+}
+.logo-icon {
+    margin-right: 10px;
+}
+.logo-text {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-left: 10px;
+}
+
+/* Text Gradient */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Card Styling */
+.export-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+.bg-gradient {
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+}
+
+/* Input Styling */
+.date-input {
+    border-radius: 10px;
+    padding-right: 40px;
+    transition: all 0.3s ease;
+}
+.date-input:focus {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 127, 0, 0.25);
+}
+.input-group-text {
+    background: #fff;
+    border-left: none;
+    color: var(--primary-orange);
+}
+
+/* Button */
+.btn-gradient {
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 127, 0, 0.3);
+}
+
+/* Info Box */
+.info-box {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = "{{ today|date:'d-m-Y' }}";
+    
+    // Initialize Flatpickr
+    const fpStart = flatpickr("#flatpickr-start", {
+        dateFormat: "d-m-Y",
+        defaultDate: today,
+        maxDate: "today",
+        onChange: function(selectedDates, dateStr, instance) {
+            updateDateDisplay("start", dateStr);
+            updateDateRangeText();
+        }
+    });
+
+    const fpEnd = flatpickr("#flatpickr-end", {
+        dateFormat: "d-m-Y",
+        defaultDate: today,
+        maxDate: "today",
+        onChange: function(selectedDates, dateStr, instance) {
+            updateDateDisplay("end", dateStr);
+            updateDateRangeText();
+        }
+    });
+
+    // Format date for display
+    function formatDateInIST(dateStr) {
+    const date = new Date(dateStr);
+
+    // Convert to IST manually by adding 5 hours 30 minutes
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const istDate = new Date(date.getTime() + istOffset);
+
+    return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'Asia/Kolkata'
+    }).format(istDate);
+}
+
+
+    // Update display text
+    function updateDateDisplay(type, dateStr) {
+        document.getElementById(`${type}Display`).textContent = formatDate(dateStr);
+    }
+
+    // Update summary text
+    function updateDateRangeText() {
+        const start = fpStart.input.value;
+        const end = fpEnd.input.value;
+        
+        if (start && end) {
+            if (start === end) {
+                document.getElementById('dateSummary').innerHTML = 
+                    `Exporting data for: <span class="text-gradient">${formatDate(start)}</span>`;
+            } else {
+                document.getElementById('dateSummary').innerHTML = 
+                    `Exporting data from <span class="text-gradient">${formatDate(start)}</span> to <span class="text-gradient">${formatDate(end)}</span>`;
+            }
+        }
+    }
+
+    // Form validation
+    document.getElementById('exportForm').addEventListener('submit', function(e) {
+        const start = fpStart.input.value;
+        const end = fpEnd.input.value;
+        
+        if (!start || !end) {
+            e.preventDefault();
+            alert('Please select both start and end dates');
+            return;
+        }
+
+        if (new Date(start) > new Date(end)) {
+            e.preventDefault();
+            alert('Error: End date must be after start date');
+            return false;
+        }
+
+        // Date range validation
+        const diffDays = Math.ceil((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+        if (diffDays > 365) {
+            if (!confirm('You are exporting more than a year of data. This may take a while. Continue?')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+
+    // Initial update
+    updateDateDisplay("start", today);
+    updateDateDisplay("end", today);
+    updateDateRangeText();
+});
+</script>
+{% endblock %}

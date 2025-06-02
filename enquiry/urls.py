@@ -29,7 +29,7 @@ urlpatterns = [
     
     # Calendar
     path('get-calendar-data/', views.get_calendar_data, name='get_calendar_data'),
-    
+     path('get-fees-details/<int:enquiry_id>/', views.get_fees_details, name='get_fees_details'),
     # Students
     path('joined-students/', views.joined_students, name='joined_students'),
     path('dropout-students/', views.dropout_students, name='dropout_students'),
@@ -63,4 +63,13 @@ urlpatterns = [
     path('followups/', views.get_followups, name='get_followups'),
     path('check-mobile-exists/', views.check_mobile_exists, name='check_mobile_exists'),
     path('daywise-summary/', views.daywise_counsellor_summary, name='daywise_summary'),
+    path('export-enquiries/', views.export_enquiries_view, name='export_todays_enquiries'),
+    
+    
+    path('target/add/', views.MonthlyTargetCreateView.as_view(), name='monthly_target_add'),
+    path('target/<int:target_id>/edit/', views.MonthlyTargetUpdateView.as_view(), name='monthly_target_edit'),
+
+    path('due-fees-calendar/', views.due_fees_calendar_view, name='due_fees_calendar'),
+    path('ajax/get-due-fees-data/', views.due_fees_data_ajax, name='ajax_due_fees_data'),
+
 ]

@@ -92,3 +92,14 @@ class CommentAdmin(admin.ModelAdmin):
     def enquiry_course(self, obj):
         return obj.enquiry.get_subject_display()
     enquiry_course.short_description = 'Course'
+    
+    
+# admin.py
+from django.contrib import admin
+from .models import MonthlyTarget
+
+@admin.register(MonthlyTarget)
+class MonthlyTargetAdmin(admin.ModelAdmin):
+    list_display = ('month', 'year', 'target_amount', 'actual_collected', 'remaining')
+    list_filter = ('year', 'month')
+    search_fields = ['year', 'month']

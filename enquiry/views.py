@@ -1,4 +1,7 @@
 # views.py
+from io import BytesIO
+
+import pytz
 from accounts.decorators import manager_required, counselor_required
 
 import calendar
@@ -1040,29 +1043,33 @@ def update_due_date(request):
             'success': False,
             'message': 'An error occurred while processing your request'
         }, status=500)
-
-
+from datetime import datetime
 import decimal
-from django.http import JsonResponse
-from .models import Enquiry
+
 @login_required(login_url='accounts:login')
 def update_payment(request):
     try:
         enquiry_id = request.POST.get('enquiry_id')
         payment_amount = request.POST.get('payment_amount')
+        target_fees = request.POST.get('target_fees')
+        due_date_str = request.POST.get('due_date')  # <-- New line
 
         if not enquiry_id or not payment_amount:
             return JsonResponse({'success': False, 'error': 'Missing required fields.'})
 
         try:
             amount = decimal.Decimal(payment_amount)
+            target = decimal.Decimal(target_fees) if target_fees else None
         except decimal.InvalidOperation:
-            return JsonResponse({'success': False, 'error': 'Invalid payment amount.'})
+            return JsonResponse({'success': False, 'error': 'Invalid payment amount or target fees.'})
 
         if amount <= 0:
             return JsonResponse({'success': False, 'error': 'Payment must be greater than zero.'})
 
         enquiry = Enquiry.objects.get(id=enquiry_id)
+
+        if target is not None:
+            enquiry.target_fees = target
 
         if enquiry.target_fees is not None and (enquiry.fees_paid + amount) > enquiry.target_fees:
             return JsonResponse({
@@ -1070,21 +1077,31 @@ def update_payment(request):
                 'error': f'Payment exceeds target fees of ₹{enquiry.target_fees}.'
             })
 
-        enquiry.fees_paid += amount
+        # Process due_date
+        if due_date_str:
+            try:
+                new_due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+                if new_due_date < datetime.today().date():
+                    return JsonResponse({'success': False, 'error': 'Due date cannot be in the past.'})
+                enquiry.due_date = new_due_date
+            except ValueError:
+                return JsonResponse({'success': False, 'error': 'Invalid due date format.'})
 
-        # ✅ Recalculate fees_balance manually
+        enquiry.fees_paid += amount
+        enquiry.fees_paid_date = datetime.today().date()
+
         if enquiry.target_fees is not None:
             enquiry.fees_balance = enquiry.target_fees - enquiry.fees_paid
         else:
             enquiry.fees_balance = None
 
-        enquiry.save(update_fields=['fees_paid', 'fees_balance'])
+        enquiry.save(update_fields=['target_fees', 'fees_paid', 'fees_balance', 'fees_paid_date', 'due_date'])
 
         return JsonResponse({
             'success': True,
             'fees_paid': float(enquiry.fees_paid),
             'fees_balance': float(enquiry.fees_balance),
-            'message': 'Payment updated successfully.'
+            'message': 'Payment and due date updated successfully.'
         })
 
     except Enquiry.DoesNotExist:
@@ -1093,6 +1110,17 @@ def update_payment(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+@login_required
+def get_fees_details(request, enquiry_id):
+    try:
+        enquiry = Enquiry.objects.get(id=enquiry_id)
+        return JsonResponse({
+            'fees_paid': str(enquiry.fees_paid),
+            'target_fees': str(enquiry.target_fees) if enquiry.target_fees else None,
+            'fees_balance': str(enquiry.fees_balance) if enquiry.fees_balance else None
+        })
+    except Enquiry.DoesNotExist:
+        return JsonResponse({'error': 'Enquiry not found'}, status=404)
 
 @require_POST
 @login_required(login_url='accounts:login')
@@ -1428,3 +1456,229 @@ def export_to_excel(summary, day_wise_fees, total_collected, total_target, yet_t
 
     wb.save(response)
     return response
+from django.utils import timezone
+
+def export_enquiries_view(request):
+    import datetime
+    if 'start_date' in request.GET and 'end_date' in request.GET:
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+
+        # Validate and parse dates
+        try:
+            start_date = datetime.datetime.strptime(start_date_str, "%d-%m-%Y").date()
+            end_date = datetime.datetime.strptime(end_date_str, "%d-%m-%Y").date()
+        except ValueError:
+            return HttpResponseBadRequest("Invalid date format. Please use DD-MM-YYYY.")
+
+        # Convert to timezone-aware datetimes
+        start_datetime = timezone.make_aware(datetime.datetime.combine(start_date, datetime.time.min))
+        end_datetime = timezone.make_aware(datetime.datetime.combine(end_date, datetime.time.max))
+
+        # Fetch filtered Enquiries with related data
+        enquiries = Enquiry.objects.filter(
+            created_at__range=(start_datetime, end_datetime)
+        ).select_related('counsellor', 'college')
+
+        # Create Excel workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Enquiries"
+
+        headers = [
+            'Name', 'Mobile', 'Subject', 'Status', 'Enquiry Type',
+            'Counsellor', 'Created At', 'Followup Date', 'Enquiry Date',
+            'Parent Number', 'Native District', 'Target Fees', 'Fees Paid',
+            'Fees Balance', 'Due Date', 'Other Subject Name', 'College Name',
+            'College Location', 'Visit Type'
+        ]
+        ws.append(headers)
+
+        for enquiry in enquiries:
+            row = [
+                enquiry.name,
+                enquiry.mobile,
+                enquiry.get_subject_display(),
+                enquiry.get_status_display(),
+                enquiry.get_enquiry_type_display(),
+                str(enquiry.counsellor) if enquiry.counsellor else '',
+                enquiry.created_at.date(),
+                enquiry.followup_date,
+                enquiry.enquiry_date,
+                enquiry.parent_number,
+                enquiry.native_district_name,
+                float(enquiry.target_fees) if enquiry.target_fees else None,
+                float(enquiry.fees_paid),
+                float(enquiry.fees_balance) if enquiry.fees_balance else None,
+                enquiry.due_date,
+                enquiry.other_subject_name,
+                enquiry.college.college_name if enquiry.college else '',
+                enquiry.college.college_place if enquiry.college else '',
+                enquiry.get_visit_type_display(),
+            ]
+            ws.append(row)
+
+        # Save to buffer
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        # Prepare response
+        filename = f"enquiries_{start_date_str}_to_{end_date_str}.xlsx"
+        response = HttpResponse(buffer.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    else:
+        # Show form with today's date pre-filled
+        ist = pytz.timezone('Asia/Kolkata')
+        today = timezone.now().astimezone(ist).date()
+
+        return render(request, 'export_enquiries_form.html', {
+            'today': today
+        })
+        
+# views.py
+from django.views.generic import CreateView, UpdateView
+from django.urls import reverse_lazy
+from .models import MonthlyTarget
+from .forms import MonthlyTargetForm
+
+
+from django.utils.decorators import method_decorator
+
+
+@method_decorator(manager_required, name='dispatch')
+class MonthlyTargetCreateView(CreateView):
+    model = MonthlyTarget
+    form_class = MonthlyTargetForm
+    template_name = 'monthly_target_form.html'
+    success_url = reverse_lazy('enquiry:dashboard')  # or any success page
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Set Monthly Target'
+        return context
+
+
+@method_decorator(manager_required, name='dispatch')
+class MonthlyTargetUpdateView(UpdateView):
+    model = MonthlyTarget
+    form_class = MonthlyTargetForm
+    template_name = 'monthly_target_form.html'
+    success_url = reverse_lazy('enquiry:dashboard')  # or any success page
+    pk_url_kwarg = 'target_id'  # Optional custom ID name
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f"Edit Target for {self.object.get_month_display()} {self.object.year}"
+        return context
+    
+# views.py
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from django.shortcuts import render
+from django.db.models import Q, Sum, F
+from django.contrib.auth.decorators import login_required
+from .models import Enquiry
+
+
+@login_required
+def due_fees_calendar_view(request):
+    """
+    Render the due fees calendar page with enhanced features
+    """
+    context = {
+        'page_title': 'Due Fees Calendar',
+        'page_description': 'Track student payment dues with interactive calendar view'
+    }
+    return render(request, 'due_fees_calendar.html', context)
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from django.db.models import Q
+from .models import Enquiry
+from datetime import date
+from django.http import JsonResponse
+from django.utils.dateparse import parse_date
+from django.contrib.auth.decorators import login_required
+from datetime import date
+from decimal import Decimal
+
+from .models import Enquiry
+
+
+@login_required
+def due_fees_data_ajax(request):
+    """
+    AJAX endpoint to fetch students with due fees.
+    Uses due_date if present, else falls back to enquiry_date.
+    """
+    try:
+        date_str = request.GET.get('date')  # Expected in YYYY-MM-DD
+        counsellor_filter = request.GET.get('counsellor')
+
+        filter_date = parse_date(date_str) if date_str else None
+        today = date.today()
+
+        # Start with joined students who have outstanding balance
+        students = Enquiry.objects.filter(
+            status='joined',
+            fees_balance__gt=0
+        ).select_related('counsellor')
+
+        # Optional: Filter by counsellor name
+        if counsellor_filter:
+            students = students.filter(counsellor__name=counsellor_filter)
+
+        # Prepare final list after applying date logic
+        filtered_students = []
+        for student in students:
+            due_date = student.due_date or student.enquiry_date
+
+            # Skip if no date available
+            if not due_date:
+                continue
+
+            # If date filter is applied, match it
+            if filter_date and due_date != filter_date:
+                continue
+
+            # Determine status tag based on due_date
+            if due_date < today:
+                status_tag = 'overdue'
+            elif due_date == today:
+                status_tag = 'due_today'
+            else:
+                status_tag = 'upcoming'
+
+            # Prepare safe data
+            target_fees = float(student.target_fees) if student.target_fees else 0.0
+            fees_due = float(student.fees_balance) if student.fees_balance else 0.0
+            fees_paid = float(student.fees_paid) if student.fees_paid else 0.0
+
+            filtered_students.append({
+                'id': student.id,
+                'name': student.name or 'N/A',
+                'mobile': student.mobile or 'N/A',
+                'counsellor': student.counsellor.name if student.counsellor else 'N/A',
+                'counsellor_id': student.counsellor.id if student.counsellor else None,
+                'target_fees': target_fees,
+                'fees_paid': fees_paid,
+                'fees_due': fees_due,
+                'due_date': str(student.due_date) if student.due_date else '',
+                'fallback_enquiry_date': str(student.enquiry_date) if student.enquiry_date else '',
+                'status': status_tag,
+                'course': dict(Enquiry.SUBJECT_CHOICES).get(student.subject, 'N/A'),
+                'created_date': str(student.created_at)[:10] if student.created_at else '',
+                'last_followup': str(student.followup_date) if student.followup_date else '',
+            })
+
+        return JsonResponse(filtered_students, safe=False)
+
+    except Exception as e:
+        return JsonResponse({
+            'error': 'Failed to fetch due fees data',
+            'details': str(e),
+        }, status=500)

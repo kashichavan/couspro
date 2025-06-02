@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load custom_filters %}
 {% block title %}Counsellor Summary{% endblock %}
 
 {% block extra_css %}
@@ -489,18 +490,11 @@
                         {% for stat in stats %}
                         <tr data-counsellor-id="{{ stat.counsellor_id }}" class="table-row">
                             <td class="counsellor-cell">
-                                {% if stat.counsellor.id and current_year and current_month %}
-                                    <a href="{% url 'enquiry:counsellor_monthly_details' counsellor_id=stat.counsellor.id year=current_year month=current_month %}" 
-                                       class="counsellor-name text-decoration-none">
-                                        <i class="fas fa-user-tie me-1"></i>
-                                        {{ stat.counsellor.name }}
-                                    </a>
-                                {% else %}
-                                    <span class="counsellor-name">
-                                        <i class="fas fa-user-tie me-1"></i>
-                                        {{ stat.counsellor.name }}
-                                    </span>
-                                {% endif %}
+                                {% with selected_month|split_month as month_data %}
+        <a href="{% url 'enquiry:counsellor_monthly_details' counsellor_id=stat.counsellor.id year=month_data.year month=month_data.month %}">
+            {{ stat.counsellor.name }}
+        </a>
+    {% endwith %}
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-primary">{{ stat.total_students }}</span>

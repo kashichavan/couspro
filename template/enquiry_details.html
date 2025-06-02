@@ -249,9 +249,16 @@
                             <i class="fas fa-info-circle me-2"></i>Student Information
                         </div>
                         <div class="card-body">
+                            <!-- Updated Subject Display -->
                             <div class="info-row d-flex mb-2">
                                 <div class="col-md-4 info-label">Subject</div>
-                                <div class="col-md-8">{{ enquiry.get_subject_display }}</div>
+                                <div class="col-md-8">
+                                    {% if enquiry.subject == 'other' %}
+                                        {{ enquiry.other_subject_name }}
+                                    {% else %}
+                                        {{ enquiry.get_subject_display }}
+                                    {% endif %}
+                                </div>
                             </div>
                             <div class="info-row d-flex mb-2">
                                 <div class="col-md-4 info-label">Counsellor</div>
@@ -261,9 +268,30 @@
                                 <div class="col-md-4 info-label">Enquiry Type</div>
                                 <div class="col-md-8">{{ enquiry.get_enquiry_type_display }}</div>
                             </div>
+                            <!-- Visit Type -->
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Visit Type</div>
+                                <div class="col-md-8">{{ enquiry.get_visit_type_display }}</div>
+                            </div>
                             <div class="info-row d-flex mb-2">
                                 <div class="col-md-4 info-label">Enquiry Date</div>
                                 <div class="col-md-8">{{ enquiry.enquiry_date|default:"Not specified" }}</div>
+                            </div>
+                            <!-- Native District -->
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">Native District</div>
+                                <div class="col-md-8">{{ enquiry.native_district_name|default:"Not specified" }}</div>
+                            </div>
+                            <!-- College -->
+                            <div class="info-row d-flex mb-2">
+                                <div class="col-md-4 info-label">College</div>
+                                <div class="col-md-8">
+                                    {% if enquiry.college %}
+                                        {{ enquiry.college.name }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </div>
                             </div>
                             <div class="info-row d-flex mb-2">
                                 <div class="col-md-4 info-label">Follow-up Date</div>
@@ -281,9 +309,8 @@
                         </div>
                     </div>
                 </div>
-                
                 <!-- Payment Information -->
-                <div class="col-md-6">
+               <div class="col-md-6">
                     <div class="card h-100">
                         <div class="card-header">
                             <i class="fas fa-money-bill-wave me-2"></i>Payment Information
@@ -338,6 +365,22 @@
                                             {% else %}
                                                 N/A
                                             {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fees Paid Date -->
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-muted small">Fees Paid Date</div>
+                                        <div>
+                                            <span id="fees-paid-date-display">
+                                                {% if enquiry.fees_paid_date %}
+                                                    {{ enquiry.fees_paid_date }}
+                                                {% else %}
+                                                    Not set
+                                                {% endif %}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -701,10 +744,24 @@ $(document).ready(function() {
 
         let commentsHTML = '';
         comments.forEach(function(comment) {
-            const date = new Date(comment.created_at);
-            const formattedDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-            
+            const date = new Date(comment.created_at); // Should be ISO format like "2025-05-28T08:15:30Z"
+
+const formattedDate = date.toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+});
+
+const formattedTime = date.toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true
+});
+
+console.log(`${formattedDate} at ${formattedTime}`);  // "28 May 2025 at 1:45 PM"
+
             commentsHTML += `
                 <div class="comment-box p-3 mb-3 border rounded bg-light">
                     <div class="d-flex justify-content-between mb-2">

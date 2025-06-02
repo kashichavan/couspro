@@ -51,3 +51,15 @@ def paid_percentage(fees_paid, target_fees):
         return round(percentage, 2)
     except (TypeError, ValueError):
         return 0
+    
+    
+from django import template
+
+register = template.Library()
+
+@register.filter
+def split_month(value):
+    if value:
+        parts = value.split('-')
+        return {'year': parts[0], 'month': parts[1]}
+    return None

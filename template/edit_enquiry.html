@@ -308,11 +308,10 @@
 
 {% block content %}
 <div class="container py-5">
-    <!-- Page Header with Current Status -->
+    <!-- Page Header -->
     <div class="mb-5 text-center">
         <h1 class="display-5 mb-3">Edit Enquiry</h1>
         <p class="lead mb-4">Update enquiry information for <strong>{{ enquiry.name }}</strong></p>
-        
         <div class="d-inline-block mt-3 p-2 px-4 bg-white rounded-pill shadow-sm">
             <span class="d-inline-flex align-items-center">
                 <i class="fas fa-circle me-2" style="font-size: 12px; color: 
@@ -362,14 +361,14 @@
                             <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
                             {{ form.name }}
                             {% if form.name.errors %}
-                                <div class="error-feedback">{{ form.name.errors.0 }}</div>
+                                <div class="text-danger">{{ form.name.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-6 required-field">
                             <label for="{{ form.mobile.id_for_label }}" class="form-label">{{ form.mobile.label }}</label>
                             {{ form.mobile }}
                             {% if form.mobile.errors %}
-                                <div class="error-feedback">{{ form.mobile.errors.0 }}</div>
+                                <div class="text-danger">{{ form.mobile.errors.0 }}</div>
                             {% endif %}
                             <div class="help-text"><i class="fas fa-info-circle me-1"></i>10-digit Indian mobile number</div>
                         </div>
@@ -377,43 +376,82 @@
                             <label for="{{ form.parent_number.id_for_label }}" class="form-label">{{ form.parent_number.label }}</label>
                             {{ form.parent_number }}
                             {% if form.parent_number.errors %}
-                                <div class="error-feedback">{{ form.parent_number.errors.0 }}</div>
+                                <div class="text-danger">{{ form.parent_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.native_district_name.id_for_label }}" class="form-label">{{ form.native_district_name.label }}</label>
+                            {{ form.native_district_name }}
+                            {% if form.native_district_name.errors %}
+                                <div class="text-danger">{{ form.native_district_name.errors.0 }}</div>
                             {% endif %}
                         </div>
                     </div>
                 </div>
 
-                <!-- Enquiry Details Section -->
+               <!-- Course & Enquiry Details Section -->
+<div class="form-section">
+    <h4 class="section-title"><i class="fas fa-book-open me-2"></i>Course & Enquiry Info</h4>
+    <div class="row g-4">
+        <!-- Subject Dropdown -->
+        <div class="col-md-6 required-field">
+            <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
+            {{ form.subject }}
+            {% if form.subject.errors %}
+                <div class="text-danger">{{ form.subject.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+            <!-- Other Subject Name Field -->
+            <div class="col-md-6" id="other-subject-name-container"
+                style="{% if form.subject.value == 'other' %}display:block{% else %}display:none{% endif %};">
+                <div class="form-group">
+                    <label for="{{ form.other_subject_name.id_for_label }}" class="form-label">
+                        {{ form.other_subject_name.label }}
+                    </label>
+                    {{ form.other_subject_name }}
+                    {% if form.other_subject_name.errors %}
+                        <div class="text-danger">{{ form.other_subject_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+        <!-- Enquiry Type -->
+        <div class="col-md-6 required-field">
+            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
+            {{ form.enquiry_type }}
+            {% if form.enquiry_type.errors %}
+                <div class="text-danger">{{ form.enquiry_type.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Visit Type -->
+        <div class="col-md-6 required-field">
+            <label for="{{ form.visit_type.id_for_label }}" class="form-label">{{ form.visit_type.label }}</label>
+            {{ form.visit_type }}
+            {% if form.visit_type.errors %}
+                <div class="text-danger">{{ form.visit_type.errors.0 }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+                <!-- Dates Section -->
                 <div class="form-section">
-                    <h4 class="section-title"><i class="fas fa-clipboard-list me-2"></i>Enquiry Details</h4>
+                    <h4 class="section-title"><i class="fas fa-calendar-alt me-2"></i>Dates</h4>
                     <div class="row g-4">
-                        <div class="col-md-6 required-field">
-                            <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
-                            {{ form.subject }}
-                            {% if form.subject.errors %}
-                                <div class="error-feedback">{{ form.subject.errors.0 }}</div>
-                            {% endif %}
-                            <div class="help-text">{{ form.subject.help_text }}</div>
-                        </div>
-                        <div class="col-md-6 required-field">
-                            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
-                            {{ form.enquiry_type }}
-                            {% if form.enquiry_type.errors %}
-                                <div class="error-feedback">{{ form.enquiry_type.errors.0 }}</div>
-                            {% endif %}
-                        </div>
                         <div class="col-md-6 required-field">
                             <label for="{{ form.enquiry_date.id_for_label }}" class="form-label">{{ form.enquiry_date.label }}</label>
                             {{ form.enquiry_date }}
                             {% if form.enquiry_date.errors %}
-                                <div class="error-feedback">{{ form.enquiry_date.errors.0 }}</div>
+                                <div class="text-danger">{{ form.enquiry_date.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-6">
                             <label for="{{ form.followup_date.id_for_label }}" class="form-label">{{ form.followup_date.label }}</label>
                             {{ form.followup_date }}
                             {% if form.followup_date.errors %}
-                                <div class="error-feedback">{{ form.followup_date.errors.0 }}</div>
+                                <div class="text-danger">{{ form.followup_date.errors.0 }}</div>
                             {% endif %}
                         </div>
                     </div>
@@ -427,55 +465,49 @@
                             <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
                             {{ form.status }}
                             {% if form.status.errors %}
-                                <div class="error-feedback">{{ form.status.errors.0 }}</div>
+                                <div class="text-danger">{{ form.status.errors.0 }}</div>
                             {% endif %}
                         </div>
                         <div class="col-md-6 required-field">
                             <label for="{{ form.counsellor.id_for_label }}" class="form-label">{{ form.counsellor.label }}</label>
                             {{ form.counsellor }}
                             {% if form.counsellor.errors %}
-                                <div class="error-feedback">{{ form.counsellor.errors.0 }}</div>
+                                <div class="text-danger">{{ form.counsellor.errors.0 }}</div>
                             {% endif %}
-                            <div class="help-text">{{ form.counsellor.help_text }}</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Payment Section - Hidden Initially and Only Shown When Status is "Joined" -->
-                <div id="feesSection" class="form-section fees-section" style="display: {% if enquiry.status == 'joined' %}block{% else %}none{% endif %};">
+                <!-- Payment Section - Hidden Initially -->
+                <div id="feesSection" class="form-section fees-section" style="display: none;">
                     <h4 class="section-title"><i class="fas fa-money-bill-wave me-2"></i>Payment Information</h4>
-                    
                     <div class="fees-info">
                         <div class="d-flex justify-content-between align-items-center">
                             <span><i class="fas fa-info-circle me-2"></i>Fee details are required when status is "Joined"</span>
-                            <span class="badge bg-light text-dark p-2 rounded-pill">Current Balance: ₹{{ enquiry.fees_balance|default:"0" }}</span>
+                            <span class="badge bg-light text-dark p-2 rounded-pill">Current Balance: ₹<span id="balanceDisplay">0</span></span>
                         </div>
                     </div>
-                    
                     <div class="row g-4">
                         <div class="col-md-4 required-field">
                             <label for="{{ form.target_fees.id_for_label }}" class="form-label">{{ form.target_fees.label }}</label>
                             {{ form.target_fees }}
                             {% if form.target_fees.errors %}
-                                <div class="error-feedback">{{ form.target_fees.errors.0 }}</div>
+                                <div class="text-danger">{{ form.target_fees.errors.0 }}</div>
                             {% endif %}
-                            <div class="help-text">{{ form.target_fees.help_text }}</div>
                         </div>
-                        <div class="col-md-4 required-field" id="feesPaidSection" style="display: {% if enquiry.status == 'joined' %}block{% else %}none{% endif %};">
+                        <div class="col-md-4 required-field" id="feesPaidSection" style="display: none;">
                             <label for="{{ form.fees_paid.id_for_label }}" class="form-label">{{ form.fees_paid.label }}</label>
                             {{ form.fees_paid }}
                             {% if form.fees_paid.errors %}
-                                <div class="error-feedback">{{ form.fees_paid.errors.0 }}</div>
+                                <div class="text-danger">{{ form.fees_paid.errors.0 }}</div>
                             {% endif %}
-                            <div class="help-text">{{ form.fees_paid.help_text }}</div>
                         </div>
                         <div class="col-md-4 required-field">
                             <label for="{{ form.due_date.id_for_label }}" class="form-label">{{ form.due_date.label }}</label>
                             {{ form.due_date }}
                             {% if form.due_date.errors %}
-                                <div class="error-feedback">{{ form.due_date.errors.0 }}</div>
+                                <div class="text-danger">{{ form.due_date.errors.0 }}</div>
                             {% endif %}
-                            <div class="help-text">{{ form.due_date.help_text }}</div>
                         </div>
                     </div>
                 </div>
@@ -502,135 +534,184 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Toggle fees section based on status
-        const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
-        const feesSection = document.getElementById('feesSection');
-        const feesPaidSection = document.getElementById('feesPaidSection');
-        
-        // Function to toggle fees section
-        function toggleFeesSection() {
-            if (statusSelect.value === 'joined') {
-                // Show both main fees section and fees paid section
-                feesSection.style.display = 'block';
-                feesPaidSection.style.display = 'block';
-                
-                // Make fee fields required
-                document.getElementById('{{ form.target_fees.id_for_label }}').setAttribute('required', '');
-                document.getElementById('{{ form.fees_paid.id_for_label }}').setAttribute('required', '');
-                document.getElementById('{{ form.due_date.id_for_label }}').setAttribute('required', '');
-                
-                // Add highlight animation
-                feesSection.classList.add('highlight');
-                setTimeout(() => {
-                    feesSection.classList.remove('highlight');
-                }, 1000);
-            } else {
-                // Hide both main fees section and fees paid section
-                feesSection.style.display = 'none';
-                feesPaidSection.style.display = 'none';
-                
-                // Make fee fields optional
-                document.getElementById('{{ form.target_fees.id_for_label }}').removeAttribute('required');
-                document.getElementById('{{ form.fees_paid.id_for_label }}').removeAttribute('required');
-                document.getElementById('{{ form.due_date.id_for_label }}').removeAttribute('required');
-            }
+document.addEventListener('DOMContentLoaded', function () {
+    // Get form elements using Django-generated IDs
+    const subjectSelect = document.getElementById('{{ form.subject.id_for_label }}');
+    const otherSubjectContainer = document.getElementById('other-subject-name-container');
+
+    const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+    const feesSection = document.getElementById('feesSection');
+    const feesPaidSection = document.getElementById('feesPaidSection');
+
+    const targetFeesInput = document.getElementById('{{ form.target_fees.id_for_label }}');
+    const feesPaidInput = document.getElementById('{{ form.fees_paid.id_for_label }}');
+    const dueDateInput = document.getElementById('{{ form.due_date.id_for_label }}');
+
+    const enquiryDateInput = document.getElementById('{{ form.enquiry_date.id_for_label }}');
+    const mobileInput = document.getElementById('{{ form.mobile.id_for_label }}');
+    const parentMobileInput = document.getElementById('{{ form.parent_number.id_for_label }}');
+
+    const form = document.getElementById('enquiryForm');
+
+    // --------------------------
+    // 1. Toggle Other Subject Name Field
+    // --------------------------
+    function toggleOtherSubjectField() {
+        if (!subjectSelect || !otherSubjectContainer) return;
+
+        const container = otherSubjectContainer;
+        const input = container.querySelector("input, textarea");
+
+        if (!input) return;
+
+        const selectedValue = subjectSelect.value.toLowerCase();
+
+        if (selectedValue === 'other') {
+            container.style.display = 'block';
+            input.setAttribute('required', 'required');
+        } else {
+            container.style.display = 'none';
+            input.removeAttribute('required');
+            input.value = '';
         }
-        
-        // Initial call
-        toggleFeesSection();
-        
-        // Add event listener
+    }
+
+    if (subjectSelect) {
+        subjectSelect.addEventListener('change', toggleOtherSubjectField);
+        toggleOtherSubjectField(); // Initial check
+    }
+
+    // --------------------------
+    // 2. Toggle Fees Section Based on Status
+    // --------------------------
+    function toggleFeesSection() {
+        const isJoined = statusSelect?.value === 'joined';
+
+        // Show/hide sections
+        feesSection.style.display = isJoined ? 'block' : 'none';
+        feesPaidSection.style.display = isJoined ? 'block' : 'none';
+
+        // Set required attributes
+        [targetFeesInput, feesPaidInput, dueDateInput].forEach(field => {
+            if (!field) return;
+            if (isJoined) {
+                field.setAttribute('required', 'required');
+            } else {
+                field.removeAttribute('required');
+                field.value = ''; // Clear value
+            }
+        });
+    }
+
+    if (statusSelect && feesSection && feesPaidSection) {
         statusSelect.addEventListener('change', toggleFeesSection);
-        
-        // Enhance date fields with date validation
-        const enquiryDate = document.getElementById('{{ form.enquiry_date.id_for_label }}');
-        const dueDate = document.getElementById('{{ form.due_date.id_for_label }}');
-        
-        dueDate.addEventListener('change', function() {
-            if (enquiryDate.value && dueDate.value) {
-                const enquiryDateObj = new Date(enquiryDate.value);
-                const dueDateObj = new Date(dueDate.value);
-                
-                if (dueDateObj < enquiryDateObj) {
-                    alert('Due date cannot be earlier than enquiry date.');
-                    dueDate.value = '';
-                }
-            }
-        });
-        
-        // Fees validation
-        const targetFees = document.getElementById('{{ form.target_fees.id_for_label }}');
-        const feesPaid = document.getElementById('{{ form.fees_paid.id_for_label }}');
-        
-        feesPaid.addEventListener('change', function() {
-            if (targetFees.value && feesPaid.value) {
-                if (parseFloat(feesPaid.value) > parseFloat(targetFees.value)) {
-                    alert('Fees paid cannot exceed target fees.');
-                    feesPaid.value = targetFees.value;
-                }
-            }
-        });
-        
-        // Mobile number validation with visual feedback
-        const mobileInput = document.getElementById('{{ form.mobile.id_for_label }}');
-        const parentMobileInput = document.getElementById('{{ form.parent_number.id_for_label }}');
-        
-        function validateMobileNumber(input) {
-            const indianMobilePattern = /^(\+91[\-\s]?)?[6-9]\d{9}$/;
-            
-            if (input.value && !indianMobilePattern.test(input.value)) {
-                input.classList.add('is-invalid');
-                return false;
-            } else {
-                input.classList.remove('is-invalid');
-                if (input.value) {
-                    input.classList.add('is-valid');
-                } else {
-                    input.classList.remove('is-valid');
-                }
-                return true;
-            }
+        toggleFeesSection(); // Initial check
+    }
+
+    // --------------------------
+    // 3. Mobile Number Validation with Visual Feedback
+    // --------------------------
+    function validateMobileNumber(input) {
+        const pattern = /^[6-9]\d{9}$/; // Indian mobile format
+        const val = input.value.replace(/\D/g, '').slice(-10);
+
+        if (!val) {
+            input.classList.remove('is-invalid', 'is-valid');
+            return true;
         }
-        
-        mobileInput.addEventListener('blur', function() {
-            validateMobileNumber(this);
-        });
-        
-        parentMobileInput.addEventListener('blur', function() {
-            if (this.value) {
-                validateMobileNumber(this);
+
+        if (pattern.test(val)) {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+            return true;
+        } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            return false;
+        }
+    }
+
+    if (mobileInput) {
+        mobileInput.addEventListener('blur', () => validateMobileNumber(mobileInput));
+        validateMobileNumber(mobileInput); // Initial validation
+    }
+
+    if (parentMobileInput) {
+        parentMobileInput.addEventListener('blur', () => {
+            if (parentMobileInput.value.trim()) {
+                validateMobileNumber(parentMobileInput);
             } else {
-                this.classList.remove('is-invalid');
-                this.classList.remove('is-valid');
+                parentMobileInput.classList.remove('is-invalid', 'is-valid');
             }
         });
-        
-        // Form submission validation
-        document.getElementById('enquiryForm').addEventListener('submit', function(event) {
+    }
+
+    // --------------------------
+    // 4. Fees Paid Validation: Can't exceed Target Fees
+    // --------------------------
+    if (targetFeesInput && feesPaidInput) {
+        feesPaidInput.addEventListener('change', function () {
+            const target = parseFloat(targetFeesInput.value);
+            const paid = parseFloat(feesPaidInput.value);
+
+            if (!isNaN(target) && !isNaN(paid) && paid > target) {
+                alert('Fees paid cannot exceed target fees.');
+                feesPaidInput.value = target.toFixed(2);
+            }
+        });
+    }
+
+    // --------------------------
+    // 5. Due Date Validation: Can't be earlier than Enquiry Date
+    // --------------------------
+    if (enquiryDateInput && dueDateInput) {
+        dueDateInput.addEventListener('change', function () {
+            const enquiryDate = new Date(enquiryDateInput.value);
+            const dueDate = new Date(dueDateInput.value);
+
+            if (dueDate < enquiryDate) {
+                alert('Due date cannot be earlier than Enquiry date.');
+                dueDateInput.value = '';
+            }
+        });
+    }
+
+    // --------------------------
+    // 6. Form Submission Validation
+    // --------------------------
+    if (form) {
+        form.addEventListener('submit', function (e) {
             let isValid = true;
-            
-            // Validate mobile numbers
-            if (!validateMobileNumber(mobileInput)) {
-                isValid = false;
-            }
-            
-            if (parentMobileInput.value && !validateMobileNumber(parentMobileInput)) {
-                isValid = false;
-            }
-            
-            // Validate fees section if status is joined
-            if (statusSelect.value === 'joined') {
-                if (!targetFees.value || !feesPaid.value || !dueDate.value) {
-                    alert('All payment fields are required when status is "Joined".');
+
+            // Re-run validations
+            if (subjectSelect?.value.toLowerCase() === 'other') {
+                const otherSubjectInput = otherSubjectContainer.querySelector("input");
+                if (!otherSubjectInput?.value.trim()) {
+                    alert('Please specify the subject when "Other" is selected.');
                     isValid = false;
                 }
             }
-            
+
+            // Validate mobile numbers
+            if (mobileInput && !validateMobileNumber(mobileInput)) {
+                e.preventDefault();
+                isValid = false;
+            }
+
+            // Prevent submission if status is "joined" but payment fields are empty
+            if (statusSelect?.value === 'joined') {
+                if (!targetFeesInput?.value || !feesPaidInput?.value || !dueDateInput?.value) {
+                    alert('All payment fields are required when status is "Joined".');
+                    e.preventDefault();
+                    isValid = false;
+                }
+            }
+
             if (!isValid) {
-                event.preventDefault();
+                e.preventDefault();
             }
         });
-    });
+    }
+});
 </script>
 {% endblock %}

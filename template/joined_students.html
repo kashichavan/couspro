@@ -675,7 +675,6 @@ body {
     outline: none;
     box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
 }
-
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     border-radius: 8px;
     transition: all 0.3s ease;
@@ -1005,6 +1004,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
                                        title="Edit Enquiry">
                                         <i class="fas fa-edit"></i>
                                     </a>
+
                                     <a href="https://wa.me/91{{ enquiry.mobile }}" target="_blank" 
    class="btn btn-success btn-sm rounded-circle d-flex justify-content-center align-items-center"
    style="width: 32px; height: 32px;">
@@ -1106,6 +1106,59 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
         </div>
     </div>
 </div>
+
+
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"> 
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="fas fa-rupee-sign me-2"></i> Record Initial Payment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="paymentEnquiryId">
+
+                <!-- Target Fees -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Target Fees (Total Course Fee)</label>
+                    <input type="number" class="form-control" id="targetFees" min="0" step="any">
+                </div>
+
+                <!-- Payment Amount -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Payment Amount <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="paymentAmount" min="0" step="any" required>
+                </div>
+
+                <!-- Remaining Balance (auto-calculated) -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Remaining Balance</label>
+                    <input type="number" class="form-control" id="remainingBalance" readonly>
+                </div>
+
+                <!-- Due Date (shown only if balance > 0) -->
+                <div class="mb-3 d-none" id="dueDateContainer">
+                    <label class="form-label fw-semibold">Due Date</label>
+                    <input type="date" class="form-control" id="dueDate">
+                </div>
+
+                <!-- Alert Box -->
+                <div id="paymentAlert" class="alert d-none mt-2"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePayment">Record Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -1289,7 +1342,112 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
             
             updateStatus(enquiryId, newStatus, statusNote);
         });
+
+
+
+          // Save payment button handler
+    $('#savePayment').on('click', function() {
+        const enquiryId = $('#paymentEnquiryId').val();
+        const paymentAmount = parseFloat($('#paymentAmount').val());
+        const targetFees = parseFloat($('#targetFees').val()) || null;
+        
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            showPaymentAlert('Please enter a valid payment amount', 'danger');
+            return;
+        }
+        
+        submitPayment(enquiryId, paymentAmount, targetFees);
+    });
+    
+    // Reset payment modal when closed
+    $('#paymentModal').on('hidden.bs.modal', function() {
+        $('#paymentAmount').val('');
+        $('#targetFees').val('');
+        $('#paymentAlert').addClass('d-none').html('');
+    });
+
     }
+
+
+    const targetInput = document.getElementById("targetFees");
+    const amountInput = document.getElementById("paymentAmount");
+    const balanceInput = document.getElementById("remainingBalance");
+    const dueDateContainer = document.getElementById("dueDateContainer");
+    const dueDateInput = document.getElementById("dueDate");
+
+    function calculateBalanceAndDueDate() {
+        const target = parseFloat(targetInput.value) || 0;
+        const amount = parseFloat(amountInput.value) || 0;
+        const balance = target - amount;
+
+        balanceInput.value = balance.toFixed(2);
+
+        if (balance > 0) {
+            dueDateContainer.classList.remove("d-none");
+
+            // Auto fill due date = today + 7 days
+            const due = new Date();
+            due.setDate(due.getDate() + 7);
+            dueDateInput.value = due.toISOString().split("T")[0];
+        } else {
+            dueDateContainer.classList.add("d-none");
+            dueDateInput.value = '';
+        }
+    }
+
+    // Event Listeners
+    targetInput.addEventListener("input", calculateBalanceAndDueDate);
+    amountInput.addEventListener("input", calculateBalanceAndDueDate);
+
+    // Add this function to handle payment submission
+function submitPayment(enquiryId, paymentAmount, targetFees) {
+    const btn = $('#savePayment');
+    btn.prop('disabled', true);
+
+    const dueDate = $('#dueDateInput').val();  // <--- Add this line
+
+    $.ajax({
+        url: '{% url "enquiry:update_payment" %}',
+        method: 'POST',
+        data: {
+            enquiry_id: enquiryId,
+            payment_amount: paymentAmount,
+            target_fees: targetFees,
+            due_date: dueDate,  // <--- Send due_date
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+            if (response.success) {
+                showPaymentAlert('Payment recorded successfully!', 'success');
+                setTimeout(() => {
+                    $('#paymentModal').modal('hide');
+                    const badge = $(`.status-badge[data-enquiry-id="${enquiryId}"]`);
+                    badge.removeClass().addClass('status-badge status-joined')
+                         .text('Joined')
+                         .data('status', 'joined');
+                }, 1500);
+            } else {
+                showPaymentAlert(response.error || 'Failed to record payment', 'danger');
+            }
+        },
+        error: function() {
+            showPaymentAlert('An error occurred', 'danger');
+        },
+        complete: function() {
+            btn.prop('disabled', false);
+        }
+    });
+}
+
+// Add this function to show alerts in payment modal
+function showPaymentAlert(message, type) {
+    const alert = $('#paymentAlert');
+    alert.removeClass('d-none')
+         .removeClass('alert-success alert-danger alert-info')
+         .addClass(`alert-${type}`)
+         .html(`<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i> ${message}`);
+}
+
     
     // Function to load comments for an enquiry
     function loadComments(enquiryId) {
@@ -1311,6 +1469,10 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
             }
         });
     }
+
+
+
+    
     
     // Function to submit a comment
     function submitComment(enquiryId, commentText, inputField) {
@@ -1406,56 +1568,53 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
         });
     }
     
-    // Function to update enquiry status
     function updateStatus(enquiryId, newStatus, statusNote) {
-        $('#saveStatus').prop('disabled', true);
-        
-        $.ajax({
-            url: '{% url "enquiry:update_status" %}',
-            method: 'POST',
-            data: {
-                enquiry_id: enquiryId,
-                new_status: newStatus,
-                status_note: statusNote,
-                csrfmiddlewaretoken: '{{ csrf_token }}'
-            },
-            success: function(response) {
-                if (response.status === 'success') {
-                    // Update the status badge in the table
+    $('#saveStatus').prop('disabled', true);
+    
+    $.ajax({
+        url: '{% url "enquiry:update_status" %}',
+        method: 'POST',
+        data: {
+            enquiry_id: enquiryId,
+            new_status: newStatus,
+            status_note: statusNote,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+            if (response.status === 'success') {
+                // If status is set to joined, open payment modal
+                if (newStatus === 'joined') {
+                    $('#statusModal').modal('hide');
+                    $('#paymentEnquiryId').val(enquiryId);
+                    $('#paymentModal').modal('show');
+                } else {
+                    // Update status for other cases
                     const badge = $(`.status-badge[data-enquiry-id="${enquiryId}"]`);
                     badge.removeClass()
                          .addClass(`status-badge status-${newStatus}`)
                          .text(response.new_status_display)
                          .data('status', newStatus);
                     
-                    // If a note was added, also add it as a comment
-                    if (statusNote && response.comment_added) {
-                        $(`#comment-container-${enquiryId}`).html(`
-                            <div class="comment-preview" 
-                                 title="${statusNote}"
-                                 data-enquiry-id="${enquiryId}">
-                                ${response.truncated_comment}
-                            </div>
-                        `);
-                    }
-                    
                     $('#statusModal').modal('hide');
                     showAlert('Status updated', 'success');
-                    
-                    // Clear the status note field
-                    $('#statusNote').val('');
-                } else {
-                    showAlert(response.message || 'Failed to update status', 'danger');
                 }
-            },
-            error: function() {
-                showAlert('An error occurred', 'danger');
-            },
-            complete: function() {
-                $('#saveStatus').prop('disabled', false);
+                
+                
+                // Clear the status note field
+                $('#statusNote').val('');
+            } else {
+                showAlert(response.message || 'Failed to update status', 'danger');
             }
-        });
-    }
+        },
+        error: function() {
+            showAlert('An error occurred', 'danger');
+        },
+        complete: function() {
+            $('#saveStatus').prop('disabled', false);
+        }
+    });
+}
+
     
     // Show alert message
     function showAlert(message, type) {
