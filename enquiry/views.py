@@ -1687,3 +1687,170 @@ def due_fees_data_ajax(request):
             'error': 'Failed to fetch due fees data',
             'details': str(e),
         }, status=500)
+
+
+
+
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from .models import Enquiry, EducationInfo
+
+@csrf_protect
+@login_required
+def update_education(request):
+    if request.method == 'POST':
+        try:
+            enquiry_id = request.POST.get('enquiry_id')
+            enquiry = Enquiry.objects.get(id=enquiry_id)
+            
+            # Get or create education info
+            edu_info = enquiry.education_details.first() or EducationInfo(enquiry=enquiry)
+            
+            # Update fields from POST data
+            edu_info.level = request.POST.get('education_level')
+            edu_info.ug_degree = request.POST.get('ug_degree')
+            edu_info.other_ug_degree_name = request.POST.get('other_ug_degree_name', '')
+            edu_info.pg_degree = request.POST.get('pg_degree')
+            edu_info.other_pg_degree_name = request.POST.get('other_pg_degree_name', '')
+            edu_info.branch = request.POST.get('branch', '').upper()
+            edu_info.year_of_passing = request.POST.get('year_of_passing')
+            edu_info.percentage = request.POST.get('percentage')
+            edu_info.college_name = request.POST.get('college_name', '')
+            edu_info.college_place = request.POST.get('college_place', '')
+
+            # Validate required fields
+            if edu_info.level == 'ug' and not edu_info.ug_degree:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'UG degree is required for undergraduate level'
+                }, status=400)
+                
+            if edu_info.level == 'pg' and not edu_info.pg_degree:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'PG degree is required for postgraduate level'
+                }, status=400)
+
+            # Additional validation for year and percentage
+            try:
+                year = int(edu_info.year_of_passing)
+                current_year = 2024  # Should be dynamic in production
+                if not (1900 <= year <= current_year + 1):
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Year must be between 1900 and {current_year + 1}'
+                    }, status=400)
+            except ValueError:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid year format'
+                }, status=400)
+
+            try:
+                percentage = float(edu_info.percentage)
+                if not (0 <= percentage <= 100):
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Percentage must be between 0 and 100'
+                    }, status=400)
+            except ValueError:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid percentage format'
+                }, status=400)
+
+            edu_info.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Education details updated successfully'
+            })
+            
+        except Enquiry.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Enquiry not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@csrf_protect
+@login_required
+def update_target_fees(request):
+    if request.method == 'POST':
+        try:
+            enquiry_id = request.POST.get('enquiry_id')
+            enquiry = Enquiry.objects.get(id=enquiry_id)
+            
+            # Check if status is 'joined' before allowing fee updates
+            if enquiry.status != 'joined':
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Only joined enquiries can have target fees'
+                }, status=400)
+            
+            target_fees = request.POST.get('target_fees')
+            due_date = request.POST.get('due_date')
+            
+            # Validate required fields
+            if not target_fees:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Target fees is required'
+                }, status=400)
+                
+            if not due_date:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Due date is required'
+                }, status=400)
+            
+            try:
+                target_fees = float(target_fees)
+                if target_fees <= 0:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Target fees must be a positive number'
+                    }, status=400)
+            except ValueError:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid fee amount'
+                }, status=400)
+            
+            # Update enquiry
+            enquiry.target_fees = target_fees
+            enquiry.due_date = due_date
+            
+            # Calculate balance if fees paid exists
+            if enquiry.fees_paid:
+                enquiry.fees_balance = max(0, target_fees - float(enquiry.fees_paid))
+            
+            enquiry.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Target fees and due date updated successfully',
+                'new_due_date': due_date,
+                'fees_paid_percentage': enquiry.fees_paid_percentage if enquiry.target_fees else 0
+            })
+            
+        except Enquiry.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Enquiry not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

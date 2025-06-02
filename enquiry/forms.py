@@ -10,8 +10,6 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['comment']
         
-
-
 from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal
@@ -20,105 +18,76 @@ from .models import Enquiry, EducationInfo
 
 
 class EnquiryForm(forms.ModelForm):
-    # EducationInfo fields (including college info now)
+    # Education fields from EducationInfo model
     education_level = forms.ChoiceField(
         choices=EducationInfo.EDUCATION_LEVEL_CHOICES,
         required=True,
         label="Education Level",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select()
     )
     ug_degree = forms.ChoiceField(
         choices=EducationInfo.UG_DEGREE_CHOICES,
         required=False,
         label="UG Degree",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select()
     )
     other_ug_degree_name = forms.CharField(
         max_length=100,
         required=False,
         label="Other UG Degree Name",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput()
     )
     pg_degree = forms.ChoiceField(
         choices=EducationInfo.PG_DEGREE_CHOICES,
         required=False,
         label="PG Degree",
-        widget=forms.Select(attrs={'class': 'form-select'})
+        widget=forms.Select()
     )
     other_pg_degree_name = forms.CharField(
         max_length=100,
         required=False,
         label="Other PG Degree Name",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput()
     )
     branch = forms.CharField(
         max_length=100,
         required=False,
         label="Branch",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput()
     )
     year_of_passing = forms.IntegerField(
         required=True,
         label="Year of Passing",
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 2024'})
+        widget=forms.NumberInput(attrs={'placeholder': 'e.g. 2024'})
     )
     percentage = forms.DecimalField(
-        max_digits=5, decimal_places=2,
+        max_digits=5,
+        decimal_places=2,
         required=True,
         label="Percentage",
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 78.50'})
+        widget=forms.NumberInput(attrs={'placeholder': 'e.g. 78.50'})
     )
 
-    # College fields moved here:
     college_name = forms.CharField(
         max_length=150,
         required=False,
         label='College Name',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter college name'})
+        widget=forms.TextInput(attrs={'placeholder': 'Enter college name'})
     )
     college_place = forms.CharField(
         max_length=150,
         required=False,
         label='College Place',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter college place'})
+        widget=forms.TextInput(attrs={'placeholder': 'Enter college place'})
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Add CSS classes correctly
-        for field_name, field in self.fields.items():
-            if field_name not in ['college_name', 'college_place']:
-                widget_class = 'form-select' if isinstance(field.widget, forms.Select) else 'form-control'
-                field.widget.attrs.update({'class': widget_class})
-
-        self.fields['subject'].empty_label = 'Select Course'
-        self.fields['enquiry_type'].empty_label = 'Select Enquiry Type'
-        self.fields['status'].empty_label = 'Select Status'
-        self.fields['counsellor'].empty_label = 'Select Counsellor'
-        self.fields['visit_type'].empty_label = 'Select Visit Type'
-
-        initial_status = self.initial.get('status', getattr(self.instance, 'status', None))
-        if initial_status != 'joined':
-            for field in ['target_fees', 'fees_paid', 'due_date']:
-                self.fields[field].required = False
-
-        self.fields['enquiry_date'].required = True
-        self.fields['parent_number'].required = False
-        self.fields['native_district_name'].required = False
-
-        # If instance exists, populate college_name and college_place from EducationInfo
-        if self.instance.pk and hasattr(self.instance, 'education_details') and self.instance.education_details.exists():
-            edu_info = self.instance.education_details.first()
-            self.fields['college_name'].initial = edu_info.college_name
-            self.fields['college_place'].initial = edu_info.college_place
 
     class Meta:
         model = Enquiry
         fields = [
             'name', 'mobile', 'parent_number', 'native_district_name',
-            'subject', 'other_subject_name', 'status', 'enquiry_type', 'counsellor', 'visit_type',
-            'followup_date', 'enquiry_date', 'target_fees', 'fees_paid', 'due_date',
+            'subject', 'other_subject_name', 'status', 'enquiry_type',
+            'counsellor', 'visit_type', 'followup_date', 'enquiry_date',
+            'target_fees', 'fees_paid', 'due_date',
         ]
         labels = {
             'name': 'Full Name',
@@ -142,119 +111,118 @@ class EnquiryForm(forms.ModelForm):
             'mobile': forms.TextInput(attrs={'placeholder': 'Enter mobile number'}),
             'parent_number': forms.TextInput(attrs={'placeholder': 'Enter parent number'}),
             'native_district_name': forms.TextInput(attrs={'placeholder': 'Enter native district'}),
+            'other_subject_name': forms.TextInput(attrs={'placeholder': 'Specify other subject'}),
             'followup_date': forms.DateInput(attrs={'type': 'date'}),
             'enquiry_date': forms.DateInput(attrs={'type': 'date'}),
             'due_date': forms.DateInput(attrs={'type': 'date'}),
-            'other_subject_name': forms.TextInput(attrs={'placeholder': 'Specify other subject'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Apply CSS classes
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs.setdefault('class', 'form-select')
+            else:
+                field.widget.attrs.setdefault('class', 'form-control')
+
+        # Set empty labels for dropdowns
+        for field_name in ['subject', 'enquiry_type', 'status', 'counsellor', 'visit_type']:
+            if field_name in self.fields:
+                self.fields[field_name].empty_label = f"Select {self.fields[field_name].label}"
+
+        self.fields['enquiry_date'].required = True
+        self.fields['parent_number'].required = False
+        self.fields['native_district_name'].required = False
+
+        if self.instance.pk and hasattr(self.instance, 'education_details') and self.instance.education_details.exists():
+            edu_info = self.instance.education_details.first()
+            self.initial['college_name'] = edu_info.college_name
+            self.initial['college_place'] = edu_info.college_place
+            self.initial['education_level'] = edu_info.level
+            self.initial['ug_degree'] = edu_info.ug_degree
+            self.initial['other_ug_degree_name'] = edu_info.other_ug_degree_name
+            self.initial['pg_degree'] = edu_info.pg_degree
+            self.initial['other_pg_degree_name'] = edu_info.other_pg_degree_name
+            self.initial['branch'] = edu_info.branch
+            self.initial['year_of_passing'] = edu_info.year_of_passing
+            self.initial['percentage'] = edu_info.percentage
+
     def clean(self):
-        cleaned_data = super().clean()
-        subject = cleaned_data.get('subject')
-        other_subject_name = cleaned_data.get('other_subject_name')
-        status = cleaned_data.get('status')
-        fees_paid = cleaned_data.get('fees_paid')
-        target_fees = cleaned_data.get('target_fees')
+        cleaned = super().clean()
+        subject = cleaned.get('subject')
+        status = cleaned.get('status')
+        other_subject = cleaned.get('other_subject_name')
+        fees_paid = cleaned.get('fees_paid') or Decimal('0.00')
+        target_fees = cleaned.get('target_fees') or Decimal('0.00')
 
-        # Validate other_subject_name
-        if subject == 'other' and not other_subject_name:
-            self.add_error('other_subject_name', "Please specify the subject when 'Other' is selected.")
+        if subject == 'other' and not other_subject:
+            self.add_error('other_subject_name', "Please specify the subject name.")
 
-        # Handle fees_paid when status is not 'joined'
         if status != 'joined':
-            cleaned_data['fees_paid'] = Decimal('0.00')
-            cleaned_data['target_fees'] = None
-            cleaned_data['due_date'] = None
-        else:
-            if target_fees is not None and fees_paid is not None:
-                if fees_paid > target_fees:
-                    self.add_error('fees_paid', "Fees paid cannot exceed target fees.")
+            cleaned['fees_paid'] = Decimal('0.00')
+            cleaned['target_fees'] = None
+            cleaned['due_date'] = None
+        elif fees_paid > target_fees:
+            self.add_error('fees_paid', "Fees paid cannot exceed target fees.")
 
-        # Validate EducationInfo fields
-        level = cleaned_data.get('education_level')
-        ug_degree = cleaned_data.get('ug_degree')
-        other_ug_degree_name = cleaned_data.get('other_ug_degree_name')
-        pg_degree = cleaned_data.get('pg_degree')
-        other_pg_degree_name = cleaned_data.get('other_pg_degree_name')
-
+        # Education level specific validations
+        level = cleaned.get('education_level')
         if level == 'ug':
-            if not ug_degree:
-                self.add_error('ug_degree', "UG degree must be selected for undergraduate level.")
-            if ug_degree == 'other' and not other_ug_degree_name:
-                self.add_error('other_ug_degree_name', "Please specify the UG degree name when 'Other UG' is selected.")
+            if not cleaned.get('ug_degree'):
+                self.add_error('ug_degree', "UG degree is required.")
+            if cleaned.get('ug_degree') == 'other' and not cleaned.get('other_ug_degree_name'):
+                self.add_error('other_ug_degree_name', "Specify the UG degree.")
         elif level == 'pg':
-            if not pg_degree:
-                self.add_error('pg_degree', "PG degree must be selected for postgraduate level.")
-            if pg_degree == 'other' and not other_pg_degree_name:
-                self.add_error('other_pg_degree_name', "Please specify the PG degree name when 'Other PG' is selected.")
+            if not cleaned.get('pg_degree'):
+                self.add_error('pg_degree', "PG degree is required.")
+            if cleaned.get('pg_degree') == 'other' and not cleaned.get('other_pg_degree_name'):
+                self.add_error('other_pg_degree_name', "Specify the PG degree.")
 
-        return cleaned_data
+        return cleaned
 
     def save(self, commit=True):
-        enquiry_instance = super().save(commit=False)
+        enquiry = super().save(commit=False)
+        status = enquiry.status
 
-        # Fees logic
-        if enquiry_instance.status != 'joined':
-            enquiry_instance.target_fees = None
-            enquiry_instance.fees_paid = Decimal('0.00')
-            enquiry_instance.fees_balance = None
-            enquiry_instance.due_date = None
+        if status != 'joined':
+            enquiry.fees_paid = Decimal('0.00')
+            enquiry.target_fees = None
+            enquiry.due_date = None
+            enquiry.fees_balance = None
         else:
-            target_fees = enquiry_instance.target_fees
-            fees_paid = enquiry_instance.fees_paid
-            if target_fees is not None and fees_paid is not None:
-                if fees_paid > target_fees:
-                    enquiry_instance.fees_paid = target_fees
-                    enquiry_instance.fees_balance = Decimal('0.00')
-                else:
-                    enquiry_instance.fees_balance = target_fees - fees_paid
-                enquiry_instance.fees_paid_date = datetime.today().date()
+            if enquiry.target_fees and enquiry.fees_paid:
+                enquiry.fees_balance = max(Decimal('0.00'), enquiry.target_fees - enquiry.fees_paid)
+                enquiry.fees_paid_date = datetime.today().date()
 
         if commit:
-            enquiry_instance.save()
+            enquiry.save()
 
-        # Save EducationInfo (with college info inside)
-        level = self.cleaned_data.get('education_level')
-        ug_degree = self.cleaned_data.get('ug_degree')
-        other_ug_degree_name = self.cleaned_data.get('other_ug_degree_name')
-        pg_degree = self.cleaned_data.get('pg_degree')
-        other_pg_degree_name = self.cleaned_data.get('other_pg_degree_name')
-        branch = self.cleaned_data.get('branch')  # Get branch value
-        year_of_passing = self.cleaned_data.get('year_of_passing')
-        percentage = self.cleaned_data.get('percentage')
-        college_name = self.cleaned_data.get('college_name')
-        college_place = self.cleaned_data.get('college_place')
+        # EducationInfo saving
+        edu_info = enquiry.education_details.first() if enquiry.education_details.exists() else EducationInfo(enquiry=enquiry)
 
-        edu_info = None
-        if hasattr(enquiry_instance, 'education_details') and enquiry_instance.education_details.exists():
-            edu_info = enquiry_instance.education_details.first()
-        if not edu_info:
-            edu_info = EducationInfo(enquiry=enquiry_instance)
+        edu_info.level = self.cleaned_data.get('education_level')
+        edu_info.branch = self.cleaned_data.get('branch', '').upper()
+        edu_info.year_of_passing = self.cleaned_data.get('year_of_passing')
+        edu_info.percentage = self.cleaned_data.get('percentage')
+        edu_info.college_name = self.cleaned_data.get('college_name', '')
+        edu_info.college_place = self.cleaned_data.get('college_place', '')
 
-        edu_info.level = level
-
-        if level == 'ug':
-            edu_info.ug_degree = ug_degree
-            edu_info.other_ug_degree_name = other_ug_degree_name
+        if edu_info.level == 'ug':
+            edu_info.ug_degree = self.cleaned_data.get('ug_degree')
+            edu_info.other_ug_degree_name = self.cleaned_data.get('other_ug_degree_name', '')
             edu_info.pg_degree = None
             edu_info.other_pg_degree_name = None
-        elif level == 'pg':
-            edu_info.pg_degree = pg_degree
-            edu_info.other_pg_degree_name = other_pg_degree_name
+        elif edu_info.level == 'pg':
+            edu_info.pg_degree = self.cleaned_data.get('pg_degree')
+            edu_info.other_pg_degree_name = self.cleaned_data.get('other_pg_degree_name', '')
             edu_info.ug_degree = None
             edu_info.other_ug_degree_name = None
 
-        # Ensure branch is stored in uppercase
-        edu_info.branch = branch.upper() if branch else branch
-
-        edu_info.college_name = college_name or ''
-        edu_info.college_place = college_place or ''
-        edu_info.year_of_passing = year_of_passing
-        edu_info.percentage = percentage
-
         edu_info.save()
+        return enquiry
 
-        return enquiry_instance
 
 class CounsellorForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

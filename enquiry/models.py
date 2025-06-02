@@ -131,6 +131,7 @@ class Enquiry(models.Model):
         ('student_reference', 'Student Reference'),
         ('old_student_reference', 'Old Student Reference'),
         ('came_with_relatives', 'Came with relatives'),
+        ('telephonic','Telephonic'),
     ]
 
     visit_type = models.CharField(
@@ -199,13 +200,12 @@ class MonthlyTarget(models.Model):
 
     @property
     def actual_collected(self):
-        from .models import Enquiry
+        from .models import PaymentHistory
 
-        total = Enquiry.objects.filter(
-            fees_paid_date__year=self.year,
-            fees_paid_date__month=self.month,
-            fees_paid_date__isnull=False
-        ).aggregate(Sum('fees_paid'))['fees_paid__sum'] or 0
+        total = PaymentHistory.objects.filter(
+            payment_date__year=self.year,
+            payment_date__month=self.month
+        ).aggregate(Sum('amount_paid'))['amount_paid__sum'] or Decimal('0.00')
 
         return total
 
@@ -221,8 +221,70 @@ def auto_set_fees_paid_date(sender, instance, **kwargs):
     if instance.fees_paid > 0 and not instance.fees_paid_date:
         instance.fees_paid_date = timezone.now().date()
         
-        
 
+
+# models.py
+from django.db import models
+from django.utils import timezone
+
+class PaymentHistory(models.Model):
+    enquiry = models.ForeignKey('Enquiry', on_delete=models.CASCADE, related_name='payment_history')
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_date = models.DateField(default=timezone.now)
+    note = models.CharField(max_length=255, blank=True, null=True)  # optional: "Initial payment", "Partial payment", etc.
+
+    def __str__(self):
+        return f"{self.enquiry.name} - ₹{self.amount_paid} on {self.payment_date}"
+
+# enquiry/signals.py
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
+from .models import Enquiry, PaymentHistory
+from django.utils import timezone
+from decimal import Decimal
+import threading
+
+# Thread-local storage to keep old values
+_thread_locals = threading.local()
+
+@receiver(pre_save, sender=Enquiry)
+def cache_old_fees_paid(sender, instance, **kwargs):
+    """Cache old fees_paid value before saving."""
+    if instance.pk:
+        try:
+            old_instance = Enquiry.objects.get(pk=instance.pk)
+            _thread_locals.old_fees_paid = old_instance.fees_paid
+        except Enquiry.DoesNotExist:
+            _thread_locals.old_fees_paid = Decimal('0.00')
+    else:
+        # New instance, no old amount
+        _thread_locals.old_fees_paid = None
+
+@receiver(post_save, sender=Enquiry)
+def log_payment_changes(sender, instance, created, **kwargs):
+    """Create PaymentHistory record on new or increased fees_paid."""
+    if created:
+        if instance.fees_paid > 0:
+            PaymentHistory.objects.create(
+                enquiry=instance,
+                amount_paid=instance.fees_paid,
+                payment_date=timezone.now().date()
+            )
+    else:
+        old_amount = getattr(_thread_locals, 'old_fees_paid', None)
+        if old_amount is not None:
+            new_amount = instance.fees_paid
+            if new_amount > old_amount:
+                delta = new_amount - old_amount
+                PaymentHistory.objects.create(
+                    enquiry=instance,
+                    amount_paid=delta,
+                    payment_date=timezone.now().date()
+                )
+
+    # Clean up to avoid leaking thread-local state
+    if hasattr(_thread_locals, 'old_fees_paid'):
+        del _thread_locals.old_fees_paid
 
 
 class EducationInfo(models.Model):

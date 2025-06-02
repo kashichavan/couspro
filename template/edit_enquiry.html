@@ -1,30 +1,27 @@
 {% extends 'base.html' %}
-
 {% block title %}Edit Enquiry | EnquiryPortal{% endblock %}
-
 {% block extra_css %}
 <style>
     /* Import trending fonts */
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
+
     /* Base styles */
     body {
         font-family: 'Inter', sans-serif;
-        background-color: #f8f9fa;
+        background-color: #f8f9fa; 
         color: #212529;
     }
-    
+
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Poppins', sans-serif;
         font-weight: 600;
     }
-    
-    /* Enhanced container and card styles */
+
     .container {
         max-width: 1200px;
     }
-    
+
     .enquiry-edit-card {
         border: none;
         border-radius: 16px;
@@ -32,7 +29,7 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         background: #fff;
     }
-    
+
     .card-header {
         background: linear-gradient(45deg, var(--primary-orange), #ff9b50);
         color: white;
@@ -40,8 +37,7 @@
         padding: 1.5rem;
         border: none;
     }
-    
-    /* Form section styling */
+
     .form-section {
         margin-bottom: 30px;
         border-radius: 12px;
@@ -51,12 +47,12 @@
         transition: all 0.3s ease;
         border-left: 5px solid transparent;
     }
-    
+
     .form-section:hover {
         box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         transform: translateY(-2px);
     }
-    
+
     .section-title {
         font-family: 'Poppins', sans-serif;
         font-weight: 600;
@@ -68,7 +64,7 @@
         position: relative;
         padding-bottom: 15px;
     }
-    
+
     .section-title::after {
         content: '';
         position: absolute;
@@ -79,8 +75,7 @@
         background: linear-gradient(90deg, var(--primary-orange), var(--light-orange));
         border-radius: 5px;
     }
-    
-    /* Form control styling */
+
     .form-control, .form-select {
         border-radius: 8px;
         padding: 10px 15px;
@@ -88,20 +83,19 @@
         font-family: 'Inter', sans-serif;
         transition: all 0.3s;
     }
-    
+
     .form-control:focus, .form-select:focus {
         box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.15);
         border-color: var(--primary-orange);
     }
-    
+
     label {
         font-family: 'Inter', sans-serif;
         font-weight: 500;
         margin-bottom: 8px;
         color: #495057;
     }
-    
-    /* Button styling */
+
     .btn {
         font-family: 'Poppins', sans-serif;
         font-weight: 500;
@@ -109,30 +103,19 @@
         border-radius: 8px;
         transition: all 0.3s;
     }
-    
+
     .btn-primary {
         background: linear-gradient(45deg, var(--primary-orange), #ff9b50);
         border: none;
         color: white;
         box-shadow: 0 4px 10px rgba(255, 149, 0, 0.3);
     }
-    
+
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 15px rgba(255, 149, 0, 0.4);
     }
-    
-    .btn-outline-primary {
-        border: 2px solid var(--primary-orange);
-        color: var(--primary-orange);
-    }
-    
-    .btn-outline-primary:hover {
-        background-color: var(--primary-orange);
-        color: white;
-    }
-    
-    /* Status badges */
+
     .status-badge {
         display: inline-block;
         padding: 6px 16px;
@@ -144,94 +127,14 @@
         letter-spacing: 0.5px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    
-    .status-processing {
-        background-color: #cff4fc;
-        color: #055160;
-    }
-    
-    .status-joined {
-        background-color: #d1e7dd;
-        color: #0f5132;
-    }
-    
-    .status-dropped {
-        background-color: #f8d7da;
-        color: #842029;
-    }
-    
-    .status-pending {
-        background-color: #fff3cd;
-        color: #664d03;
-    }
-    
-    /* Timeline styling */
-    .timeline {
-        position: relative;
-        max-width: 1200px;
-        margin: 0 auto 40px;
-    }
-    
-    .timeline::after {
-        content: '';
-        position: absolute;
-        width: 4px;
-        background: linear-gradient(to bottom, var(--light-orange), var(--primary-orange));
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        margin-left: -2px;
-        border-radius: 5px;
-    }
-    
-    .timeline-item {
-        padding: 10px 40px;
-        position: relative;
-        width: 50%;
-    }
-    
-    .timeline-item::after {
-        content: '';
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background: linear-gradient(45deg, var(--primary-orange), #ff9b50);
-        top: 15px;
-        right: -10px;
-        border-radius: 50%;
-        z-index: 1;
-        box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
-    }
-    
-    .timeline-content {
-        padding: 20px;
-        background-color: white;
-        position: relative;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-    }
-    
-    .timeline-content:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    
-    /* Required field styling */
-    .required-field label::after {
-        content: " *";
-        color: #dc3545;
-        font-weight: bold;
-    }
-    
-    /* Fees section */
+
     .fees-section {
         border-left: 4px solid var(--light-orange);
         padding-left: 20px;
         transition: all 0.3s ease;
         background-color: #fff9f0;
     }
-    
+
     .fees-info {
         background-color: var(--very-light-orange);
         border-radius: 10px;
@@ -239,64 +142,20 @@
         margin-bottom: 20px;
         border: 1px dashed var(--light-orange);
     }
-    
-    /* Animation for status change */
-    @keyframes highlight {
-        0% { background-color: var(--very-light-orange); }
-        50% { background-color: rgba(255, 174, 66, 0.3); }
-        100% { background-color: var(--very-light-orange); }
-    }
-    
-    .highlight {
-        animation: highlight 1s ease;
-    }
-    
-    /* Helper classes */
-    .help-text {
-        color: #6c757d;
-        font-size: 0.85rem;
-        margin-top: 8px;
-        font-style: italic;
-    }
-    
+
     .error-feedback {
         color: #dc3545;
         font-size: 0.85rem;
         margin-top: 5px;
         font-weight: 500;
     }
-    
-    /* Responsive adjustments */
+
     @media screen and (max-width: 768px) {
-        .timeline::after {
-            left: 31px;
-        }
-        
-        .timeline-item {
-            width: 100%;
-            padding-left: 70px;
-            padding-right: 25px;
-        }
-        
-        .timeline-right {
-            left: 0%;
-        }
-        
-        .timeline-item::before {
-            left: 60px;
-            border-width: 10px 10px 10px 0;
-            border-color: transparent var(--white) transparent transparent;
-        }
-        
-        .timeline-left::after, .timeline-right::after {
-            left: 24px;
-        }
-        
         .form-actions {
             flex-direction: column;
             gap: 15px;
         }
-        
+
         .form-actions div {
             display: flex;
             width: 100%;
@@ -305,7 +164,6 @@
     }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="container py-5">
     <!-- Page Header -->
@@ -352,7 +210,6 @@
         <div class="card-body p-4">
             <form method="post" id="enquiryForm">
                 {% csrf_token %}
-
                 <!-- Personal Information Section -->
                 <div class="form-section">
                     <h4 class="section-title"><i class="fas fa-address-card me-2"></i>Personal Information</h4>
@@ -389,52 +246,49 @@
                     </div>
                 </div>
 
-               <!-- Course & Enquiry Details Section -->
-<div class="form-section">
-    <h4 class="section-title"><i class="fas fa-book-open me-2"></i>Course & Enquiry Info</h4>
-    <div class="row g-4">
-        <!-- Subject Dropdown -->
-        <div class="col-md-6 required-field">
-            <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
-            {{ form.subject }}
-            {% if form.subject.errors %}
-                <div class="text-danger">{{ form.subject.errors.0 }}</div>
-            {% endif %}
-        </div>
-
-            <!-- Other Subject Name Field -->
-            <div class="col-md-6" id="other-subject-name-container"
-                style="{% if form.subject.value == 'other' %}display:block{% else %}display:none{% endif %};">
-                <div class="form-group">
-                    <label for="{{ form.other_subject_name.id_for_label }}" class="form-label">
-                        {{ form.other_subject_name.label }}
-                    </label>
-                    {{ form.other_subject_name }}
-                    {% if form.other_subject_name.errors %}
-                        <div class="text-danger">{{ form.other_subject_name.errors.0 }}</div>
-                    {% endif %}
+                <!-- Course & Enquiry Details Section -->
+                <div class="form-section">
+                    <h4 class="section-title"><i class="fas fa-book-open me-2"></i>Course & Enquiry Info</h4>
+                    <div class="row g-4">
+                        <!-- Subject Dropdown -->
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <div class="text-danger">{{ form.subject.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Other Subject Name Field -->
+                        <div class="col-md-6" id="other-subject-name-container"
+                            style="{% if form.subject.value == 'other' %}display:block{% else %}display:none{% endif %};">
+                            <div class="form-group">
+                                <label for="{{ form.other_subject_name.id_for_label }}" class="form-label">
+                                    {{ form.other_subject_name.label }}
+                                </label>
+                                {{ form.other_subject_name }}
+                                {% if form.other_subject_name.errors %}
+                                    <div class="text-danger">{{ form.other_subject_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Enquiry Type -->
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
+                            {{ form.enquiry_type }}
+                            {% if form.enquiry_type.errors %}
+                                <div class="text-danger">{{ form.enquiry_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Visit Type -->
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.visit_type.id_for_label }}" class="form-label">{{ form.visit_type.label }}</label>
+                            {{ form.visit_type }}
+                            {% if form.visit_type.errors %}
+                                <div class="text-danger">{{ form.visit_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-        <!-- Enquiry Type -->
-        <div class="col-md-6 required-field">
-            <label for="{{ form.enquiry_type.id_for_label }}" class="form-label">{{ form.enquiry_type.label }}</label>
-            {{ form.enquiry_type }}
-            {% if form.enquiry_type.errors %}
-                <div class="text-danger">{{ form.enquiry_type.errors.0 }}</div>
-            {% endif %}
-        </div>
-
-        <!-- Visit Type -->
-        <div class="col-md-6 required-field">
-            <label for="{{ form.visit_type.id_for_label }}" class="form-label">{{ form.visit_type.label }}</label>
-            {{ form.visit_type }}
-            {% if form.visit_type.errors %}
-                <div class="text-danger">{{ form.visit_type.errors.0 }}</div>
-            {% endif %}
-        </div>
-    </div>
-</div>
 
                 <!-- Dates Section -->
                 <div class="form-section">
@@ -452,6 +306,103 @@
                             {{ form.followup_date }}
                             {% if form.followup_date.errors %}
                                 <div class="text-danger">{{ form.followup_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education Background Section -->
+                <div class="form-section">
+                    <h4 class="section-title"><i class="fas fa-graduation-cap me-2"></i>Education Background</h4>
+                    <div class="row g-4">
+                        <!-- Education Level -->
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.education_level.id_for_label }}" class="form-label">{{ form.education_level.label }}</label>
+                            {{ form.education_level }}
+                            {% if form.education_level.errors %}
+                                <div class="text-danger">{{ form.education_level.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- UG Degree -->
+                        <div class="col-md-6">
+                            <label for="{{ form.ug_degree.id_for_label }}" class="form-label">{{ form.ug_degree.label }}</label>
+                            {{ form.ug_degree }}
+                            {% if form.ug_degree.errors %}
+                                <div class="text-danger">{{ form.ug_degree.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Other UG Degree -->
+                        <div class="col-md-6" id="other-ug-degree-container"
+                            style="{% if form.ug_degree.value == 'other' %}display:block{% else %}display:none{% endif %};">
+                            <div class="form-group">
+                                <label for="{{ form.other_ug_degree_name.id_for_label }}" class="form-label">
+                                    {{ form.other_ug_degree_name.label }}
+                                </label>
+                                {{ form.other_ug_degree_name }}
+                                {% if form.other_ug_degree_name.errors %}
+                                    <div class="text-danger">{{ form.other_ug_degree_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- PG Degree -->
+                        <div class="col-md-6">
+                            <label for="{{ form.pg_degree.id_for_label }}" class="form-label">{{ form.pg_degree.label }}</label>
+                            {{ form.pg_degree }}
+                            {% if form.pg_degree.errors %}
+                                <div class="text-danger">{{ form.pg_degree.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Other PG Degree -->
+                        <div class="col-md-6" id="other-pg-degree-container"
+                            style="{% if form.pg_degree.value == 'other' %}display:block{% else %}display:none{% endif %};">
+                            <div class="form-group">
+                                <label for="{{ form.other_pg_degree_name.id_for_label }}" class="form-label">
+                                    {{ form.other_pg_degree_name.label }}
+                                </label>
+                                {{ form.other_pg_degree_name }}
+                                {% if form.other_pg_degree_name.errors %}
+                                    <div class="text-danger">{{ form.other_pg_degree_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Branch -->
+                        <div class="col-md-6">
+                            <label for="{{ form.branch.id_for_label }}" class="form-label">{{ form.branch.label }}</label>
+                            {{ form.branch }}
+                            {% if form.branch.errors %}
+                                <div class="text-danger">{{ form.branch.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Year of Passing -->
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.year_of_passing.id_for_label }}" class="form-label">{{ form.year_of_passing.label }}</label>
+                            {{ form.year_of_passing }}
+                            {% if form.year_of_passing.errors %}
+                                <div class="text-danger">{{ form.year_of_passing.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- Percentage -->
+                        <div class="col-md-6 required-field">
+                            <label for="{{ form.percentage.id_for_label }}" class="form-label">{{ form.percentage.label }}</label>
+                            {{ form.percentage }}
+                            {% if form.percentage.errors %}
+                                <div class="text-danger">{{ form.percentage.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- College Name -->
+                        <div class="col-md-6">
+                            <label for="{{ form.college_name.id_for_label }}" class="form-label">{{ form.college_name.label }}</label>
+                            {{ form.college_name }}
+                            {% if form.college_name.errors %}
+                                <div class="text-danger">{{ form.college_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <!-- College Place -->
+                        <div class="col-md-6">
+                            <label for="{{ form.college_place.id_for_label }}" class="form-label">{{ form.college_place.label }}</label>
+                            {{ form.college_place }}
+                            {% if form.college_place.errors %}
+                                <div class="text-danger">{{ form.college_place.errors.0 }}</div>
                             {% endif %}
                         </div>
                     </div>
@@ -535,37 +486,32 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Get form elements using Django-generated IDs
     const subjectSelect = document.getElementById('{{ form.subject.id_for_label }}');
     const otherSubjectContainer = document.getElementById('other-subject-name-container');
-
     const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
     const feesSection = document.getElementById('feesSection');
     const feesPaidSection = document.getElementById('feesPaidSection');
-
     const targetFeesInput = document.getElementById('{{ form.target_fees.id_for_label }}');
     const feesPaidInput = document.getElementById('{{ form.fees_paid.id_for_label }}');
     const dueDateInput = document.getElementById('{{ form.due_date.id_for_label }}');
-
     const enquiryDateInput = document.getElementById('{{ form.enquiry_date.id_for_label }}');
     const mobileInput = document.getElementById('{{ form.mobile.id_for_label }}');
     const parentMobileInput = document.getElementById('{{ form.parent_number.id_for_label }}');
-
     const form = document.getElementById('enquiryForm');
 
-    // --------------------------
-    // 1. Toggle Other Subject Name Field
-    // --------------------------
+    const educationLevel = document.getElementById('{{ form.education_level.id_for_label }}');
+    const ugDegree = document.getElementById('{{ form.ug_degree.id_for_label }}');
+    const pgDegree = document.getElementById('{{ form.pg_degree.id_for_label }}');
+    const otherUgDegree = document.getElementById('other-ug-degree-container');
+    const otherPgDegree = document.getElementById('other-pg-degree-container');
+
+    // Toggle other subject name
     function toggleOtherSubjectField() {
         if (!subjectSelect || !otherSubjectContainer) return;
-
         const container = otherSubjectContainer;
         const input = container.querySelector("input, textarea");
-
         if (!input) return;
-
         const selectedValue = subjectSelect.value.toLowerCase();
-
         if (selectedValue === 'other') {
             container.style.display = 'block';
             input.setAttribute('required', 'required');
@@ -576,50 +522,64 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (subjectSelect) {
-        subjectSelect.addEventListener('change', toggleOtherSubjectField);
-        toggleOtherSubjectField(); // Initial check
-    }
-
-    // --------------------------
-    // 2. Toggle Fees Section Based on Status
-    // --------------------------
+    // Toggle fees section based on status
     function toggleFeesSection() {
         const isJoined = statusSelect?.value === 'joined';
-
-        // Show/hide sections
         feesSection.style.display = isJoined ? 'block' : 'none';
         feesPaidSection.style.display = isJoined ? 'block' : 'none';
-
-        // Set required attributes
         [targetFeesInput, feesPaidInput, dueDateInput].forEach(field => {
             if (!field) return;
             if (isJoined) {
                 field.setAttribute('required', 'required');
             } else {
                 field.removeAttribute('required');
-                field.value = ''; // Clear value
+                field.value = '';
             }
         });
     }
 
-    if (statusSelect && feesSection && feesPaidSection) {
-        statusSelect.addEventListener('change', toggleFeesSection);
-        toggleFeesSection(); // Initial check
+    // Toggle education degree fields
+    function toggleEducationFields() {
+        const isUG = educationLevel?.value === 'ug';
+        const isPG = educationLevel?.value === 'pg';
+
+        // Show/hide UG fields
+        if (ugDegree && otherUgDegree) {
+            if (isUG) {
+                ugDegree.setAttribute('required', 'required');
+                if (ugDegree.value === 'other') {
+                    otherUgDegree.style.display = 'block';
+                } else {
+                    otherUgDegree.style.display = 'none';
+                }
+            } else {
+                ugDegree.removeAttribute('required');
+            }
+        }
+
+        // Show/hide PG fields
+        if (pgDegree && otherPgDegree) {
+            if (isPG) {
+                pgDegree.setAttribute('required', 'required');
+                if (pgDegree.value === 'other') {
+                    otherPgDegree.style.display = 'block';
+                } else {
+                    otherPgDegree.style.display = 'none';
+                }
+            } else {
+                pgDegree.removeAttribute('required');
+            }
+        }
     }
 
-    // --------------------------
-    // 3. Mobile Number Validation with Visual Feedback
-    // --------------------------
+    // Validate mobile number
     function validateMobileNumber(input) {
-        const pattern = /^[6-9]\d{9}$/; // Indian mobile format
+        const pattern = /^[6-9]\d{9}$/;
         const val = input.value.replace(/\D/g, '').slice(-10);
-
         if (!val) {
             input.classList.remove('is-invalid', 'is-valid');
             return true;
         }
-
         if (pattern.test(val)) {
             input.classList.add('is-valid');
             input.classList.remove('is-invalid');
@@ -631,29 +591,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (mobileInput) {
-        mobileInput.addEventListener('blur', () => validateMobileNumber(mobileInput));
-        validateMobileNumber(mobileInput); // Initial validation
-    }
-
-    if (parentMobileInput) {
-        parentMobileInput.addEventListener('blur', () => {
-            if (parentMobileInput.value.trim()) {
-                validateMobileNumber(parentMobileInput);
-            } else {
-                parentMobileInput.classList.remove('is-invalid', 'is-valid');
-            }
-        });
-    }
-
-    // --------------------------
-    // 4. Fees Paid Validation: Can't exceed Target Fees
-    // --------------------------
+    // Validate fees paid
     if (targetFeesInput && feesPaidInput) {
         feesPaidInput.addEventListener('change', function () {
             const target = parseFloat(targetFeesInput.value);
             const paid = parseFloat(feesPaidInput.value);
-
             if (!isNaN(target) && !isNaN(paid) && paid > target) {
                 alert('Fees paid cannot exceed target fees.');
                 feesPaidInput.value = target.toFixed(2);
@@ -661,14 +603,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --------------------------
-    // 5. Due Date Validation: Can't be earlier than Enquiry Date
-    // --------------------------
+    // Validate due date
     if (enquiryDateInput && dueDateInput) {
         dueDateInput.addEventListener('change', function () {
             const enquiryDate = new Date(enquiryDateInput.value);
             const dueDate = new Date(dueDateInput.value);
-
             if (dueDate < enquiryDate) {
                 alert('Due date cannot be earlier than Enquiry date.');
                 dueDateInput.value = '';
@@ -676,14 +615,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --------------------------
-    // 6. Form Submission Validation
-    // --------------------------
+    // Form submission validation
     if (form) {
         form.addEventListener('submit', function (e) {
             let isValid = true;
 
-            // Re-run validations
+            // Validate other subject
             if (subjectSelect?.value.toLowerCase() === 'other') {
                 const otherSubjectInput = otherSubjectContainer.querySelector("input");
                 if (!otherSubjectInput?.value.trim()) {
@@ -692,13 +629,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // Validate mobile numbers
+            // Validate mobile
             if (mobileInput && !validateMobileNumber(mobileInput)) {
                 e.preventDefault();
                 isValid = false;
             }
 
-            // Prevent submission if status is "joined" but payment fields are empty
+            // Validate fees when joined
             if (statusSelect?.value === 'joined') {
                 if (!targetFeesInput?.value || !feesPaidInput?.value || !dueDateInput?.value) {
                     alert('All payment fields are required when status is "Joined".');
@@ -707,8 +644,53 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
+            // Validate education fields
+            if (educationLevel?.value === 'ug' && !ugDegree?.value) {
+                alert('UG degree is required for Undergraduate level.');
+                e.preventDefault();
+                isValid = false;
+            }
+            if (educationLevel?.value === 'pg' && !pgDegree?.value) {
+                alert('PG degree is required for Postgraduate level.');
+                e.preventDefault();
+                isValid = false;
+            }
+
             if (!isValid) {
                 e.preventDefault();
+            }
+        });
+    }
+
+    // Event listeners
+    if (subjectSelect) {
+        subjectSelect.addEventListener('change', toggleOtherSubjectField);
+        toggleOtherSubjectField();
+    }
+
+    if (statusSelect && feesSection && feesPaidSection) {
+        statusSelect.addEventListener('change', toggleFeesSection);
+        toggleFeesSection();
+    }
+
+    if (educationLevel && ugDegree && pgDegree) {
+        educationLevel.addEventListener('change', toggleEducationFields);
+        ugDegree.addEventListener('change', toggleEducationFields);
+        pgDegree.addEventListener('change', toggleEducationFields);
+        toggleEducationFields();
+    }
+
+    if (mobileInput) {
+        mobileInput.addEventListener('blur', () => validateMobileNumber(mobileInput));
+        validateMobileNumber(mobileInput);
+    }
+
+    if (parentMobileInput) {
+        parentMobileInput.addEventListener('blur', () => {
+            if (parentMobileInput.value.trim()) {
+                validateMobileNumber(parentMobileInput);
+            } else {
+                parentMobileInput.classList.remove('is-invalid', 'is-valid');
             }
         });
     }

@@ -72,4 +72,7 @@ urlpatterns = [
     path('due-fees-calendar/', views.due_fees_calendar_view, name='due_fees_calendar'),
     path('ajax/get-due-fees-data/', views.due_fees_data_ajax, name='ajax_due_fees_data'),
 
+     path('update-education/', views.update_education, name='update_education'),
+    path('update-target-fees/', views.update_target_fees, name='update_target_fees'),
+
 ]
