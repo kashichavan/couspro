@@ -91,7 +91,11 @@ class Enquiry(models.Model):
     help_text="True if the student has joined a batch"
 )
 
-
+    joined_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date when the student joined"
+    )
     
 
     def clean(self):
@@ -100,29 +104,35 @@ class Enquiry(models.Model):
 
     # models.py
     def save(self, *args, **kwargs):
-        # Validate other subject
+        # 1️⃣ Enforce “other subject” requirement
         if self.subject == 'other' and not self.other_subject_name:
             raise ValidationError({
-            'other_subject_name': "Please specify the subject when 'Other' is selected."
-        })
-    
-    # Handle fees based on status
+                'other_subject_name': "Please specify the subject when 'Other' is selected."
+            })
+
+        # 2️⃣ Handle non‐joined state
         if self.status != 'joined':
+            # reset all join/fee fields
+            self.joined_date = None
             self.target_fees = None
             self.fees_paid = Decimal('0.00')
             self.fees_balance = None
             self.due_date = None
+
         else:
-        # Validate fees
+            # 3️⃣ First time joining → stamp joined_date
+            if not self.joined_date:
+                self.joined_date = timezone.now().date()
+
+            # 4️⃣ Validate & recalc fees
             if self.target_fees is not None and self.fees_paid > self.target_fees:
                 raise ValidationError("Fees paid cannot exceed target fees.")
-            
-        # Calculate balance
-            if self.target_fees is not None:
-                self.fees_balance = max(self.target_fees - self.fees_paid, Decimal('0.00'))
-            else:
-                self.fees_balance = None
-    
+            self.fees_balance = (
+                self.target_fees - self.fees_paid
+                if self.target_fees is not None
+                else None
+            )
+
         super().save(*args, **kwargs)
 
     @property

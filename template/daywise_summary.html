@@ -429,55 +429,59 @@
 
   {% if summary %}
   
-  
   <!-- Enhanced Counsellor Summary Table -->
-  <div class="table-container">
-    <div class="p-3 border-bottom">
-      <h5 class="mb-0"><i class="fas fa-table me-2 text-orange"></i>Counsellor Performance Matrix</h5>
-    </div>
-    <div class="table-responsive">
-      <table id="dataTable" class="table table-hover">
-        <thead>
-          <tr>
-            <th><i class="fas fa-user me-1"></i>Counsellor</th>
-            <th><i class="fas fa-phone me-1"></i>Mobile</th>
-            <th><i class="fas fa-chart-bar me-1"></i>Total</th>
-            <th><i class="fas fa-phone-alt me-1"></i>Tel</th>
-            <th><i class="fas fa-user-plus me-1"></i>T J</th>
-            <th><i class="fas fa-walking me-1"></i>Walk-in</th>
-            <th><i class="fas fa-door-open me-1"></i>W Joined</th>
-            <th><i class="fas fa-check-circle me-1"></i>Joined</th>
-            <th><i class="fas fa-hourglass-half me-1"></i>Pending</th>
-            <th><i class="fas fa-user-times me-1"></i>Dropout</th>
-            <th><i class="fas fa-rupee-sign me-1"></i>Fees Paid</th>
-            <th><i class="fas fa-bullseye me-1"></i>Target</th>
-            <th><i class="fas fa-balance-scale me-1"></i>Balance</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in summary %}
-          <tr>
-            <td class="fw-semibold">{{ item.counsellor_name }}</td>
-            <td>{{ item.counsellor_mobile }}</td>
-            <td><span class="badge bg-primary rounded-pill">{{ item.total_enquiries }}</span></td>
-            <td><span class="badge bg-info rounded-pill">{{ item.telephonic_count }}</span></td>
-            <td><span class="badge bg-success rounded-pill">{{ item.telephonic_joined }}</span></td>
-            <td><span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span></td>
-            <td><span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span></td>
-            <td><span class="badge bg-success rounded-pill">{{ item.joined_count }}</span></td>
-            <td><span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span></td>
-            <td><span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span></td>
-            <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>
-            <td class="fw-bold text-orange">₹{{ item.fees_target|floatformat:2 }}</td>
-            <td class="fw-bold {% if item.fees_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-              ₹{{ item.fees_balance|floatformat:2 }}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+<div class="table-container">
+  <div class="p-3 border-bottom">
+    <h5 class="mb-0">
+      <i class="fas fa-table me-2 text-orange"></i>Counsellor Performance Matrix
+    </h5>
   </div>
+
+  <div class="table-responsive">
+    <table id="dataTable" class="table table-hover">
+      <thead>
+        <tr>
+          <th><i class="fas fa-user me-1"></i>Counsellor</th>
+          <th><i class="fas fa-phone me-1"></i>Mobile</th>
+          <th><i class="fas fa-chart-bar me-1"></i>Total</th>
+          <th><i class="fas fa-phone-alt me-1"></i>Tel</th>
+          <th><i class="fas fa-user-plus me-1"></i>T J</th>
+          <th><i class="fas fa-walking me-1"></i>Walk-in</th>
+          <th><i class="fas fa-door-open me-1"></i>W Joined</th>
+          <th><i class="fas fa-check-circle me-1"></i>Joined</th>
+          <th><i class="fas fa-history me-1"></i>Prev Conv</th>
+          <th><i class="fas fa-hourglass-half me-1"></i>Pending</th>
+          <th><i class="fas fa-user-times me-1"></i>Dropout</th>
+          <th><i class="fas fa-rupee-sign me-1"></i>Fees Paid</th>
+          <th><i class="fas fa-bullseye me-1"></i>Target</th>
+          <th><i class="fas fa-balance-scale me-1"></i>Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in summary %}
+        <tr>
+          <td class="fw-semibold">{{ item.counsellor_name }}</td>
+          <td>{{ item.counsellor_mobile }}</td>
+          <td><span class="badge bg-primary rounded-pill">{{ item.total_enquiries }}</span></td>
+          <td><span class="badge bg-info rounded-pill">{{ item.telephonic_count }}</span></td>
+          <td><span class="badge bg-success rounded-pill">{{ item.telephonic_joined }}</span></td>
+          <td><span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span></td>
+          <td><span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span></td>
+          <td><span class="badge bg-success rounded-pill">{{ item.joined_count }}</span></td>
+          <td><span class="badge bg-dark rounded-pill">{{ item.previous_converted_count }}</span></td>
+          <td><span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span></td>
+          <td><span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span></td>
+          <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>
+          <td class="fw-bold text-orange">₹{{ item.fees_target|floatformat:2 }}</td>
+          <td class="fw-bold {% if item.fees_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+            ₹{{ item.fees_balance|floatformat:2 }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
   <!-- Enhanced Day-wise Fees Section -->
   <div class="table-container">

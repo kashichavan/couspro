@@ -1173,28 +1173,39 @@ def get_comments(request):
     comments = enquiry.comments.all().order_by('-created_at')
     return render(request, 'comments_partial.html', {'comments': comments})
 
+
 @login_required(login_url='accounts:login')
 def update_status(request):
     if request.method == 'POST':
         enquiry_id = request.POST.get('enquiry_id')
         new_status = request.POST.get('new_status')
+
         try:
             enquiry = Enquiry.objects.get(id=enquiry_id)
+            old_status = enquiry.status  # capture current status before change
+
             enquiry.status = new_status
+
+            # If status changed to 'joined' and it wasn't previously joined
+            if new_status == 'joined' and old_status != 'joined' and not enquiry.joined_date:
+                ist = pytz.timezone('Asia/Kolkata')
+                enquiry.joined_date = timezone.now().astimezone(ist).date()
+
             enquiry.save()
+
             return JsonResponse({
                 'status': 'success',
                 'message': 'Status updated successfully',
                 'new_status_display': enquiry.get_status_display(),
                 'new_status': new_status
             })
+
         except Enquiry.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Enquiry not found'}, status=404)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
-
 
 from django.http import JsonResponse
 from datetime import datetime
@@ -1296,22 +1307,21 @@ def check_mobile_exists(request):
     else:
         return JsonResponse({'exists': False})
     
-# views.py
+
 from django.shortcuts import render
 from django.db.models import Count, Sum, Q
-from .models import Enquiry, Counsellor
+from .models import Enquiry, Counsellor, PaymentHistory
 from datetime import date
 import openpyxl
 from django.http import HttpResponse
 from django.contrib import messages
-
-
 
 @manager_required
 def daywise_counsellor_summary(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
+    # Validate and parse dates
     try:
         start_date = date.fromisoformat(start_date) if start_date else date.today()
         end_date = date.fromisoformat(end_date) if end_date else date.today()
@@ -1321,48 +1331,74 @@ def daywise_counsellor_summary(request):
 
     if start_date > end_date:
         messages.error(request, "Start date must be before end date.")
-        start_date, end_date = end_date, start_date  # Swap dates for consistency
+        start_date, end_date = end_date, start_date  # Swap for consistency
 
     counsellors = Counsellor.objects.all().order_by('name')
     summary = []
 
     for counsellor in counsellors:
+        # Base queryset: enquiries created in range
         base_queryset = Enquiry.objects.filter(
             counsellor=counsellor,
-            created_at__date__range=(start_date, end_date))
-        
-        telephonic_all = base_queryset.filter(
-            enquiry_type__in=['direct_telephonic', 'someone_telephonic'])
-        walkin_all = base_queryset.filter(
-            enquiry_type__in=['direct_walkin', 'someone_walkin', 'telephonic_to_walkin'])
-
-        fees_summary = base_queryset.aggregate(
-            total_paid=Sum('fees_paid'),
-            total_target=Sum('target_fees'),
-            total_balance=Sum('fees_balance'),
+            created_at__date__range=(start_date, end_date)
         )
+
+        telephonic_all = base_queryset.filter(
+            enquiry_type__in=['direct_telephonic', 'someone_telephonic']
+        )
+        walkin_all = base_queryset.filter(
+            enquiry_type__in=['direct_walkin', 'someone_walkin', 'telephonic_to_walkin']
+        )
+
+        # Previous Enquiry Converted Today:
+        # Enquiries created before start_date but joined_date in range
+        prev_converted_qs = Enquiry.objects.filter(
+            counsellor=counsellor,
+            enquiry_date__lt=start_date,
+            joined_date__range=(start_date, end_date),
+            status='joined'
+        )
+
+        # For fees calculations:
+        # Target fees = sum of target_fees on enquiries in base_queryset + prev_converted_qs
+        total_target_fees = (base_queryset | prev_converted_qs).aggregate(
+            total_target=Sum('target_fees')
+        )['total_target'] or 0
+
+        # Fees paid = sum of PaymentHistory amounts linked to these enquiries within date range
+        enquiry_ids = list((base_queryset | prev_converted_qs).values_list('id', flat=True))
+        total_paid = PaymentHistory.objects.filter(
+            enquiry_id__in=enquiry_ids,
+            payment_date__range=(start_date, end_date)
+        ).aggregate(total_paid=Sum('amount_paid'))['total_paid'] or 0
+
+        # Fees balance = target - paid
+        fees_balance = total_target_fees - total_paid
 
         summary.append({
             'counsellor_name': counsellor.name,
             'counsellor_mobile': getattr(counsellor, 'mobile', 'N/A'),
+            'total_enquiries': base_queryset.count(),
             'telephonic_count': telephonic_all.count(),
             'telephonic_joined': telephonic_all.filter(status='joined').count(),
             'walkin_count': walkin_all.count(),
             'walkin_joined': walkin_all.filter(status='joined').count(),
             'joined_count': base_queryset.filter(status='joined').count(),
+            'previous_converted_count': prev_converted_qs.count(),
+            'fees_paid': total_paid,
+            'fees_target': total_target_fees,
+            'fees_balance': fees_balance,
             'pending_count': base_queryset.filter(status='pending').count(),
             'dropout_count': base_queryset.filter(status='dropout').count(),
-            'fees_paid': fees_summary['total_paid'] or 0,
-            'fees_target': fees_summary['total_target'] or 0,
-            'fees_balance': fees_summary['total_balance'] or 0,
         })
 
-    day_wise_fees = Enquiry.objects.filter(
-        status='joined',
-        created_at__date__range=(start_date, end_date)
-    ).values('created_at__date').annotate(
-        total_paid=Sum('fees_paid')
-    ).order_by('created_at__date')
+    # Day wise fees collected for all counsellors combined, based on PaymentHistory (joined enquiries)
+    day_wise_fees = PaymentHistory.objects.filter(
+        enquiry__status='joined',
+        payment_date__range=(start_date, end_date)
+    ).values('payment_date').annotate(
+        total_paid=Sum('amount_paid')
+    ).order_by('payment_date')
 
     total_fees_collected = sum(day['total_paid'] or 0 for day in day_wise_fees)
     total_target_fees = sum(row['fees_target'] for row in summary)
@@ -1380,12 +1416,14 @@ def daywise_counsellor_summary(request):
 
     if 'export' in request.GET:
         return export_to_excel(
-            summary, day_wise_fees, 
+            summary, day_wise_fees,
             total_fees_collected, total_target_fees,
             yet_to_collect, start_date, end_date
         )
 
     return render(request, 'daywise_summary.html', context)
+
+
 
 @login_required(login_url='accounts:login')
 def export_to_excel(summary, day_wise_fees, total_collected, total_target, yet_to_collect, start_date, end_date):
@@ -1886,8 +1924,7 @@ def mark_joined_batch(request, pk):
     except Enquiry.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Enquiry not found'})
     
-    
-from django.db.models import Count, Q, F
+from django.db.models import Count, Q, F, Sum
 from django.db.models.functions import TruncDate
 from django.db.models import Case, When, Value, IntegerField
 from django.shortcuts import render
@@ -1908,15 +1945,31 @@ def today_enquiries(request):
     else:
         enquiries = Enquiry.objects.filter(enquiry_date=today)
 
-    # Counsellor-wise breakdown with all required stats
+    # Get current enquiry IDs for today
+    enquiry_ids_today = enquiries.values_list('id', flat=True)
+
+    # Previous enquiries converted today
+    previous_converted_today = Enquiry.objects.filter(
+        enquiry_date__lt=today,
+        joined_date=today,
+        status='joined'
+    )
+
+    # Combine both sets for breakdown
+    all_counsellor_ids = set(
+        enquiries.values_list('counsellor_id', flat=True)
+    ).union(
+        previous_converted_today.values_list('counsellor_id', flat=True)
+    )
+
+    # Base breakdown for today enquiries
     counsellor_breakdown = (
         enquiries
         .select_related('counsellor')
         .values('counsellor__id', 'counsellor__name')
         .annotate(
             total=Count('id'),
-            
-            # Walk-in counts
+
             walkin=Count(Case(
                 When(enquiry_type__icontains='walkin', then=Value(1)),
                 output_field=IntegerField()
@@ -1925,8 +1978,7 @@ def today_enquiries(request):
                 When(enquiry_type__icontains='walkin', status='joined', then=Value(1)),
                 output_field=IntegerField()
             )),
-            
-            # Telephonic counts
+
             telephonic=Count(Case(
                 When(enquiry_type__icontains='telephonic', then=Value(1)),
                 output_field=IntegerField()
@@ -1935,14 +1987,12 @@ def today_enquiries(request):
                 When(enquiry_type__icontains='telephonic', status='joined', then=Value(1)),
                 output_field=IntegerField()
             )),
-            
-            # Dropout counts
+
             dropout=Count(Case(
                 When(status='dropout', then=Value(1)),
                 output_field=IntegerField()
             )),
-            
-            # Fees stats
+
             paid_enquiries=Count(Case(
                 When(fees_paid__gt=0, then=Value(1)),
                 output_field=IntegerField()
@@ -1950,10 +2000,52 @@ def today_enquiries(request):
             fully_paid=Count(Case(
                 When(target_fees__isnull=False, fees_paid__gte=F('target_fees'), then=Value(1)),
                 output_field=IntegerField()
-            ))
+            )),
         )
         .order_by('counsellor__name')
     )
+
+    # Create a map for previous enquiry conversions today
+    prev_conversion_map = previous_converted_today.values('counsellor_id').annotate(
+        prev_converted=Count('id')
+    )
+    prev_map = {
+        item['counsellor_id']: item['prev_converted']
+        for item in prev_conversion_map
+    }
+
+    # Add previous conversions to each breakdown row
+    for block in counsellor_breakdown:
+        cid = block['counsellor__id']
+        block['previous_converted_today'] = prev_map.get(cid, 0)
+
+    # Add rows for counsellors who only had conversions today (not fresh enquiries)
+    existing_ids = {c['counsellor__id'] for c in counsellor_breakdown}
+    only_conversion_ids = set(prev_map.keys()) - existing_ids
+
+    if only_conversion_ids:
+        extra_counsellors = (
+            Enquiry.objects.filter(counsellor_id__in=only_conversion_ids)
+            .values('counsellor__id', 'counsellor__name')
+            .distinct()
+        )
+
+        for c in extra_counsellors:
+            cid = c['counsellor__id']
+            counsellor_breakdown = list(counsellor_breakdown)  # ensure it's mutable
+            counsellor_breakdown.append({
+                'counsellor__id': cid,
+                'counsellor__name': c['counsellor__name'],
+                'total': 0,
+                'walkin': 0,
+                'walkin_joined': 0,
+                'telephonic': 0,
+                'telephonic_joined': 0,
+                'dropout': 0,
+                'paid_enquiries': 0,
+                'fully_paid': 0,
+                'previous_converted_today': prev_map[cid],
+            })
 
     context = {
         'enquiries': enquiries,
