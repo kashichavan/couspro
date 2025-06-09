@@ -881,12 +881,37 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
         max-width: 150px;
     }
 }
+.loader-gear {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.loader-gear i {
+    font-size: 3rem;
+    color: #ffaa00;
+}
+.loader-gear p {
+    margin: 0;
+    font-weight: bold;
+    color: #333;
+}
 </style>
 
 {% endblock %}
 
 {% block content %}
 <div class="app-wrapper">
+
+    <!-- Global Page Loader -->
+<div id="globalLoader" class="loader-overlay">
+    <div class="loader-gear">
+        <i class="fas fa-cog fa-spin"></i>
+        <p>Loading...</p>
+    </div>
+</div>
+    
+
     <!-- Dashboard Header -->
     <div class="dashboard-header">
         <h1 class="dashboard-title">
@@ -1661,6 +1686,11 @@ document.addEventListener('DOMContentLoaded', function () {
             // Optional: Trigger behavior when date changes
         }
     });
+
+    function setDefaultFollowupDate() {
+        const today = new Date().toISOString().split('T')[0];
+        $('#followupDateInput').val(today);
+    }
 });
 </script>
 {% endblock %}
