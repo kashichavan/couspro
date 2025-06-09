@@ -14,7 +14,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 from datetime import datetime
-from .models import Enquiry, EducationInfo
+from .models import Enquiry, EducationInfo, Comment  # Added Comment import
 
 
 class EnquiryForm(forms.ModelForm):
@@ -81,6 +81,14 @@ class EnquiryForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'placeholder': 'Enter college place'})
     )
 
+    # New comment field
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 4}),
+        required=False,
+        label='Add Comment (Optional)',
+        help_text='Leave this blank if no comment is needed.'
+    )
+
     class Meta:
         model = Enquiry
         fields = [
@@ -88,6 +96,7 @@ class EnquiryForm(forms.ModelForm):
             'subject', 'other_subject_name', 'status', 'enquiry_type',
             'counsellor', 'visit_type', 'followup_date', 'enquiry_date',
             'target_fees', 'fees_paid', 'due_date',
+            # Add other relevant fields from your model
         ]
         labels = {
             'name': 'Full Name',
@@ -186,6 +195,7 @@ class EnquiryForm(forms.ModelForm):
         enquiry = super().save(commit=False)
         status = enquiry.status
 
+        # Fees logic
         if status != 'joined':
             enquiry.fees_paid = Decimal('0.00')
             enquiry.target_fees = None
@@ -199,7 +209,7 @@ class EnquiryForm(forms.ModelForm):
         if commit:
             enquiry.save()
 
-        # EducationInfo saving
+        # EducationInfo handling
         edu_info = enquiry.education_details.first() if enquiry.education_details.exists() else EducationInfo(enquiry=enquiry)
 
         edu_info.level = self.cleaned_data.get('education_level')
@@ -220,7 +230,17 @@ class EnquiryForm(forms.ModelForm):
             edu_info.ug_degree = None
             edu_info.other_ug_degree_name = None
 
-        edu_info.save()
+        if commit:
+            edu_info.save()
+
+        # Comment handling
+        comment_text = self.cleaned_data.get('comment')
+        if comment_text and commit:
+            Comment.objects.create(
+                enquiry=enquiry,
+                comment=comment_text
+            )
+
         return enquiry
 
 

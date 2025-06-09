@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
+
 {% block title %}Smart Enquiry Dashboard{% endblock %}
+{% load static %}
+{% load humanize %}
+{% load custom_filters %}
+
 
 
 {% block extra_css %}
@@ -891,7 +896,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
     <div class="dashboard-header">
         <h1 class="dashboard-title">
             <i class="fas fa-comments"></i> 
-            Enquiry Dashboard
+            Today's Enquiries
         </h1>
         <div class="dashboard-actions">
             <a href="{% url 'enquiry:add_enquiry' %}" class="btn btn-light">
@@ -921,6 +926,8 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
                 </button>
             </div>
         </div>
+      
+
         <div class="card-body p-0">
             <div class="data-table-wrapper">
                 <table id="enquiryTable" class="display nowrap w-100">
@@ -1056,13 +1063,13 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="datePickerModalLabel">
-                    <i class="fas fa-calendar-alt me-2"></i> Set Follow-up Date
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Set Follow-up Date
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Updated input field -->
-                <input type="text" class="form-control" id="followupDateInput" placeholder="Select a date">
+                <input type="date" class="form-control" id="followupDateInput">
                 <input type="hidden" id="currentEnquiryId">
             </div>
             <div class="modal-footer">
@@ -1158,6 +1165,99 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
         </div>
     </div>
 </div>
+
+<!-- Counsellor Breakdown -->
+<div class="data-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-list"></i> Counsellor Breakdown
+            </h2>
+        </div>
+  <div class="card-body">
+    {% if counsellor_breakdown %}
+      <div class="card-body p-0">
+            <div class="data-table-wrapper">
+                <table id="enquiryTable" class="display nowrap w-100">
+                    <thead>
+            <tr>
+              <th>Counsellor</th>
+              <th>Total</th>
+              <th>Walk-in</th>
+              <th>Joined</th>
+              <th>Telephonic</th>
+              <th>Joined</th>
+              <th>Dropouts</th>
+              <th>Paid</th>
+              <th>Completed</th>
+              <th>Conversion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in counsellor_breakdown %}
+              <tr>
+                <td>{{ item.counsellor__name|default:"Unassigned" }}</td>
+                
+                <!-- Total -->
+                <td><span class="badge bg-primary">{{ item.total }}</span></td>
+                
+                <!-- Walk-in -->
+                <td>{{ item.walkin }}</td>
+                <td>
+                  <span class="badge bg-success">{{ item.walkin_joined }}</span>
+                  {% if item.walkin %}
+                    <div class="progress mt-1" style="height: 8px;">
+                      <div class="progress-bar bg-success" role="progressbar"
+                           style="width: {{ item.walkin_joined|div1:item.walkin|mul1:100 }}%"
+                           aria-valuenow="{{ item.walkin_joined|div1:item.walkin|mul1:100 }}"
+                           aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  {% endif %}
+                </td>
+                
+                <!-- Telephonic -->
+                <td>{{ item.telephonic }}</td>
+                <td>
+                  <span class="badge bg-info text-dark">{{ item.telephonic_joined }}</span>
+                  {% if item.telephonic %}
+                    <div class="progress mt-1" style="height: 8px;">
+                      <div class="progress-bar bg-info" role="progressbar"
+                           style="width: {{ item.telephonic_joined|div1:item.telephonic|mul1:100 }}%"
+                           aria-valuenow="{{ item.telephonic_joined|div1:item.telephonic|mul1:100 }}"
+                           aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  {% endif %}
+                </td>
+                
+                <!-- Dropouts -->
+                <td><span class="badge bg-danger">{{ item.dropout }}</span></td>
+                
+                <!-- Fees Stats -->
+                <td>{{ item.paid_enquiries }}</td>
+                <td>{{ item.fully_paid }}</td>
+                
+                <!-- Overall Conversion -->
+                <td>
+                  {% if item.total %}
+                    <strong>{{ item.walkin_joined|add:item.telephonic_joined|div:item.total|mul:100|floatformat:0 }}%</strong>
+                    <div class="progress mt-1" style="height: 8px;">
+                      <div class="progress-bar bg-warning" role="progressbar"
+                           style="width: {{ item.walkin_joined|add:item.telephonic_joined|div:item.total|mul:100 }}%"
+                           aria-valuenow="{{ item.walkin_joined|add:item.telephonic_joined|div:item.total|mul:100 }}"
+                           aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted">No enquiries today for any counsellor.</p>
+    {% endif %}
+  </div>
+</div>
+
 
 {% endblock %}
 
@@ -1646,21 +1746,5 @@ function showPaymentAlert(message, type) {
         $('#followupDateInput').val(today);
     }
 })();
-
-
-  // Initialize Flatpickr
-document.addEventListener('DOMContentLoaded', function () {
-    flatpickr("#followupDateInput", {
-        altInput: true,
-        altFormat: "F j, Y", // Display format
-        dateFormat: "Y-m-d",  // Internal format
-        minDate: "today",     // Prevent past dates
-        defaultDate: new Date(), // Default to today
-        theme: "light",       // Optional: choose theme
-        onChange: function(selectedDates, dateStr, instance) {
-            // Optional: Trigger behavior when date changes
-        }
-    });
-});
 </script>
 {% endblock %}

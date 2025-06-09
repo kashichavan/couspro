@@ -34,6 +34,7 @@ urlpatterns = [
     path('joined-students/', views.joined_students, name='joined_students'),
     path('dropout-students/', views.dropout_students, name='dropout_students'),
     path('pending-enquiries/', views.pending_enquiries, name='pending_enquiries'),
+    path('today-enquiries/', views.today_enquiries, name='today_enquiries'),
     
     # Bulk Upload
     path('download-template/', views.download_dummy_template, name='download_dummy_template'),

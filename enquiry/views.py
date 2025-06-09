@@ -1858,6 +1858,20 @@ def update_target_fees(request):
 
 
 
+
+
+from django.views.generic import ListView
+from .models import Enquiry
+
+class InconsistentJoinedEnquiryListView(ListView):
+    model = Enquiry
+    template_name = 'inconsistent_joined_list.html'
+    context_object_name = 'enquiries'
+
+    def get_queryset(self):
+        return Enquiry.objects.filter(status='joined', is_joined_batch=False)
+
+
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from .models import Enquiry
@@ -1871,3 +1885,81 @@ def mark_joined_batch(request, pk):
         return JsonResponse({'success': True})
     except Enquiry.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Enquiry not found'})
+    
+    
+from django.db.models import Count, Q, F
+from django.db.models.functions import TruncDate
+from django.db.models import Case, When, Value, IntegerField
+from django.shortcuts import render
+from django.utils import timezone
+from .models import Enquiry
+from zoneinfo import ZoneInfo
+
+def today_enquiries(request):
+    india_tz = ZoneInfo("Asia/Kolkata")
+    today = timezone.now().astimezone(india_tz).date()
+    filter_by = request.GET.get('filter_by', 'created')
+
+    # Base queryset filtering
+    if filter_by == 'created':
+        enquiries = Enquiry.objects.annotate(
+            local_created_date=TruncDate(F('created_at'), tzinfo=india_tz)
+        ).filter(local_created_date=today)
+    else:
+        enquiries = Enquiry.objects.filter(enquiry_date=today)
+
+    # Counsellor-wise breakdown with all required stats
+    counsellor_breakdown = (
+        enquiries
+        .select_related('counsellor')
+        .values('counsellor__id', 'counsellor__name')
+        .annotate(
+            total=Count('id'),
+            
+            # Walk-in counts
+            walkin=Count(Case(
+                When(enquiry_type__icontains='walkin', then=Value(1)),
+                output_field=IntegerField()
+            )),
+            walkin_joined=Count(Case(
+                When(enquiry_type__icontains='walkin', status='joined', then=Value(1)),
+                output_field=IntegerField()
+            )),
+            
+            # Telephonic counts
+            telephonic=Count(Case(
+                When(enquiry_type__icontains='telephonic', then=Value(1)),
+                output_field=IntegerField()
+            )),
+            telephonic_joined=Count(Case(
+                When(enquiry_type__icontains='telephonic', status='joined', then=Value(1)),
+                output_field=IntegerField()
+            )),
+            
+            # Dropout counts
+            dropout=Count(Case(
+                When(status='dropout', then=Value(1)),
+                output_field=IntegerField()
+            )),
+            
+            # Fees stats
+            paid_enquiries=Count(Case(
+                When(fees_paid__gt=0, then=Value(1)),
+                output_field=IntegerField()
+            )),
+            fully_paid=Count(Case(
+                When(target_fees__isnull=False, fees_paid__gte=F('target_fees'), then=Value(1)),
+                output_field=IntegerField()
+            ))
+        )
+        .order_by('counsellor__name')
+    )
+
+    context = {
+        'enquiries': enquiries,
+        'counsellor_breakdown': counsellor_breakdown,
+        'filter_by': filter_by,
+        'today': today,
+    }
+
+    return render(request, 'today_enquiries.html', context)

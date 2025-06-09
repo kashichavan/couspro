@@ -1,15 +1,85 @@
-{# templates/accounts/unauthorized.html #}
 {% extends "base.html" %}
+{% block title %}Unauthorized Access | Enquiry Portal{% endblock %}
 
-{% block title %}Unauthorized Access{% endblock %}
+{% block extra_css %}
+<style>
+.unauthorized-card {
+    max-width: 500px;
+    margin: 3rem auto;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+.card-header {
+    background: linear-gradient(45deg, var(--dark-orange), var(--primary-orange));
+    color: white;
+    font-weight: 600;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 3rem;
+    color: var(--primary-orange);
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.error-message {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--dark-orange), var(--primary-orange));
+    border: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255,127,0,0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="alert alert-danger text-center">
-    <h4>⚠️ Unauthorized Access</h4>
-    <p>You do not have permission to access this page.</p>
-    <p>If you believe this is an error, please contact the administrator.</p>
-    
-  </div>
+<div class="page-header">
+    <h2>Access Denied</h2>
+    <p>You don't have permission to access this page</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card unauthorized-card">
+            <div class="card-header">
+                <i class="fas fa-lock-slash me-2"></i>Unauthorized Access
+            </div>
+            <div class="card-body text-center p-4">
+                <div class="d-flex justify-content-center mb-3">
+                    <i class="fas fa-exclamation-triangle error-icon"></i>
+                </div>
+                <p class="error-message">
+                    You do not have permission to access this page. 
+                    If you believe this is an error, please contact the administrator.
+                </p>
+                <a href="{% url 'enquiry:dashboard' %}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-arrow-left me-2"></i>Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -8,6 +8,8 @@ def mul(value, arg):
         return float(value) * float(arg)
     except (ValueError, TypeError):
         return ''
+    
+
 
 @register.filter
 def div(value, arg):
@@ -19,9 +21,6 @@ def div(value, arg):
     
 
 
-from django import template
-
-register = template.Library()
 
 @register.filter
 def balance_percentage(fees_paid, target_fees):
@@ -53,9 +52,7 @@ def paid_percentage(fees_paid, target_fees):
         return 0
     
     
-from django import template
 
-register = template.Library()
 
 @register.filter
 def split_month(value):
@@ -65,9 +62,7 @@ def split_month(value):
     return None
 
 
-from django import template
 
-register = template.Library()
 
 @register.filter
 def mul(value, arg):
@@ -75,3 +70,30 @@ def mul(value, arg):
         return float(value) * float(arg)
     except (ValueError, TypeError):
         return ''
+    
+    
+
+
+@register.filter
+def div1(value, arg):
+    try:
+        return float(value) / float(arg)
+    except (ValueError, ZeroDivisionError):
+        return 0
+
+@register.filter
+def mul1(value, arg):
+    try:
+        return float(value) * float(arg)
+    except ValueError:
+        return 0
+
+
+
+
+@register.filter
+def add(value, arg):
+    try:
+        return float(value) + float(arg)
+    except ValueError:
+        return value

@@ -684,6 +684,10 @@
                             <li><a class="dropdown-item" href="{% url 'enquiry:today_followups' %}">
                                 <i class="fas fa-calendar-day"></i> Today's Followups
                             </a></li>
+
+                            <li><a class="dropdown-item" href="{% url 'enquiry:today_enquiries' %}">
+                                <i class="fas fa-history"></i> Today's Enquiries
+                            </a></li>
                             <li><a class="dropdown-item" href="{% url 'enquiry:joined_students' %}">
                                 <i class="fas fa-user-graduate"></i> Joined Students
                             </a></li>
@@ -716,7 +720,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'enquiry:inconsistent_joined' %}">
-                                <i class="fas fa-calendar-day"></i> Today's Due
+                                <i class="fas fa-calendar-day"></i> Waiting For Batch
                             </a></li>
                             <li><a class="dropdown-item" href="{% url 'enquiry:today_payment_due' %}">
                                 <i class="fas fa-calendar-day"></i> Today's Due
@@ -914,5 +918,7 @@ function refreshMarqueeData() {
     {% block extra_js %}
 
     {% endblock %}
+
+
 </body>
 </html>
