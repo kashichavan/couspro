@@ -1307,21 +1307,18 @@ def check_mobile_exists(request):
     else:
         return JsonResponse({'exists': False})
     
-
 from django.shortcuts import render
-from django.db.models import Count, Sum, Q
+from django.db.models import Sum, F
 from .models import Enquiry, Counsellor, PaymentHistory
 from datetime import date
-import openpyxl
-from django.http import HttpResponse
 from django.contrib import messages
+# if not already defined, adjust as needed
 
 @manager_required
 def daywise_counsellor_summary(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Validate and parse dates
     try:
         start_date = date.fromisoformat(start_date) if start_date else date.today()
         end_date = date.fromisoformat(end_date) if end_date else date.today()
@@ -1331,13 +1328,12 @@ def daywise_counsellor_summary(request):
 
     if start_date > end_date:
         messages.error(request, "Start date must be before end date.")
-        start_date, end_date = end_date, start_date  # Swap for consistency
+        start_date, end_date = end_date, start_date  # Swap
 
     counsellors = Counsellor.objects.all().order_by('name')
     summary = []
 
     for counsellor in counsellors:
-        # Base queryset: enquiries created in range
         base_queryset = Enquiry.objects.filter(
             counsellor=counsellor,
             created_at__date__range=(start_date, end_date)
@@ -1350,8 +1346,6 @@ def daywise_counsellor_summary(request):
             enquiry_type__in=['direct_walkin', 'someone_walkin', 'telephonic_to_walkin']
         )
 
-        # Previous Enquiry Converted Today:
-        # Enquiries created before start_date but joined_date in range
         prev_converted_qs = Enquiry.objects.filter(
             counsellor=counsellor,
             enquiry_date__lt=start_date,
@@ -1359,20 +1353,16 @@ def daywise_counsellor_summary(request):
             status='joined'
         )
 
-        # For fees calculations:
-        # Target fees = sum of target_fees on enquiries in base_queryset + prev_converted_qs
         total_target_fees = (base_queryset | prev_converted_qs).aggregate(
             total_target=Sum('target_fees')
         )['total_target'] or 0
 
-        # Fees paid = sum of PaymentHistory amounts linked to these enquiries within date range
         enquiry_ids = list((base_queryset | prev_converted_qs).values_list('id', flat=True))
         total_paid = PaymentHistory.objects.filter(
             enquiry_id__in=enquiry_ids,
             payment_date__range=(start_date, end_date)
         ).aggregate(total_paid=Sum('amount_paid'))['total_paid'] or 0
 
-        # Fees balance = target - paid
         fees_balance = total_target_fees - total_paid
 
         summary.append({
@@ -1392,13 +1382,13 @@ def daywise_counsellor_summary(request):
             'dropout_count': base_queryset.filter(status='dropout').count(),
         })
 
-    # Day wise fees collected for all counsellors combined, based on PaymentHistory (joined enquiries)
+    # Day-wise collection
     day_wise_fees = PaymentHistory.objects.filter(
         enquiry__status='joined',
         payment_date__range=(start_date, end_date)
-    ).values('payment_date').annotate(
+    ).values(day=F('payment_date')).annotate(
         total_paid=Sum('amount_paid')
-    ).order_by('payment_date')
+    ).order_by('day')
 
     total_fees_collected = sum(day['total_paid'] or 0 for day in day_wise_fees)
     total_target_fees = sum(row['fees_target'] for row in summary)
@@ -1413,13 +1403,6 @@ def daywise_counsellor_summary(request):
         'total_target_fees': total_target_fees,
         'yet_to_collect': yet_to_collect,
     }
-
-    if 'export' in request.GET:
-        return export_to_excel(
-            summary, day_wise_fees,
-            total_fees_collected, total_target_fees,
-            yet_to_collect, start_date, end_date
-        )
 
     return render(request, 'daywise_summary.html', context)
 

@@ -483,46 +483,50 @@
   </div>
 </div>
 
-  <!-- Enhanced Day-wise Fees Section -->
-  <div class="table-container">
-    <div class="p-3 border-bottom">
-      <h5 class="mb-0"><i class="fas fa-calendar-money me-2 text-success"></i>Day-wise Revenue Tracking</h5>
-    </div>
-    <div class="table-responsive">
-      <table class="table table-hover" id="feesTable">
-        <thead>
-          <tr>
-            <th><i class="fas fa-calendar me-1"></i>Date</th>
-            <th><i class="fas fa-coins me-1"></i>Fees Collected</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for day in day_wise_fees %}
-          <tr>
-            <td class="fw-semibold">{{ day.created_at__date|date:"d M Y" }}</td>
-            <td class="fw-bold text-success">₹{{ day.total_paid|floatformat:2 }}</td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="2" class="text-center text-muted py-4">
-              <i class="fas fa-info-circle me-2"></i>No fees collected in this period.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-        <tfoot>
-          <tr>
-            <th class="text-center">
-              <i class="fas fa-calculator me-2"></i>TOTAL COLLECTION
-            </th>
-            <th class="text-center text-orange">
-              ₹{{ total_fees_collected|floatformat:2|default:"0.00" }}
-            </th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+<!-- Enhanced Day-wise Fees Section -->
+<div class="table-container my-5">
+  <div class="p-3 border-bottom bg-light">
+    <h5 class="mb-0">
+      <i class="fas fa-calendar-money me-2 text-success"></i>
+      Day-wise Revenue Tracking
+    </h5>
   </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-striped" id="feesTable">
+      <thead class="table-dark">
+        <tr>
+          <th><i class="fas fa-calendar me-1"></i>Date</th>
+          <th><i class="fas fa-coins me-1"></i>Fees Collected</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for day in day_wise_fees %}
+        <tr>
+          <td class="fw-semibold">{{ day.day|date:"d M Y" }}</td>
+          <td class="fw-bold text-success">₹{{ day.total_paid|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="2" class="text-center text-muted py-4">
+            <i class="fas fa-info-circle me-2"></i>No fees collected in this period.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light">
+        <tr>
+          <th class="text-center">
+            <i class="fas fa-calculator me-2"></i>Total Collection
+          </th>
+          <th class="text-center text-primary fw-bold">
+            ₹{{ total_fees_collected|floatformat:2|default:"0.00" }}
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
 
  <!-- Updated Total Summary Card -->
 {% if total_fees_collected %}
