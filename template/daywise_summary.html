@@ -468,7 +468,15 @@
           <td><span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span></td>
           <td><span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span></td>
           <td><span class="badge bg-success rounded-pill">{{ item.joined_count }}</span></td>
-          <td><span class="badge bg-dark rounded-pill">{{ item.previous_converted_count }}</span></td>
+       <td>
+    {% if item.counsellor_id and item.previous_converted_count %}
+        <a href="{% url 'enquiry:previous_converted_list' counsellor_id=item.counsellor_id %}?start_date={{ start_date }}&end_date={{ end_date }}">
+            {{ item.previous_converted_count }}
+        </a>
+    {% else %}
+        {{ item.previous_converted_count }}
+    {% endif %}
+</td>
           <td><span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span></td>
           <td><span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span></td>
           <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>

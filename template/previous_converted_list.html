@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Previous Converted Students{% endblock %}
+
+{% block content %}
+
+<!-- templates/previous_converted_list.html -->
+<h2>Previous Converted Students - {{ counsellor.name }}</h2>
+<p>Date Range: {{ start_date }} to {{ end_date }}</p>
+
+{% if prev_converted_list %}
+<table border="1" cellpadding="8">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Mobile</th>
+      <th>Enquiry Date</th>
+      <th>Joined Date</th>
+      <th>Target Fees</th>
+      <th>Fees Paid</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for student in prev_converted_list %}
+    <tr>
+      <td>{{ student.name }}</td>
+      <td>{{ student.mobile }}</td>
+      <td>{{ student.enquiry_date|default:"-" }}</td>
+      <td>{{ student.joined_date|default:"-" }}</td>
+      <td>{{ student.target_fees|default:0 }}</td>
+      <td>{{ student.fees_paid|default:0 }}</td>
+      <td>{{ student.fees_balance|default:0 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No previous converted students found.</p>
+{% endif %}
+
+<a href="{% url 'enquiry:daywise_summary' %}">Back to Summary</a>
+{% endblock %}

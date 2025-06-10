@@ -1369,6 +1369,7 @@ def daywise_counsellor_summary(request):
             'counsellor_name': counsellor.name,
             'counsellor_mobile': getattr(counsellor, 'mobile', 'N/A'),
             'total_enquiries': base_queryset.count(),
+             'counsellor_id': counsellor.id,  # 👈 Add this line
             'telephonic_count': telephonic_all.count(),
             'telephonic_joined': telephonic_all.filter(status='joined').count(),
             'walkin_count': walkin_all.count(),
@@ -2131,3 +2132,45 @@ class MergeEnquiriesView(View):
             messages.error(request, f"An error occurred: {e}")
 
         return redirect('search_by_mobile')
+    
+    
+    
+    
+from django.shortcuts import render, get_object_or_404
+from .models import Counsellor, Enquiry
+from datetime import date
+from django.contrib import messages
+
+@manager_required
+def previous_converted_list(request, counsellor_id):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    try:
+        start_date = date.fromisoformat(start_date) if start_date else date.today()
+        end_date = date.fromisoformat(end_date) if end_date else date.today()
+    except ValueError:
+        start_date = end_date = date.today()
+        messages.error(request, "Invalid date format. Showing today's data.")
+
+    if start_date > end_date:
+        messages.error(request, "Start date must be before end date.")
+        start_date, end_date = end_date, start_date  # Swap
+
+    counsellor = get_object_or_404(Counsellor, id=counsellor_id)
+
+    prev_converted_list = Enquiry.objects.filter(
+        counsellor=counsellor,
+        enquiry_date__lt=start_date,
+        joined_date__range=(start_date, end_date),
+        status='joined'
+    )
+
+    context = {
+        'counsellor': counsellor,
+        'prev_converted_list': prev_converted_list,
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+
+    return render(request, 'previous_converted_list.html', context)
