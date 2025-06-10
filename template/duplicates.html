@@ -1,0 +1,22 @@
+<!-- templates/enquiry/duplicates.html -->
+<h2>Duplicate Enquiries for {{ enquiry.name }}</h2>
+
+{% if duplicates %}
+  <ul>
+    {% for dup in duplicates %}
+      <li>
+        {{ dup.name }} - {{ dup.mobile }} ({{ dup.get_enquiry_type_display }})
+        <form method="POST" action="{% url 'enquiry:merge_enquiries' %}">
+          {% csrf_token %}
+          <input type="hidden" name="primary_id" value="{{ enquiry.id }}">
+          <input type="hidden" name="secondary_id" value="{{ dup.id }}">
+          <button type="submit" class="btn btn-danger">Merge</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No duplicates found.</p>
+{% endif %}
+
+<a href="{% url 'enquiry:enquiry_details' enquiry_id=enquiry.id %}">Back to Enquiry</a>

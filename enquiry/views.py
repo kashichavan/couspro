@@ -2038,3 +2038,96 @@ def today_enquiries(request):
     }
 
     return render(request, 'today_enquiries.html', context)
+
+
+
+# views.py
+from django.views import View
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db import transaction
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from .models import Enquiry
+from django.db.models import Q
+
+def search_by_mobile(request):
+    query = request.GET.get('q', '')
+    results = []
+
+    if query:
+        results = Enquiry.objects.filter(
+            Q(mobile__icontains=query) |
+            Q(parent_number__icontains=query) |
+            Q(name__icontains=query)
+        ).distinct().order_by('-created_at')
+
+    return render(request, 'merge_search.html', {
+        'query': query,
+        'results': results
+    })
+
+
+class MergeEnquiriesView(View):
+    def post(self, request, *args, **kwargs):
+        selected_ids = request.POST.getlist('enquiry_ids')
+
+        if len(selected_ids) != 2:
+            messages.error(request, "Please select exactly two records to merge.")
+            return redirect('search_by_mobile')
+
+        primary_id, secondary_id = selected_ids
+        primary = get_object_or_404(Enquiry, id=primary_id)
+        secondary = get_object_or_404(Enquiry, id=secondary_id)
+
+        if primary == secondary:
+            messages.error(request, "Cannot merge a record with itself.")
+            return redirect('search_by_mobile')
+
+        # 🔒 Restrict merge to only allowed types
+        allowed_types = ['someone_telephonic', 'someone_walkin']
+        if primary.enquiry_type not in allowed_types or secondary.enquiry_type not in allowed_types:
+            messages.error(
+                request,
+                "Merge is only allowed for 'Someone Telephonic' or 'Someone WalkIn' records."
+            )
+            return redirect('search_by_mobile')
+
+        try:
+            with transaction.atomic():
+                # Preserve original values
+                original_counsellor = primary.counsellor
+                original_mobile = primary.mobile
+                original_parent_number = primary.parent_number
+
+                # Fields to merge from secondary to primary (only if not empty)
+                fields_to_merge = [
+                    'name', 'mobile', 'subject', 'other_subject_name', 'status',
+                    'enquiry_type', 'followup_date', 'enquiry_date', 'fees_paid_date',
+                    'native_district_name', 'target_fees', 'fees_paid', 'due_date',
+                    'is_joined_batch', 'joined_date', 'visit_type'
+                ]
+
+                for field in fields_to_merge:
+                    secondary_value = getattr(secondary, field)
+                    if secondary_value not in [None, '', 'None']:
+                        setattr(primary, field, secondary_value)
+
+                # Preserve core data
+                primary.parent_number = original_parent_number
+                primary.counsellor = original_counsellor
+
+                # Validate and save
+                primary.full_clean()
+                primary.save()
+
+                # Delete secondary record
+                secondary.delete()
+
+                messages.success(request, "Enquiries merged successfully.")
+
+        except ValidationError as e:
+            messages.error(request, f"Validation error during merge: {e}")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+
+        return redirect('search_by_mobile')

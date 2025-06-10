@@ -2,118 +2,280 @@
 {% block title %}Due Fees Calendar - JEnquiry Portal{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center flex-wrap">
-        <div class="header-content">
-            <h2 class="header-title"><i class="fas fa-calendar-alt me-3"></i>Due Fees Calendar</h2>
-            <p class="header-subtitle">Track student payment dues with interactive calendar view</p>
+<!-- Modern Hero Section -->
+<div class="hero-dashboard">
+    <div class="hero-content">
+        <div class="hero-text">
+            <div class="hero-badge">
+                <i class="ri-calendar-check-line"></i>
+                <span>Payment Tracking System</span>
+            </div>
+            <h1 class="hero-title">Due Fees Calendar</h1>
+            <p class="hero-subtitle">Advanced payment tracking with intelligent analytics and interactive calendar visualization</p>
         </div>
-        <div class="header-stats">
-            <div class="stat-card">
-                <div class="stat-number" id="total-due-students">0</div>
-                <div class="stat-label">Students Due</div>
+        <div class="hero-metrics">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="ri-group-line"></i>
+                </div>
+                <div class="metric-data">
+                    <div class="metric-number" id="total-due-students">0</div>
+                    <div class="metric-label">Students Due</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="total-due-amount">₹0</div>
-                <div class="stat-label">Total Due</div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="ri-money-rupee-circle-line"></i>
+                </div>
+                <div class="metric-data">
+                    <div class="metric-number" id="total-due-amount">₹0</div>
+                    <div class="metric-label">Total Amount</div>
+                </div>
             </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="ri-alarm-warning-line"></i>
+                </div>
+                <div class="metric-data">
+                    <div class="metric-number" id="overdue-count">0</div>
+                    <div class="metric-label">Overdue</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-decoration">
+        <div class="floating-elements">
+            <div class="float-item"></div>
+            <div class="float-item"></div>
+            <div class="float-item"></div>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- Calendar Section -->
-    <div class="col-lg-8">
-        <div class="card calendar-card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">
-                        <i class="fas fa-calendar me-2"></i>Payment Due Calendar
-                    </h5>
-                    <div class="calendar-legend">
-                        <span class="legend-item">
-                            <span class="legend-dot low"></span>1-5 Students
-                        </span>
-                        <span class="legend-item">
-                            <span class="legend-dot medium"></span>6-10 Students
-                        </span>
-                        <span class="legend-item">
-                            <span class="legend-dot high"></span>10+ Students
-                        </span>
+<!-- Advanced Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Main Calendar Section -->
+    <div class="calendar-section">
+        <div class="section-card">
+            <div class="card-header-modern">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="ri-calendar-2-line"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3 class="card-title">Payment Due Calendar</h3>
+                        <p class="card-subtitle">Interactive monthly view of payment schedules</p>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <div class="legend-modern">
+                        <div class="legend-item">
+                            <span class="legend-indicator low"></span>
+                            <span>1-3 Due</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-indicator medium"></span>
+                            <span>4-8 Due</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-indicator high"></span>
+                            <span>9+ Due</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body-modern">
                 <div id="due-calendar"></div>
             </div>
         </div>
     </div>
 
-    <!-- Student Details Section -->
-    <div class="col-lg-4">
-        <div class="card student-details-card">
-            <div class="card-header">
-                <h5 class="card-title">
-                    <i class="fas fa-users me-2"></i>Students Due on 
-                    <span id="selected-date" class="selected-date">Select Date</span>
-                </h5>
-            </div>
-            <div class="card-body p-0">
-                <div id="student-list-container">
-                    <div class="empty-state">
-                        <i class="fas fa-calendar-check"></i>
-                        <p>Click on a calendar date to view students with due payments</p>
+    <!-- Smart Sidebar -->
+    <div class="sidebar-section">
+        <div class="section-card">
+            <div class="card-header-modern">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="ri-user-search-line"></i>
                     </div>
+                    <div class="header-text">
+                        <h3 class="card-title">Daily Overview</h3>
+                        <div class="selected-date-display" id="selected-date">Select Date</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body-modern sidebar-body" id="student-list-container">
+                <div class="empty-state-modern">
+                    <div class="empty-icon">
+                        <i class="ri-calendar-check-line"></i>
+                    </div>
+                    <h4>No Date Selected</h4>
+                    <p>Click on any calendar date to view students with due payments for that day</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-card quick-actions">
+            <div class="card-header-modern">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="ri-lightning-line"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3 class="card-title">Quick Actions</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body-modern">
+                <div class="action-buttons">
+                    <button class="action-btn-modern primary">
+                        <i class="ri-download-line"></i>
+                        <span>Export Data</span>
+                    </button>
+                    <button class="action-btn-modern secondary">
+                        <i class="ri-mail-send-line"></i>
+                        <span>Send Reminders</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Detailed Students Table -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card table-card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <h5 class="card-title">
-                        <i class="fas fa-table me-2"></i>Detailed Payment Due List
-                    </h5>
-                    <div class="table-filters">
-                        <select id="filter-counsellor" class="form-select">
-                            <option value="">All Counsellors</option>
-                        </select>
-                        <input type="text" id="search-student" class="form-control" placeholder="Search students...">
-                    </div>
+<!-- Advanced Filters -->
+<div class="filters-section">
+    <div class="section-card">
+        <div class="card-header-modern">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="ri-filter-3-line"></i>
+                </div>
+                <div class="header-text">
+                    <h3 class="card-title">Smart Filters</h3>
+                    <p class="card-subtitle">Refine your search with advanced filtering options</p>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="students-table">
-                        <thead class="table-header">
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Mobile</th>
-                                <th>Counsellor</th>
-                                <th>Target Fees</th>
-                                <th>Paid</th>
-                                <th>Due Amount</th>
-                                <th>Due Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="students-table-body">
-                            <tr>
-                                <td colspan="8" class="text-center py-5">
-                                    <div class="loading-spinner">
-                                        <div class="spinner"></div>
-                                        <p class="mt-3">Loading students data...</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+        </div>
+        <div class="card-body-modern">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Counsellor</label>
+                    <select id="filter-counsellor" class="modern-select">
+                        <option value="">All Counsellors</option>
+                    </select>
                 </div>
+                <div class="filter-group">
+                    <label class="filter-label">Payment Status</label>
+                    <select id="filter-status" class="modern-select">
+                        <option value="">All Status</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="due-today">Due Today</option>
+                        <option value="upcoming">Upcoming</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search Students</label>
+                    <div class="search-input-modern">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="search-student" placeholder="Search by name or mobile...">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Amount Range</label>
+                    <select id="filter-amount" class="modern-select">
+                        <option value="">All Amounts</option>
+                        <option value="0-10000">₹0 - ₹10,000</option>
+                        <option value="10000-50000">₹10,000 - ₹50,000</option>
+                        <option value="50000+">₹50,000+</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Data Table -->
+<div class="table-section">
+    <div class="section-card">
+        <div class="card-header-modern">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="ri-table-line"></i>
+                </div>
+                <div class="header-text">
+                    <h3 class="card-title">Complete Payment Register</h3>
+                    <p class="card-subtitle">Comprehensive view of all due payments with detailed breakdown</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="results-count">
+                    <span id="filtered-count">0 Records</span>
+                </div>
+                <div class="table-actions">
+                    <button class="table-action-btn">
+                        <i class="ri-refresh-line"></i>
+                    </button>
+                    <button class="table-action-btn">
+                        <i class="ri-download-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body-modern">
+            <div class="table-container-modern">
+                <table class="modern-table" id="students-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="th-content">
+                                    <i class="ri-user-line"></i>
+                                    <span>Student Details</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    <i class="ri-phone-line"></i>
+                                    <span>Contact Info</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    <i class="ri-user-star-line"></i>
+                                    <span>Counsellor</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    <i class="ri-money-dollar-circle-line"></i>
+                                    <span>Fee Structure</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    <i class="ri-calendar-event-line"></i>
+                                    <span>Due Status</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content">
+                                    <i class="ri-settings-line"></i>
+                                    <span>Actions</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                        <tr>
+                            <td colspan="6">
+                                <div class="loading-state-modern">
+                                    <div class="modern-loader"></div>
+                                    <p>Loading student data...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -122,168 +284,302 @@
 
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
     :root {
+        /* Orange Theme Colors */
         --primary-orange: #ff6b35;
         --secondary-orange: #ff8c42;
         --accent-orange: #ffa726;
         --deep-orange: #e55100;
         --light-orange: #ffcc80;
-        --gradient-primary: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff8c42 100%);
-        --gradient-secondary: linear-gradient(135deg, #ff8c42 0%, #ffa726 100%);
-        --gradient-accent: linear-gradient(135deg, #ffa726 0%, #ffcc80 100%);
-        --text-dark: #2d3748;
-        --text-light: #718096;
-        --bg-light: #fef7f0;
-        --border-color: #fed7aa;
-        --shadow-soft: 0 10px 40px rgba(255, 107, 53, 0.1);
-        --shadow-hover: 0 20px 60px rgba(255, 107, 53, 0.15);
+        --pale-orange: #fff3e0;
+        
+        /* Enhanced Gradients */
+        --gradient-primary: linear-gradient(135deg, #ff6b35 0%, #ff8c42 50%, #ffa726 100%);
+        --gradient-secondary: linear-gradient(135deg, #ffa726 0%, #ffcc80 100%);
+        --gradient-accent: linear-gradient(45deg, #ff6b35, #e55100);
+        --gradient-bg: linear-gradient(135deg, #fff9f5 0%, #ffffff 100%);
+        --gradient-card: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+        
+        /* Modern Colors */
+        --text-primary: #1a202c;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
+        --border-light: #e2e8f0;
+        --border-medium: #cbd5e0;
+        --bg-white: #ffffff;
+        --bg-light: #f7fafc;
+        --bg-card: #ffffff;
+        
+        /* Shadows */
+        --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.07);
+        --shadow-md: 0 10px 25px rgba(255, 107, 53, 0.08);
+        --shadow-lg: 0 20px 40px rgba(255, 107, 53, 0.12);
+        --shadow-xl: 0 25px 50px rgba(255, 107, 53, 0.15);
+        
+        /* Modern Spacing */
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --space-10: 2.5rem;
+        --space-12: 3rem;
+        --space-16: 4rem;
+        
+        /* Border Radius */
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --radius-2xl: 24px;
     }
 
     * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     body {
-        background: linear-gradient(135deg, #fef7f0 0%, #ffffff 100%);
-        color: var(--text-dark);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--gradient-bg);
+        color: var(--text-primary);
         line-height: 1.6;
+        font-weight: 400;
+        overflow-x: hidden;
     }
 
-    /* Header & Stats */
-    .page-header {
-        background: var(--gradient-primary);
-        padding: 3rem 2.5rem;
-        border-radius: 24px;
-        color: white;
-        margin-bottom: 2.5rem;
-        box-shadow: var(--shadow-soft);
+    /* Modern Hero Section */
+    .hero-dashboard {
         position: relative;
+        background: var(--gradient-primary);
+        padding: var(--space-12) var(--space-8);
+        border-radius: var(--radius-2xl);
+        margin-bottom: var(--space-12);
         overflow: hidden;
+        min-height: 200px;
     }
 
-    .page-header::before {
+    .hero-dashboard::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
-        z-index: 0;
-    }
-
-    .header-content {
-        position: relative;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         z-index: 1;
     }
 
-    .header-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
-    }
-
-    .header-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        font-weight: 400;
-        margin: 0;
-    }
-
-    .header-stats {
+    .hero-content {
+        position: relative;
+        z-index: 2;
         display: flex;
-        gap: 1.5rem;
-        position: relative;
-        z-index: 1;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: var(--space-8);
     }
 
-    .stat-card {
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
         background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 2rem 1.5rem;
-        border-radius: 20px;
-        text-align: center;
+        color: white;
+        padding: var(--space-2) var(--space-4);
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: var(--space-4);
+    }
+
+    .hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        font-weight: 800;
+        color: white;
+        margin-bottom: var(--space-3);
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+
+    .hero-subtitle {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+        max-width: 500px;
+        line-height: 1.6;
+    }
+
+    .hero-metrics {
+        display: flex;
+        gap: var(--space-6);
+        flex-wrap: wrap;
+    }
+
+    .metric-card {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: var(--space-6);
+        border-radius: var(--radius-lg);
+        min-width: 180px;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        min-width: 140px;
     }
 
-    .stat-card:hover {
+    .metric-card:hover {
         transform: translateY(-8px) scale(1.02);
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.2);
     }
 
-    .stat-number {
-        font-size: 2.5rem;
+    .metric-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .metric-number {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2rem;
         font-weight: 800;
         color: white;
         line-height: 1;
-        font-family: 'Inter', sans-serif;
     }
 
-    .stat-label {
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.85);
-        margin-top: 0.5rem;
+    .metric-label {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
         font-weight: 500;
     }
 
-    /* Cards */
-    .card {
-        border: none;
-        border-radius: 20px;
-        box-shadow: var(--shadow-soft);
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: var(--space-8);
+        margin-bottom: var(--space-8);
+    }
+
+    .calendar-section {
+        grid-column: 1;
+    }
+
+    .sidebar-section {
+        grid-column: 2;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+    }
+
+    /* Modern Section Cards */
+    .section-card {
+        background: var(--gradient-card);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
         overflow: hidden;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        background: white;
     }
 
-    .card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-hover);
+    .section-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
     }
 
-    .card-header {
+    .card-header-modern {
         background: var(--gradient-primary);
         color: white;
-        padding: 2rem;
+        padding: var(--space-8);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         border-bottom: none;
     }
 
-    .card-title {
-        font-size: 1.25rem;
+    .header-left {
+        display: flex;
+        gap: var(--space-4);
+        align-items: flex-start;
+    }
+
+    .header-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+                flex-shrink: 0;
+    }
+
+    .header-text .card-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.5rem;
         font-weight: 700;
         margin: 0;
         letter-spacing: -0.01em;
     }
 
-    .calendar-legend {
+    .header-text .card-subtitle {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin: var(--space-1) 0 0 0;
+        font-weight: 400;
+    }
+
+    .card-body-modern {
+        padding: var(--space-8);
+    }
+
+    /* Calendar Enhancements */
+    .legend-modern {
         display: flex;
-        gap: 2rem;
+        gap: var(--space-6);
         align-items: center;
     }
 
     .legend-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        font-size: 0.9rem;
+        gap: var(--space-2);
+        font-size: 0.875rem;
         font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
     }
 
-    .legend-dot {
-        width: 14px;
-        height: 14px;
+    .legend-indicator {
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
     }
 
-    .legend-dot.low { background: #10b981; }
-    .legend-dot.medium { background: #f59e0b; }
-    .legend-dot.high { background: #ef4444; }
+    .legend-indicator.low { background: #10b981; }
+    .legend-indicator.medium { background: #f59e0b; }
+    .legend-indicator.high { background: #ef4444; }
 
     /* Calendar Styling */
     #due-calendar {
@@ -292,28 +588,31 @@
     }
 
     .fc-header-toolbar {
-        padding: 1.5rem;
+        padding: var(--space-6);
         background: var(--bg-light);
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-light);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
     }
 
     .fc-button-primary {
         background: var(--gradient-primary) !important;
         border: none !important;
-        border-radius: 12px !important;
+        border-radius: var(--radius-md) !important;
         font-weight: 600 !important;
-        padding: 0.75rem 1.5rem !important;
+        padding: var(--space-3) var(--space-5) !important;
         transition: all 0.3s ease !important;
+        font-family: 'Inter', sans-serif !important;
     }
 
     .fc-button-primary:hover {
         background: var(--gradient-secondary) !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3) !important;
+        box-shadow: var(--shadow-md) !important;
     }
 
     .fc-day {
         transition: all 0.3s ease !important;
+        border-color: var(--border-light) !important;
     }
 
     .fc-day:hover {
@@ -326,12 +625,13 @@
     }
 
     .fc-event {
-        border-radius: 8px !important;
+        border-radius: var(--radius-sm) !important;
         border: none !important;
         font-weight: 600 !important;
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
         cursor: pointer !important;
         transition: all 0.3s ease !important;
+        padding: 2px 4px !important;
     }
 
     .fc-event:hover {
@@ -353,150 +653,326 @@
         color: white !important;
     }
 
-    /* Student Details */
-    .student-details-card {
-        max-height: 650px;
+    /* Sidebar Enhancements */
+    .selected-date-display {
+        background: rgba(255, 255, 255, 0.2);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-top: var(--space-1);
     }
 
-    .student-details-card .card-body {
+    .sidebar-body {
+        max-height: 500px;
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: var(--light-orange) transparent;
     }
 
-    .student-details-card .card-body::-webkit-scrollbar {
+    .sidebar-body::-webkit-scrollbar {
         width: 6px;
     }
 
-    .student-details-card .card-body::-webkit-scrollbar-track {
+    .sidebar-body::-webkit-scrollbar-track {
         background: transparent;
     }
 
-    .student-details-card .card-body::-webkit-scrollbar-thumb {
+    .sidebar-body::-webkit-scrollbar-thumb {
         background: var(--light-orange);
         border-radius: 3px;
     }
 
-    .selected-date {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
+    .empty-state-modern {
+        text-align: center;
+        padding: var(--space-16) var(--space-8);
+        color: var(--text-muted);
+    }
+
+    .empty-state-modern .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-secondary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto var(--space-6);
+    }
+
+    .empty-state-modern h4 {
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--text-secondary);
+        margin-bottom: var(--space-3);
         font-weight: 600;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: var(--text-light);
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        color: var(--accent-orange);
-        margin-bottom: 1.5rem;
-        opacity: 0.7;
-    }
-
-    .student-item {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-color);
+    /* Student Items */
+    .student-item-modern {
+        padding: var(--space-6);
+        border-bottom: 1px solid var(--border-light);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        position: relative;
     }
 
-    .student-item:hover {
-        background: var(--bg-light);
-        transform: translateX(12px);
+    .student-item-modern:hover {
+        background: var(--pale-orange);
+        transform: translateX(8px);
         border-left: 4px solid var(--primary-orange);
     }
 
-    .student-name {
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: 0.75rem;
-        font-size: 1.1rem;
+    .student-item-modern:last-child {
+        border-bottom: none;
     }
 
-    .student-info {
-        font-size: 0.9rem;
-        color: var(--text-light);
-        margin-bottom: 0.5rem;
+    .student-name-modern {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-3);
+        font-size: 1.125rem;
+    }
+
+    .student-info-modern {
         display: flex;
         align-items: center;
+        gap: var(--space-2);
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: var(--space-2);
     }
 
-    .student-info i {
+    .student-info-modern i {
         width: 16px;
         color: var(--accent-orange);
     }
 
-    .student-amount {
+    .student-amount-modern {
+        font-family: 'JetBrains Mono', monospace;
         font-weight: 800;
         color: var(--deep-orange);
-        font-size: 1.3rem;
-        margin-top: 0.75rem;
-        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.25rem;
+        margin-top: var(--space-3);
     }
 
-    /* Table Styling */
-    .table-filters {
+    /* Quick Actions */
+    .quick-actions {
+        height: fit-content;
+    }
+
+    .action-buttons {
         display: flex;
-        gap: 1rem;
+        flex-direction: column;
+        gap: var(--space-3);
     }
 
-    .table-filters .form-control,
-    .table-filters .form-select {
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
+    .action-btn-modern {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
     }
 
-    .table-filters .form-control:focus,
-    .table-filters .form-select:focus {
-        border-color: var(--primary-orange);
-        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.15);
-    }
-
-    .table-header {
+    .action-btn-modern.primary {
         background: var(--gradient-primary);
         color: white;
     }
 
-    .table-header th {
+    .action-btn-modern.secondary {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-medium);
+    }
+
+    .action-btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Filters Section */
+    .filters-section {
+        margin-bottom: var(--space-8);
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-6);
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: var(--space-1);
+    }
+
+    .modern-select {
+        padding: var(--space-3) var(--space-4);
+        border: 2px solid var(--border-light);
+        border-radius: var(--radius-md);
+        background: white;
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .modern-select:focus {
+        outline: none;
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .search-input-modern {
+        position: relative;
+    }
+
+    .search-input-modern i {
+        position: absolute;
+        left: var(--space-4);
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .search-input-modern input {
+        padding: var(--space-3) var(--space-4) var(--space-3) var(--space-10);
+        border: 2px solid var(--border-light);
+        border-radius: var(--radius-md);
+        background: white;
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .search-input-modern input:focus {
+        outline: none;
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Table Section */
+    .table-section {
+        margin-bottom: var(--space-8);
+    }
+
+    .results-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .table-actions {
+        display: flex;
+        gap: var(--space-2);
+    }
+
+    .table-action-btn {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
         border: none;
+        border-radius: var(--radius-md);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .table-action-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    .table-container-modern {
+        overflow-x: auto;
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .modern-table thead {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    .modern-table th {
+        padding: var(--space-6) var(--space-4);
+        text-align: left;
         font-weight: 700;
-        padding: 1.5rem 1rem;
-        font-size: 0.9rem;
+        border: none;
+        position: relative;
+    }
+
+    .th-content {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    .table tbody td {
-        padding: 1.5rem 1rem;
+    .th-content i {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+
+    .modern-table tbody td {
+        padding: var(--space-6) var(--space-4);
+        border-bottom: 1px solid var(--border-light);
         vertical-align: middle;
-        border-color: var(--border-color);
         font-weight: 500;
     }
 
-    .table tbody tr {
+    .modern-table tbody tr {
         transition: all 0.3s ease;
+        background: white;
     }
 
-    .table tbody tr:hover {
-        background: var(--bg-light);
-        transform: scale(1.01);
-        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.08);
+    .modern-table tbody tr:hover {
+        background: var(--pale-orange);
+        transform: scale(1.005);
+        box-shadow: var(--shadow-sm);
     }
 
-    .status-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
+    /* Status Badges */
+    .status-badge-modern {
+        padding: var(--space-2) var(--space-3);
+        border-radius: var(--radius-md);
         font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        display: inline-block;
     }
 
     .status-overdue {
@@ -514,111 +990,197 @@
         color: white;
     }
 
-    .action-btn {
+    /* Action Button in Table */
+    .view-btn-modern {
         background: var(--gradient-primary);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
+        padding: var(--space-3) var(--space-5);
+        border-radius: var(--radius-md);
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--space-2);
+        font-size: 0.875rem;
     }
 
-    .action-btn:hover {
+    .view-btn-modern:hover {
         background: var(--gradient-secondary);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
         color: white;
+        text-decoration: none;
     }
 
-    /* Loading Spinner */
-    .loading-spinner {
-        color: var(--primary-orange);
+    /* Loading State */
+    .loading-state-modern {
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding: var(--space-16) var(--space-8);
+        color: var(--primary-orange);
     }
 
-    .spinner {
-        width: 40px;
-        height: 40px;
+    .modern-loader {
+        width: 48px;
+        height: 48px;
         border: 4px solid var(--light-orange);
         border-top: 4px solid var(--primary-orange);
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: modernSpin 1s linear infinite;
     }
 
-    @keyframes spin {
+    @keyframes modernSpin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
 
+    /* Floating Decoration */
+    .hero-decoration {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .floating-elements {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .float-item {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .float-item:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 20%;
+        right: 10%;
+        animation-delay: 0s;
+    }
+
+    .float-item:nth-child(2) {
+        width: 60px;
+        height: 60px;
+        top: 60%;
+        right: 30%;
+        animation-delay: 2s;
+    }
+
+    .float-item:nth-child(3) {
+        width: 40px;
+        height: 40px;
+        top: 80%;
+        right: 15%;
+        animation-delay: 4s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
     /* Responsive Design */
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-6);
+        }
+        
+        .sidebar-section {
+            grid-column: 1;
+            flex-direction: row;
+        }
+        
+        .filters-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+    }
+
     @media (max-width: 768px) {
-        .page-header {
+        .hero-dashboard {
+            padding: var(--space-8) var(--space-6);
             text-align: center;
-            padding: 2rem;
         }
 
-        .header-title {
-            font-size: 2rem;
-        }
-
-        .header-stats {
-            margin-top: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            padding: 1.5rem 1rem;
-            min-width: 120px;
-        }
-
-        .calendar-legend {
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-
-        .table-filters {
+        .hero-content {
             flex-direction: column;
+            align-items: center;
+            gap: var(--space-6);
+        }
+
+        .hero-metrics {
+            justify-content: center;
             width: 100%;
         }
 
-        .card-header {
-            padding: 1.5rem;
+        .metric-card {
+            min-width: 150px;
         }
 
-        .student-item {
-            padding: 1rem;
+        .card-header-modern {
+            padding: var(--space-6);
+            flex-direction: column;
+            gap: var(--space-4);
         }
 
-        .student-item:hover {
-            transform: translateX(8px);
+        .header-controls {
+            width: 100%;
+        }
+
+        .legend-modern {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--space-4);
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-section {
+            flex-direction: column;
+        }
+
+        .table-container-modern {
+            font-size: 0.875rem;
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: var(--space-4) var(--space-2);
         }
     }
 
     @media (max-width: 576px) {
-        .header-title {
-            font-size: 1.75rem;
-        }
-
-        .stat-number {
+        .hero-title {
             font-size: 2rem;
         }
 
-        .card {
-            border-radius: 16px;
+        .metric-number {
+            font-size: 1.5rem;
         }
 
-        .page-header {
-            border-radius: 16px;
+        .section-card {
+            border-radius: var(--radius-lg);
+        }
+
+        .hero-dashboard {
+            border-radius: var(--radius-lg);
+        }
+
+        .card-body-modern {
+            padding: var(--space-6);
         }
     }
 </style>
@@ -628,7 +1190,7 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Core elements
+    // Enhanced elements selector
     const els = {
         calendar: document.getElementById('due-calendar'),
         selectedDate: document.getElementById('selected-date'),
@@ -636,27 +1198,45 @@ document.addEventListener('DOMContentLoaded', function() {
         tableBody: document.getElementById('students-table-body'),
         totalStudents: document.getElementById('total-due-students'),
         totalAmount: document.getElementById('total-due-amount'),
+        overdueCount: document.getElementById('overdue-count'),
+        filteredCount: document.getElementById('filtered-count'),
         filterCounsellor: document.getElementById('filter-counsellor'),
+        filterStatus: document.getElementById('filter-status'),
+        filterAmount: document.getElementById('filter-amount'),
         searchStudent: document.getElementById('search-student')
     };
 
     let studentsData = [];
     let calendar;
+    let filteredData = [];
 
-    // Initialize
+    // Initialize application
     init();
 
     async function init() {
         try {
+            showLoadingStates();
             await loadData();
-            updateStats();
+            updateAllStats();
             setupFilters();
             renderTable();
             initCalendar();
             bindEvents();
+            hideLoadingStates();
         } catch (error) {
-            showError('Failed to initialize. Please refresh the page.');
+            console.error('Initialization error:', error);
+            showError('Failed to initialize dashboard. Please refresh the page.');
         }
+    }
+
+    function showLoadingStates() {
+                els.totalStudents.textContent = '...';
+        els.totalAmount.textContent = '...';
+        els.overdueCount.textContent = '...';
+    }
+
+    function hideLoadingStates() {
+        // Loading states are handled by updateAllStats
     }
 
     async function loadData() {
@@ -671,18 +1251,48 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             studentsData = Array.isArray(data) ? data : [];
+            filteredData = [...studentsData];
         } catch (error) {
             console.error('Data loading error:', error);
             throw error;
         }
     }
 
-    function updateStats() {
+    function updateAllStats() {
         const total = studentsData.length;
         const amount = studentsData.reduce((sum, s) => sum + (parseFloat(s.fees_due) || 0), 0);
+        const overdue = studentsData.filter(s => getPaymentStatus(s.due_date).class === 'overdue').length;
         
-        els.totalStudents.textContent = total;
-        els.totalAmount.textContent = `₹${amount.toLocaleString('en-IN')}`;
+        // Animate counter updates
+        animateCounter(els.totalStudents, total);
+        animateCounter(els.totalAmount, amount, '₹');
+        animateCounter(els.overdueCount, overdue);
+        
+        els.filteredCount.textContent = `${filteredData.length} Record${filteredData.length !== 1 ? 's' : ''}`;
+    }
+
+    function animateCounter(element, targetValue, prefix = '') {
+        const startValue = parseInt(element.textContent.replace(/[^\d]/g, '')) || 0;
+        const duration = 1000;
+        const startTime = performance.now();
+        
+        function updateCounter(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
+            
+            if (prefix === '₹') {
+                element.textContent = `₹${currentValue.toLocaleString('en-IN')}`;
+            } else {
+                element.textContent = currentValue.toString();
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            }
+        }
+        
+        requestAnimationFrame(updateCounter);
     }
 
     function setupFilters() {
@@ -710,14 +1320,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const students = dateGroups[info.dateStr] || [];
                 showStudentsForDate(info.dateStr, students);
             },
-            height: 'auto'
+            height: 'auto',
+            dayMaxEvents: 3,
+            moreLinkClick: 'popover'
         });
 
         calendar.render();
     }
 
     function groupByDate() {
-        return studentsData.reduce((groups, student) => {
+        return filteredData.reduce((groups, student) => {
             const date = student.due_date;
             if (!groups[date]) groups[date] = [];
             groups[date].push(student);
@@ -728,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function createCalendarEvents(dateGroups) {
         return Object.entries(dateGroups).map(([date, students]) => {
             const count = students.length;
-            const className = count > 10 ? 'high-count' : count > 5 ? 'medium-count' : 'low-count';
+            const className = count > 8 ? 'high-count' : count > 3 ? 'medium-count' : 'low-count';
             
             return {
                 title: `${count} student${count !== 1 ? 's' : ''}`,
@@ -740,46 +1352,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showStudentsForDate(dateStr, students) {
-        els.selectedDate.textContent = new Date(dateStr).toLocaleDateString('en-IN', {
-            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        const formattedDate = new Date(dateStr).toLocaleDateString('en-IN', {
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
         });
+        
+        els.selectedDate.textContent = formattedDate;
 
         if (!students.length) {
             els.studentList.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-calendar-check"></i>
-                    <p>No students due on this date</p>
+                <div class="empty-state-modern">
+                    <div class="empty-icon">
+                        <i class="ri-calendar-check-line"></i>
+                    </div>
+                    <h4>No Students Due</h4>
+                    <p>No students have payments due on this date</p>
                 </div>
             `;
             return;
         }
 
-        els.studentList.innerHTML = students.map(createStudentItem).join('');
+        els.studentList.innerHTML = students.map(createStudentItemModern).join('');
     }
 
-    function createStudentItem(student) {
+    function createStudentItemModern(student) {
         const status = getPaymentStatus(student.due_date);
         return `
-            <div class="student-item">
-                <div class="student-name">${student.name}</div>
-                <div class="student-info"><i class="fas fa-phone"></i>${student.mobile}</div>
-                <div class="student-info"><i class="fas fa-user-tie"></i>${student.counsellor}</div>
-                <div class="student-amount">₹${parseFloat(student.fees_due || 0).toLocaleString('en-IN')}</div>
-                <span class="status-badge status-${status.class} mt-2 d-inline-block">${status.text}</span>
+            <div class="student-item-modern" onclick="window.location.href='{% url 'enquiry:enquiry_details' 0 %}'.replace('0', '${student.id}')">
+                <div class="student-name-modern">${student.name}</div>
+                <div class="student-info-modern">
+                    <i class="ri-phone-line"></i>
+                    <span>${student.mobile}</span>
+                </div>
+                <div class="student-info-modern">
+                    <i class="ri-user-star-line"></i>
+                    <span>${student.counsellor}</span>
+                </div>
+                <div class="student-amount-modern">₹${parseFloat(student.fees_due || 0).toLocaleString('en-IN')}</div>
+                <span class="status-badge-modern status-${status.class} mt-2">${status.text}</span>
             </div>
         `;
     }
 
-    function renderTable(data = studentsData) {
+    function renderTable(data = filteredData) {
         if (!data.length) {
-            els.tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-5">No students found</td></tr>';
+            els.tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="empty-state-modern">
+                            <div class="empty-icon">
+                                <i class="ri-search-line"></i>
+                            </div>
+                            <h4>No Results Found</h4>
+                            <p>Try adjusting your filters or search terms</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
             return;
         }
 
-        els.tableBody.innerHTML = data.map(createTableRow).join('');
+        els.tableBody.innerHTML = data.map(createTableRowModern).join('');
+        els.filteredCount.textContent = `${data.length} Record${data.length !== 1 ? 's' : ''}`;
     }
 
-    function createTableRow(student) {
+    function createTableRowModern(student) {
         const status = getPaymentStatus(student.due_date);
         const fees = {
             target: parseFloat(student.target_fees || 0),
@@ -788,62 +1427,266 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         return `
-            <tr>
-                <td><strong>${student.name}</strong></td>
-                <td>${student.mobile}</td>
-                <td>${student.counsellor}</td>
-                <td class="text-primary fw-bold">₹${fees.target.toLocaleString('en-IN')}</td>
-                <td class="text-success fw-bold">₹${fees.paid.toLocaleString('en-IN')}</td>
-                <td class="text-danger fw-bold">₹${fees.due.toLocaleString('en-IN')}</td>
+            <tr onclick="window.location.href='{% url 'enquiry:enquiry_details' 0 %}'.replace('0', '${student.id}')" style="cursor: pointer;">
                 <td>
-                    ${new Date(student.due_date).toLocaleDateString('en-IN')}
-                    <br><span class="status-badge status-${status.class}">${status.text}</span>
+                    <div>
+                        <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${student.name}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-muted);">ID: ${student.id}</div>
+                    </div>
                 </td>
                 <td>
-                    <a href="/enquiry/${student.id}/" class="action-btn">
-    <i class="fas fa-eye"></i>View
-</a>
-
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-phone-line" style="color: var(--accent-orange);"></i>
+                        <span>${student.mobile}</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-user-star-line" style="color: var(--accent-orange);"></i>
+                        <span>${student.counsellor}</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="font-family: 'JetBrains Mono', monospace;">
+                        <div style="color: var(--text-primary); font-weight: 600;">₹${fees.target.toLocaleString('en-IN')}</div>
+                        <div style="color: var(--deep-orange); font-weight: 700; font-size: 1.1rem;">₹${fees.due.toLocaleString('en-IN')}</div>
+                        <div style="color: #059669; font-size: 0.875rem;">Paid: ₹${fees.paid.toLocaleString('en-IN')}</div>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <div style="margin-bottom: 8px;">${new Date(student.due_date).toLocaleDateString('en-IN')}</div>
+                        <span class="status-badge-modern status-${status.class}">${status.text}</span>
+                    </div>
+                </td>
+                <td>
+                    <a href="{% url 'enquiry:enquiry_details' 0 %}".replace('0', '${student.id}') class="view-btn-modern" onclick="event.stopPropagation();">
+                        <i class="ri-eye-line"></i>
+                        <span>View Details</span>
+                    </a>
                 </td>
             </tr>
         `;
     }
 
     function getPaymentStatus(dueDateStr) {
-        const daysUntilDue = Math.ceil((new Date(dueDateStr) - new Date()) / (1000 * 60 * 60 * 24));
+        const today = new Date();
+        const dueDate = new Date(dueDateStr);
+        const diffTime = dueDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        if (daysUntilDue < 0) return { class: 'overdue', text: 'Overdue' };
-        if (daysUntilDue === 0) return { class: 'due-today', text: 'Due Today' };
-        return { class: 'upcoming', text: `${daysUntilDue} days` };
+        if (diffDays < 0) return { class: 'overdue', text: `${Math.abs(diffDays)} days overdue` };
+        if (diffDays === 0) return { class: 'due-today', text: 'Due Today' };
+        if (diffDays <= 7) return { class: 'due-soon', text: `Due in ${diffDays} days` };
+        return { class: 'upcoming', text: `Due in ${diffDays} days` };
     }
 
-    function filterTable() {
-        const searchTerm = els.searchStudent.value.toLowerCase();
+    function applyFilters() {
+        const searchTerm = els.searchStudent.value.toLowerCase().trim();
         const selectedCounsellor = els.filterCounsellor.value;
+        const selectedStatus = els.filterStatus.value;
+        const selectedAmount = els.filterAmount.value;
 
-        const filtered = studentsData.filter(student => {
+        filteredData = studentsData.filter(student => {
+            // Search filter
             const matchesSearch = !searchTerm || 
                 student.name.toLowerCase().includes(searchTerm) ||
-                student.mobile.includes(searchTerm);
+                student.mobile.includes(searchTerm) ||
+                student.id.toString().includes(searchTerm);
+            
+            // Counsellor filter
             const matchesCounsellor = !selectedCounsellor || student.counsellor === selectedCounsellor;
-            return matchesSearch && matchesCounsellor;
+            
+            // Status filter
+            let matchesStatus = true;
+            if (selectedStatus) {
+                const status = getPaymentStatus(student.due_date);
+                matchesStatus = status.class === selectedStatus;
+            }
+            
+            // Amount filter
+            let matchesAmount = true;
+            if (selectedAmount) {
+                const amount = parseFloat(student.fees_due || 0);
+                switch (selectedAmount) {
+                    case '0-10000':
+                        matchesAmount = amount <= 10000;
+                        break;
+                    case '10000-50000':
+                        matchesAmount = amount > 10000 && amount <= 50000;
+                        break;
+                    case '50000+':
+                        matchesAmount = amount > 50000;
+                        break;
+                }
+            }
+            
+            return matchesSearch && matchesCounsellor && matchesStatus && matchesAmount;
         });
 
-        renderTable(filtered);
+        renderTable(filteredData);
+        updateCalendarWithFilters();
+        els.filteredCount.textContent = `${filteredData.length} Record${filteredData.length !== 1 ? 's' : ''}`;
+    }
+
+    function updateCalendarWithFilters() {
+        const dateGroups = groupByDate();
+        const events = createCalendarEvents(dateGroups);
+        calendar.removeAllEvents();
+        calendar.addEventSource(events);
     }
 
     function bindEvents() {
-        els.searchStudent.addEventListener('input', filterTable);
-        els.filterCounsellor.addEventListener('change', filterTable);
+        // Debounced search
+        let searchTimeout;
+        els.searchStudent.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(applyFilters, 300);
+        });
+
+        // Filter changes
+        els.filterCounsellor.addEventListener('change', applyFilters);
+        els.filterStatus.addEventListener('change', applyFilters);
+        els.filterAmount.addEventListener('change', applyFilters);
+
+        // Quick actions
+        document.querySelectorAll('.action-btn-modern').forEach(btn => {
+            btn.addEventListener('click', handleQuickAction);
+        });
+
+        document.querySelectorAll('.table-action-btn').forEach(btn => {
+            btn.addEventListener('click', handleTableAction);
+        });
+    }
+
+    function handleQuickAction(e) {
+        const action = e.currentTarget.querySelector('span')?.textContent;
+        
+        switch (action) {
+            case 'Export Data':
+                exportData();
+                break;
+            case 'Send Reminders':
+                sendReminders();
+                break;
+        }
+    }
+
+    function handleTableAction(e) {
+        const icon = e.currentTarget.querySelector('i').className;
+        
+        if (icon.includes('refresh')) {
+            refreshData();
+        } else if (icon.includes('download')) {
+            exportData();
+        }
+    }
+
+    function exportData() {
+        // Create CSV content
+        const headers = ['Student Name', 'Mobile', 'Counsellor', 'Target Fees', 'Paid', 'Due Amount', 'Due Date', 'Status'];
+        const csvContent = [
+            headers.join(','),
+            ...filteredData.map(student => {
+                const status = getPaymentStatus(student.due_date);
+                return [
+                    `"${student.name}"`,
+                    student.mobile,
+                    `"${student.counsellor}"`,
+                    student.target_fees || 0,
+                    student.fees_paid || 0,
+                    student.fees_due || 0,
+                    student.due_date,
+                    `"${status.text}"`
+                ].join(',');
+            })
+        ].join('\n');
+
+        // Download file
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `due_fees_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        showNotification('Data exported successfully!', 'success');
+    }
+
+    function sendReminders() {
+        // This would typically make an API call to send reminders
+        showNotification('Reminders sent to overdue students!', 'success');
+    }
+
+    async function refreshData() {
+        try {
+            showNotification('Refreshing data...', 'info');
+            await loadData();
+            applyFilters();
+            updateAllStats();
+            updateCalendarWithFilters();
+            showNotification('Data refreshed successfully!', 'success');
+        } catch (error) {
+            showNotification('Failed to refresh data', 'error');
+        }
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            z-index: 1000;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
     function showError(message) {
         els.tableBody.innerHTML = `
-            <tr><td colspan="8" class="text-center py-5 text-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>${message}
-            </td></tr>
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <div class="empty-state-modern">
+                        <div class="empty-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                            <i class="ri-error-warning-line"></i>
+                        </div>
+                        <h4>Error Loading Data</h4>
+                        <p>${message}</p>
+                    </div>
+                </td>
+            </tr>
         `;
     }
+
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %}

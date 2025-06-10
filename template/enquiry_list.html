@@ -1691,6 +1691,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const today = new Date().toISOString().split('T')[0];
         $('#followupDateInput').val(today);
     }
+
+    
+    const loader = document.getElementById('globalLoader');
+    loader.style.opacity = '0';
+    setTimeout(() => loader.remove(), 300);
 });
 </script>
 {% endblock %}

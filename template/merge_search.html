@@ -1,0 +1,68 @@
+<!-- templates/enquiry/merge_search.html -->
+<h2>Search & Merge Enquiries</h2>
+
+<form method="get">
+  <input type="text" name="q" value="{{ query }}" placeholder="Search by mobile, name, or parent number">
+  <button type="submit">Search</button>
+</form>
+
+{% if results %}
+  <h3>Matching Records</h3>
+  <form method="post" action="{% url 'enquiry:merge_enquiries' %}">
+    {% csrf_token %}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Name</th>
+          <th>Mobile</th>
+          <th>Parent Number</th>
+          <th>Enquiry Type</th>
+          <th>Counsellor</th>
+          <th>Status</th>
+          <th>Subject</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in results %}
+          <tr>
+            <td>
+              {% if item.enquiry_type in 'someone_telephonic,someone_walkin' %}
+                <input type="checkbox" name="enquiry_ids" value="{{ item.id }}">
+              {% else %}
+                <span title="Merge not allowed for this type">🚫</span>
+              {% endif %}
+            </td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.mobile }}</td>
+            <td>{{ item.parent_number|default:"—" }}</td>
+            <td>{{ item.get_enquiry_type_display }}</td>
+            <td>{{ item.counsellor }}</td>
+            <td>{{ item.get_status_display }}</td>
+            <td>{{ item.get_subject_display }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p><strong>Select exactly two records of type "Someone Telephonic" or "Someone WalkIn" to merge.</strong></p>
+    <button type="submit" class="btn btn-danger" id="merge-button" disabled>Merge Selected</button>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const checkboxes = document.querySelectorAll('input[name="enquiry_ids"]');
+      const mergeButton = document.getElementById('merge-button');
+
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const checked = document.querySelectorAll('input[name="enquiry_ids"]:checked');
+          mergeButton.disabled = checked.length !== 2;
+        });
+      });
+    });
+  </script>
+
+{% elif query %}
+  <p>No matching records found for "{{ query }}".</p>
+{% endif %}

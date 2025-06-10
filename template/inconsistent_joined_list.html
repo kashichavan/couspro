@@ -278,6 +278,7 @@
             font-weight: 500;
             position: relative;
         }
+        
         /* Modern Status Badges - Capsule Style */
 .status-badge {
     display: inline-flex;
@@ -390,7 +391,9 @@
 .action-btn:hover::before {
     left: 100%;
 }
-
+.fa-phone-alt{
+    transform: rotate(84deg);
+}
 .btn-success-modern {
     background: var(--gradient-warning);
     color: #2d3748;
@@ -747,6 +750,9 @@
             position: relative;
             overflow: hidden;
         }
+        .hover-text:hover{
+            color:#fff !important
+        }
     </style>
 {% endblock %}  
 
@@ -791,7 +797,7 @@
                         </div>
                     </td>
                     <td>
-                        <span class="text-muted">{{ enquiry.counsellor.name }}</span>
+                        <span>{{ enquiry.counsellor.name }}</span>
                     </td>
                     <td>
                         <a href="tel:{{ enquiry.mobile }}" class="text-decoration-none">

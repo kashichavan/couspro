@@ -78,4 +78,10 @@ urlpatterns = [
     path('inconsistent-joined/', views.InconsistentJoinedEnquiryListView.as_view(), name='inconsistent_joined'),
     path('enquiry/<int:pk>/mark-joined/', views.mark_joined_batch, name='mark_joined_batch'),
 
+    # urls.py
+
+    path('enquiry/search/', views.search_by_mobile, name='search_by_mobile'),
+    path('enquiry/merge/', views.MergeEnquiriesView.as_view(), name='merge_enquiries'),
+
+
 ]

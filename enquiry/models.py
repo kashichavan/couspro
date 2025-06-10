@@ -26,6 +26,7 @@ class Enquiry(models.Model):
         ('joined', 'Joined'),
         ('pending', 'Pending'),
         ('dropout', 'Dropout'),
+        
     ]
 
     SUBJECT_CHOICES = [
