@@ -80,8 +80,8 @@ urlpatterns = [
 
     # urls.py
 
-    path('enquiry/search/', views.search_by_mobile, name='search_by_mobile'),
-    path('enquiry/merge/', views.MergeEnquiriesView.as_view(), name='merge_enquiries'),
+    path('merge-two-mobiles/', views.search_by_two_mobiles, name='search_by_two_mobiles'),
+    path('merge/', views.MergeEnquiriesView.as_view(), name='merge_enquiries'),
 
      path('previous-converted/<int:counsellor_id>/', views.previous_converted_list, name='previous_converted_list'),
 ]

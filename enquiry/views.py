@@ -583,51 +583,75 @@ def bulk_enquiry_upload(request):
 
 
 
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Enquiry, Counsellor
+from .forms import EnquiryForm
+
 @login_required(login_url='accounts:login')
 def edit_enquiry(request, pk):
     enquiry = get_object_or_404(Enquiry, pk=pk)
+    
     if request.method == 'POST':
         form = EnquiryForm(request.POST, instance=enquiry)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Enquiry updated successfully!')
             return redirect('enquiry:enquary_list')
+
         else:
-            messages.error(request, 'Please correct the errors below.')
+            # Clear fees-related errors if status is not 'joined'
+            status = form.data.get('status', '')
+            if status != 'joined':
+                for field in ['target_fees', 'fees_paid', 'due_date']:
+                    if field in form.errors:
+                        del form.errors[field]
+
+            messages.warning(request, 'Please correct the errors below.')
+
     else:
         form = EnquiryForm(instance=enquiry)
+
     context = {
-        'enquiry': enquiry,
         'form': form,
-        'counsellors': Counsellor.objects.all(),
+        'enquiry': enquiry,
+        'counsellor': form.fields['counsellor'].queryset,
         'status_choices': Enquiry.STATUS_CHOICES,
         'subject_choices': Enquiry.SUBJECT_CHOICES,
         'enquiry_type_choices': Enquiry.ENQUIRY_TYPE_CHOICES,
     }
-    return render(request, 'edit_enquiry.html', context)
 
+    return render(request, 'edit_enquiry.html', context)
+# ========== Monthly Student List ==========
 @login_required(login_url='accounts:login')
 def monthly_student_list(request):
     selected_month = request.GET.get('month', None)
     status_filter = request.GET.get('status', '')
     search_query = request.GET.get('q', '')
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
     now = datetime.now()
     current_year = now.year
     current_month = now.month
     years = [2025] if current_year < 2025 else list(range(2025, current_year + 1))
-    enquiries = Enquiry.objects.all().select_related('counsellor').order_by('-created_at')
+    
+    enquiries = Enquiry.objects.select_related('counsellor').order_by('-created_at')
+    
     if selected_month:
         year, month = map(int, selected_month.split('-'))
         enquiries = enquiries.filter(created_at__year=year, created_at__month=month)
+    
     if status_filter:
         enquiries = enquiries.filter(status=status_filter)
+    
     if search_query:
         enquiries = enquiries.filter(
             Q(name__icontains=search_query) |
             Q(mobile__icontains=search_query) |
             Q(subject__icontains=search_query)
         )
+    
     paginator = Paginator(enquiries, 10)
     page_number = request.GET.get('page')
     try:
@@ -636,10 +660,12 @@ def monthly_student_list(request):
         page_obj = paginator.page(1)
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
+    
     total_count = page_obj.paginator.count
     joined_count = enquiries.filter(status='joined').count()
     pending_count = enquiries.filter(status='pending').count()
     dropout_count = enquiries.filter(status='dropout').count()
+    
     context = {
         'enquiries': page_obj,
         'selected_month': selected_month,
@@ -649,10 +675,14 @@ def monthly_student_list(request):
         'joined_count': joined_count,
         'pending_count': pending_count,
         'dropout_count': dropout_count,
-        'month_choices': [(f"{year}-{str(month).zfill(2)}", f"{calendar.month_name[month]} {year}")
-                          for year in years for month in range(1, 13)
-                          if not (year == current_year and month > current_month)]
+        'month_choices': [
+            (f"{year}-{str(month).zfill(2)}", f"{calendar.month_name[month]} {year}")
+            for year in years
+            for month in range(1, 13)
+            if not (year == current_year and month > current_month)
+        ]
     }
+    
     if is_ajax:
         return JsonResponse({
             'total_count': total_count,
@@ -660,39 +690,42 @@ def monthly_student_list(request):
             'pending_count': pending_count,
             'dropout_count': dropout_count,
         })
+    
     return render(request, 'monthly_student_list.html', context)
 
+# ========== Download Monthly Student List ==========
 @login_required(login_url='accounts:login')
 def download_monthly_excel(request):
     selected_month = request.GET.get('month')
     status_filter = request.GET.get('status', '')
     search_query = request.GET.get('q', '')
-    enquiries = Enquiry.objects.all().select_related('counsellor').order_by('-created_at')
+    
+    enquiries = Enquiry.objects.select_related('counsellor').order_by('-created_at')
+    
     if selected_month:
         year, month = map(int, selected_month.split('-'))
         enquiries = enquiries.filter(created_at__year=year, created_at__month=month)
+    
     if status_filter:
         enquiries = enquiries.filter(status=status_filter)
+    
     if search_query:
         enquiries = enquiries.filter(
             Q(name__icontains=search_query) |
             Q(mobile__icontains=search_query) |
             Q(subject__icontains=search_query)
         )
-    wb = openpyxl.Workbook()
+    
+    wb = Workbook()
     ws = wb.active
     ws.title = "Monthly Enquiries"
+    
     headers = [
-        'Name',
-        'Mobile',
-        'Course',
-        'Status',
-        'Enquiry Type',
-        'Counsellor',
-        'Follow-up Date',
-        'Enquiry Date'
+        'Name', 'Mobile', 'Course', 'Status',
+        'Enquiry Type', 'Counsellor', 'Follow-up Date', 'Enquiry Date'
     ]
     ws.append(headers)
+    
     for enquiry in enquiries:
         ws.append([
             enquiry.name,
@@ -704,21 +737,22 @@ def download_monthly_excel(request):
             enquiry.followup_date.strftime('%Y-%m-%d') if enquiry.followup_date else '',
             enquiry.created_at.strftime('%Y-%m-%d %H:%M'),
         ])
+    
     current_date = datetime.now().strftime("%Y%m%d_%H%M")
     filename = f"monthly_enquiries_{selected_month or 'all'}_{current_date}.xlsx"
+    
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
 
-
-
+# ========== Monthly Summary Dashboard ==========
 @manager_required
-def get_monthly_stats(request,month_filter=None, status_filter=None):
-    from django.db.models import Sum, Count, Q
-    now = datetime.now()
+def get_monthly_stats(request, month_filter=None, status_filter=None):
     stats = []
+    now = datetime.now()
     years = list(range(2025, now.year + 1))
+    
     for year in years:
         start_month = 1
         end_month = 12 if year < now.year else now.month
@@ -726,14 +760,17 @@ def get_monthly_stats(request,month_filter=None, status_filter=None):
             start_date = datetime(year, month, 1)
             end_date = datetime(year, month, calendar.monthrange(year, month)[1])
             queryset = Enquiry.objects.filter(created_at__range=(start_date, end_date))
+            
             if status_filter:
                 queryset = queryset.filter(status=status_filter)
+            
             total_students = queryset.count()
             joined_count = queryset.filter(status='joined').count()
             pending_count = queryset.filter(status='pending').count()
             dropout_count = queryset.filter(status='dropout').count()
-            total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or 0
-            total_balance = queryset.aggregate(Sum('fees_balance'))['fees_balance__sum'] or 0
+            total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or Decimal('0.00')
+            total_balance = queryset.aggregate(Sum('fees_balance'))['fees_balance__sum'] or Decimal('0.00')
+            
             stats.append({
                 'month': f"{year}-{month:02d}",
                 'label': f"{calendar.month_abbr[month]} {year}",
@@ -744,13 +781,15 @@ def get_monthly_stats(request,month_filter=None, status_filter=None):
                 'fees_paid': float(total_fees_paid),
                 'fees_balance': float(total_balance),
             })
+    
     return stats
 
 @manager_required
 def monthly_summary_dashboard(request):
     selected_month = request.GET.get('month', None)
     status_filter = request.GET.get('status', '')
-    stats = get_monthly_stats(request,selected_month, status_filter)
+    stats = get_monthly_stats(request, selected_month, status_filter)
+    
     context = {
         'title': 'Monthly Summary',
         'stats': stats,
@@ -758,17 +797,20 @@ def monthly_summary_dashboard(request):
         'status_filter': status_filter,
     }
     return render(request, 'monthly_summary_dashboard.html', context)
-
+# ========== Download Monthly Summary Excel ==========
 @login_required(login_url='accounts:login')
 def download_monthly_summary_excel(request):
     selected_month = request.GET.get('month')
     status_filter = request.GET.get('status')
-    stats = get_monthly_stats(selected_month, status_filter)
-    wb = openpyxl.Workbook()
+    stats = get_monthly_stats(request, selected_month, status_filter)
+    
+    wb = Workbook()
     ws = wb.active
     ws.title = "Monthly Summary"
+    
     headers = ['Month', 'Total Students', 'Joined', 'Pending', 'Dropout', 'Fees Collected', 'Pending Balance']
     ws.append(headers)
+    
     for row in stats:
         ws.append([
             row['label'],
@@ -779,28 +821,38 @@ def download_monthly_summary_excel(request):
             row['fees_paid'],
             row['fees_balance'],
         ])
+    
+    current_date = datetime.now().strftime("%Y%m%d_%H%M")
+    filename = f"monthly_summary_{selected_month or 'all'}_{current_date}.xlsx"
+    
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    filename = f"monthly_summary_{selected_month or 'all'}_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
+
+# ========== Monthly Summary by Counsellor ==========
 @manager_required
-def get_monthly_stats_by_counsellor(request,month_filter=None, status_filter=None):
+def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
     stats = []
     counsellors = Counsellor.objects.all()
+    
     for counsellor in counsellors:
         queryset = Enquiry.objects.filter(counsellor=counsellor)
+        
         if month_filter:
             year, month = map(int, month_filter.split('-'))
             queryset = queryset.filter(created_at__year=year, created_at__month=month)
+        
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+        
         total_students = queryset.count()
         joined_count = queryset.filter(status='joined').count()
         pending_count = queryset.filter(status='pending').count()
         dropout_count = queryset.filter(status='dropout').count()
-        total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or 0
-        total_balance = queryset.aggregate(Sum('fees_balance'))['fees_balance__sum'] or 0
+        total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or Decimal('0.00')
+        total_balance = queryset.aggregate(Sum('fees_balance'))['fees_balance__sum'] or Decimal('0.00')
+        
         stats.append({
             'counsellor': counsellor,
             'total_students': total_students,
@@ -810,9 +862,10 @@ def get_monthly_stats_by_counsellor(request,month_filter=None, status_filter=Non
             'fees_paid': float(total_fees_paid),
             'fees_balance': float(total_balance),
         })
+    
     return stats
 
-@login_required(login_url='accounts:login')
+@login_required
 @manager_required
 def monthly_summary_by_counsellor(request):
     selected_month = request.GET.get('month', None)
@@ -820,10 +873,13 @@ def monthly_summary_by_counsellor(request):
     now = datetime.now()
     current_year = now.year
     current_month = now.month
+    
     if not selected_month:
         selected_month = f"{current_year}-{current_month:02d}"
-    stats = get_monthly_stats_by_counsellor(request,selected_month, status_filter)
+    
+    stats = get_monthly_stats_by_counsellor(request, selected_month, status_filter)
     years = list(range(2025, current_year + 1))
+    
     month_choices = []
     for year in years:
         start_month = 1
@@ -832,6 +888,7 @@ def monthly_summary_by_counsellor(request):
             month_label = f"{calendar.month_abbr[month]} {year}"
             month_value = f"{year}-{str(month).zfill(2)}"
             month_choices.append((month_value, month_label))
+    
     context = {
         'title': 'Monthly Summary by Counsellor',
         'stats': stats,
@@ -842,20 +899,24 @@ def monthly_summary_by_counsellor(request):
         'current_month': current_month,
     }
     return render(request, 'monthly_summary_by_counsellor.html', context)
-
+from openpyxl import Workbook
+# ========== Download Monthly Summary by Counsellor Excel ==========
 @login_required(login_url='accounts:login')
 def download_monthly_summary_by_counsellor_excel(request):
     selected_month = request.GET.get('month')
     status_filter = request.GET.get('status')
-    stats = get_monthly_stats_by_counsellor(selected_month, status_filter)
+    stats = get_monthly_stats_by_counsellor(request,selected_month, status_filter)
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Counsellor Summary"
+
     headers = ['Counsellor', 'Total Students', 'Joined', 'Pending', 'Dropout', 'Fees Collected', 'Pending Balance']
     ws.append(headers)
+
     for row in stats:
         ws.append([
-            row['counsellor'],
+            row['counsellor'].name,  # ✅ Now writes the counsellor's name
             row['total_students'],
             row['joined'],
             row['pending'],
@@ -863,11 +924,14 @@ def download_monthly_summary_by_counsellor_excel(request):
             row['fees_paid'],
             row['fees_balance'],
         ])
+
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     filename = f"counsellor_summary_{selected_month or 'all'}_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
+
+
 from django.shortcuts import get_object_or_404, render
 from django.utils.timezone import make_aware
 from datetime import datetime, timedelta
@@ -877,34 +941,29 @@ from django.contrib.auth.decorators import login_required
 @login_required(login_url='accounts:login')
 def counsellor_monthly_details(request, counsellor_id, year, month):
     counsellor = get_object_or_404(Counsellor, id=counsellor_id)
-
-    # Validate month
+    
     if not (1 <= month <= 12):
         return render(request, 'error.html', {'message': 'Invalid month'})
-
-    # Define date range for the month
+    
     try:
         start_date = datetime(year=year, month=month, day=1)
         next_month = start_date.replace(day=28) + timedelta(days=4)
         end_date = next_month.replace(day=1) - timedelta(days=1)
     except ValueError:
         return render(request, 'error.html', {'message': 'Invalid date range'})
-
-    # Ensure timezone-aware datetimes if using timezone-aware DB fields
+    
     start_date = make_aware(start_date)
     end_date = make_aware(datetime.combine(end_date, datetime.max.time()))
-
-    # Get enquiries in the month by this counsellor
+    
     enquiries = Enquiry.objects.filter(
         counsellor=counsellor,
         created_at__range=(start_date, end_date)
-    )
-
-    # Count by status
+    ).select_related('counsellor')
+    
     joined_count = enquiries.filter(status='joined').count()
     pending_count = enquiries.filter(status='pending').count()
     dropout_count = enquiries.filter(status='dropout').count()
-
+    
     context = {
         'counsellor': counsellor,
         'enquiries': enquiries,
@@ -2042,97 +2101,7 @@ def today_enquiries(request):
 
 
 
-# views.py
-from django.views import View
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db import transaction
-from django.contrib import messages
-from django.core.exceptions import ValidationError
-from .models import Enquiry
-from django.db.models import Q
 
-def search_by_mobile(request):
-    query = request.GET.get('q', '')
-    results = []
-
-    if query:
-        results = Enquiry.objects.filter(
-            Q(mobile__icontains=query) |
-            Q(parent_number__icontains=query) |
-            Q(name__icontains=query)
-        ).distinct().order_by('-created_at')
-
-    return render(request, 'merge_search.html', {
-        'query': query,
-        'results': results
-    })
-
-
-class MergeEnquiriesView(View):
-    def post(self, request, *args, **kwargs):
-        selected_ids = request.POST.getlist('enquiry_ids')
-
-        if len(selected_ids) != 2:
-            messages.error(request, "Please select exactly two records to merge.")
-            return redirect('search_by_mobile')
-
-        primary_id, secondary_id = selected_ids
-        primary = get_object_or_404(Enquiry, id=primary_id)
-        secondary = get_object_or_404(Enquiry, id=secondary_id)
-
-        if primary == secondary:
-            messages.error(request, "Cannot merge a record with itself.")
-            return redirect('search_by_mobile')
-
-        # 🔒 Restrict merge to only allowed types
-        allowed_types = ['someone_telephonic', 'someone_walkin']
-        if primary.enquiry_type not in allowed_types or secondary.enquiry_type not in allowed_types:
-            messages.error(
-                request,
-                "Merge is only allowed for 'Someone Telephonic' or 'Someone WalkIn' records."
-            )
-            return redirect('search_by_mobile')
-
-        try:
-            with transaction.atomic():
-                # Preserve original values
-                original_counsellor = primary.counsellor
-                original_mobile = primary.mobile
-                original_parent_number = primary.parent_number
-
-                # Fields to merge from secondary to primary (only if not empty)
-                fields_to_merge = [
-                    'name', 'mobile', 'subject', 'other_subject_name', 'status',
-                    'enquiry_type', 'followup_date', 'enquiry_date', 'fees_paid_date',
-                    'native_district_name', 'target_fees', 'fees_paid', 'due_date',
-                    'is_joined_batch', 'joined_date', 'visit_type'
-                ]
-
-                for field in fields_to_merge:
-                    secondary_value = getattr(secondary, field)
-                    if secondary_value not in [None, '', 'None']:
-                        setattr(primary, field, secondary_value)
-
-                # Preserve core data
-                primary.parent_number = original_parent_number
-                primary.counsellor = original_counsellor
-
-                # Validate and save
-                primary.full_clean()
-                primary.save()
-
-                # Delete secondary record
-                secondary.delete()
-
-                messages.success(request, "Enquiries merged successfully.")
-
-        except ValidationError as e:
-            messages.error(request, f"Validation error during merge: {e}")
-        except Exception as e:
-            messages.error(request, f"An error occurred: {e}")
-
-        return redirect('search_by_mobile')
-    
     
     
     
@@ -2174,3 +2143,97 @@ def previous_converted_list(request, counsellor_id):
     }
 
     return render(request, 'previous_converted_list.html', context)
+
+
+
+# views.py
+from django.views import View
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db import transaction
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+from .models import Enquiry
+
+def search_by_two_mobiles(request):
+    q1 = request.GET.get('q1', '')
+    q2 = request.GET.get('q2', '')
+    results = []
+
+    if q1 or q2:
+        query1 = Enquiry.objects.filter(
+            Q(mobile__icontains=q1) | Q(parent_number__icontains=q1)
+        )
+        query2 = Enquiry.objects.filter(
+            Q(mobile__icontains=q2) | Q(parent_number__icontains=q2)
+        )
+        results = (query1 | query2).distinct().order_by('-created_at')
+
+    return render(request, 'merge_two_mobiles.html', {
+        'q1': q1,
+        'q2': q2,
+        'results': results
+    })
+
+class MergeEnquiriesView(View):
+    def post(self, request, *args, **kwargs):
+        selected_ids = request.POST.getlist('enquiry_ids')
+
+        if len(selected_ids) != 2:
+            messages.error(request, "Please select exactly two records to merge.")
+            return redirect('enquiry:search_by_two_mobiles')
+
+        primary_id, secondary_id = selected_ids
+        primary = get_object_or_404(Enquiry, id=secondary_id)
+        secondary = get_object_or_404(Enquiry, id=primary_id)
+
+        if primary == secondary:
+            messages.error(request, "Cannot merge a record with itself.")
+            return redirect('enquiry:search_by_two_mobiles')
+
+        allowed_types = ['someone_telephonic', 'someone_walkin']
+        if secondary.enquiry_type not in allowed_types:
+            messages.error(
+                request,
+                "The primary record must be of type 'Someone Telephonic' or 'Someone WalkIn'."
+            )
+            return redirect('enquiry:search_by_two_mobiles')
+
+        try:
+            with transaction.atomic():
+                original_mobile = primary.mobile
+                original_name = primary.name
+
+                # Fields to merge from secondary to primary (excluding name and mobile)
+                fields_to_merge = [
+                    'subject', 'other_subject_name', 'status',
+                    'enquiry_type', 'followup_date', 'enquiry_date', 'fees_paid_date',
+                    'native_district_name', 'target_fees', 'fees_paid', 'due_date',
+                    'is_joined_batch', 'joined_date', 'visit_type',
+                    'parent_number', 'counsellor'
+                ]
+
+                for field in fields_to_merge:
+                    secondary_value = getattr(secondary, field)
+                    if secondary_value not in [None, '', 'None']:
+                        setattr(primary, field, secondary_value)
+
+                # Ensure name and mobile remain unchanged
+                primary.name = original_name
+                primary.mobile = original_mobile
+
+                # Validate and save
+                primary.full_clean()
+                primary.save()
+
+                # Delete secondary record
+                secondary.delete()
+
+                messages.success(request, "🎉 Enquiries merged successfully.")
+
+        except ValidationError as e:
+            messages.error(request, f"Validation error during merge: {e}")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {e}")
+
+        return redirect('enquiry:search_by_two_mobiles')

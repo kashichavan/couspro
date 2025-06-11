@@ -233,9 +233,6 @@
                     <a href="{% url 'enquiry:edit_enquiry' enquiry.id %}" class="btn btn-sm btn-light ms-2" title="Edit">
             <i class="fas fa-edit"></i>
         </a>
-        <a href="{% url 'enquiry:find_duplicates' enquiry.id %}" class="btn btn-primary">
-    Find Duplicates
-</a>
                 </div>
             </div>
             <div class="status-badge ms-auto px-3 py-2 rounded status-{{ enquiry.status|lower }}">

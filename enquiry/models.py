@@ -105,27 +105,33 @@ class Enquiry(models.Model):
 
     # models.py
     def save(self, *args, **kwargs):
-        # 1️⃣ Enforce “other subject” requirement
-        if self.subject == 'other' and not self.other_subject_name:
-            raise ValidationError({
-                'other_subject_name': "Please specify the subject when 'Other' is selected."
-            })
+        is_new = self.pk is None
+        previous_status = None
 
-        # 2️⃣ Handle non‐joined state
+        if not is_new:
+            try:
+                old = Enquiry.objects.get(pk=self.pk)
+                previous_status = old.status
+            except Enquiry.DoesNotExist:
+                previous_status = None
+
+        # Handle joined_date logic based on status change
+        if previous_status != self.status:
+            if self.status == 'joined':
+                self.joined_date = timezone.now().date()
+            elif self.status == 'dropout':
+                if previous_status != 'joined' and not self.joined_date:
+                    self.joined_date = timezone.now().date()
+            elif self.status == 'pending':
+                self.joined_date = None
+
+        # Handle fee-related fields
         if self.status != 'joined':
-            # reset all join/fee fields
-            self.joined_date = None
             self.target_fees = None
             self.fees_paid = Decimal('0.00')
             self.fees_balance = None
             self.due_date = None
-
         else:
-            # 3️⃣ First time joining → stamp joined_date
-            if not self.joined_date:
-                self.joined_date = timezone.now().date()
-
-            # 4️⃣ Validate & recalc fees
             if self.target_fees is not None and self.fees_paid > self.target_fees:
                 raise ValidationError("Fees paid cannot exceed target fees.")
             self.fees_balance = (
@@ -139,6 +145,7 @@ class Enquiry(models.Model):
     @property
     def is_fully_paid(self):
         return self.target_fees is not None and self.fees_paid >= self.target_fees
+
     
     
     VISIT_TYPE_CHOICES = [

@@ -173,6 +173,9 @@ class EnquiryForm(forms.ModelForm):
             cleaned['fees_paid'] = Decimal('0.00')
             cleaned['target_fees'] = None
             cleaned['due_date'] = None
+            self._errors.pop('target_fees', None)
+            self._errors.pop('fees_paid', None)
+            self._errors.pop('due_date', None)
         elif fees_paid > target_fees:
             self.add_error('fees_paid', "Fees paid cannot exceed target fees.")
 
