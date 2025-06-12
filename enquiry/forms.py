@@ -294,3 +294,4 @@ class MonthlyTargetForm(forms.ModelForm):
         self.fields['month'].widget.attrs.update({'class': 'form-control'})
         self.fields['year'].widget.attrs.update({'class': 'form-control'})
         self.fields['target_amount'].widget.attrs.update({'class': 'form-control'})
+        

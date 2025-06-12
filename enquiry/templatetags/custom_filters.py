@@ -1,3 +1,4 @@
+from datetime import timezone
 from django import template
 
 register = template.Library()
@@ -56,10 +57,13 @@ def paid_percentage(fees_paid, target_fees):
 
 @register.filter
 def split_month(value):
-    if value:
-        parts = value.split('-')
-        return {'year': parts[0], 'month': parts[1]}
-    return None
+    if not value:
+        return {'year': timezone.now().year, 'month': timezone.now().month}
+    try:
+        year, month = map(int, value.split('-'))
+        return {'year': year, 'month': month}
+    except:
+        return {'year': timezone.now().year, 'month': timezone.now().month}
 
 
 

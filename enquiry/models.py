@@ -4,6 +4,10 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+
+
+
+
 class Counsellor(models.Model):
     name = models.CharField(max_length=100, unique=True)
     mobile = models.CharField(max_length=15)
@@ -139,8 +143,15 @@ class Enquiry(models.Model):
                 if self.target_fees is not None
                 else None
             )
+        if self.batch:
+            self.is_joined_batch = True
+        else:
+            self.is_joined_batch = False
+
 
         super().save(*args, **kwargs)
+    
+
 
     @property
     def is_fully_paid(self):
@@ -374,6 +385,5 @@ class EducationInfo(models.Model):
             degree = self.other_pg_degree_name if self.pg_degree == 'other' else self.get_pg_degree_display()
 
         return f"{self.get_level_display()} - {degree} - {self.college_name} ({self.year_of_passing})"
-
 
 

@@ -830,65 +830,144 @@ def download_monthly_summary_excel(request):
     wb.save(response)
     return response
 
-# ========== Monthly Summary by Counsellor ==========
-@manager_required
+from django.db.models import Q, Sum
+from decimal import Decimal
+
 def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
     stats = []
-    counsellors = Counsellor.objects.all()
-    
+    counsellors = Counsellor.objects.all().prefetch_related('enquiry_set')
+    from django.db.models import Q, Sum
+from decimal import Decimal
+
+def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
+    stats = []
+    counsellors = Counsellor.objects.all().prefetch_related('enquiry_set')
+
+    # List of all telephonic-related enquiry types
+    TELEPHONIC_TYPES = [
+        'someone_telephonic',
+        'direct_telephonic',
+        'telephonic_to_walkin',
+    ]
+
+
     for counsellor in counsellors:
         queryset = Enquiry.objects.filter(counsellor=counsellor)
-        
+
         if month_filter:
-            year, month = map(int, month_filter.split('-'))
-            queryset = queryset.filter(created_at__year=year, created_at__month=month)
-        
+            try:
+                year, month = map(int, month_filter.split('-'))
+                queryset = queryset.filter(created_at__year=year, created_at__month=month)
+            except ValueError:
+                pass
+
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+
+        # Split by visit_type
+        telephonic_q = Q(enquiry_type__in=TELEPHONIC_TYPES)
+        walkin_q = ~telephonic_q
+
+        # Total Telephonic / Walkin
+        total_telephonic = queryset.filter(telephonic_q).count()
+        total_walkin = queryset.filter(walkin_q).count()
         
-        total_students = queryset.count()
-        joined_count = queryset.filter(status='joined').count()
-        pending_count = queryset.filter(status='pending').count()
-        dropout_count = queryset.filter(status='dropout').count()
-        total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or Decimal('0.00')
-        total_balance = queryset.aggregate(Sum('fees_balance'))['fees_balance__sum'] or Decimal('0.00')
+        print(total_telephonic)
         
+
+        # Joined
+        joined_telephonic = queryset.filter(telephonic_q, status='joined').count()
+        joined_walkin = queryset.filter(walkin_q, status='joined').count()
+        joined_total = joined_telephonic + joined_walkin
+        print(joined_telephonic)
+
+        # Pending
+        pending_telephonic = queryset.filter(telephonic_q, status='pending').count()
+        pending_walkin = queryset.filter(walkin_q, status='pending').count()
+        pending_total = pending_telephonic + pending_walkin
+
+        # Dropout
+        dropout_telephonic = queryset.filter(telephonic_q, status='dropout').count()
+        dropout_walkin = queryset.filter(walkin_q, status='dropout').count()
+        dropout_total = dropout_telephonic + dropout_walkin
+
+        # Fees
+        fees_data = queryset.aggregate(Sum('fees_paid'), Sum('fees_balance'))
+        fees_paid = fees_data['fees_paid__sum'] or Decimal('0.00')
+        fees_balance = fees_data['fees_balance__sum'] or Decimal('0.00')
+
         stats.append({
             'counsellor': counsellor,
-            'total_students': total_students,
-            'joined': joined_count,
-            'pending': pending_count,
-            'dropout': dropout_count,
-            'fees_paid': float(total_fees_paid),
-            'fees_balance': float(total_balance),
+            'total_telephonic': total_telephonic,
+            'total_walkin': total_walkin,
+            'joined_telephonic': joined_telephonic,
+            'joined_walkin': joined_walkin,
+            'joined': joined_total,  # ✅ Precomputed total
+            'pending_telephonic': pending_telephonic,
+            'pending_walkin': pending_walkin,
+            'pending': pending_total,  # ✅ Precomputed total
+            'dropout_telephonic': dropout_telephonic,
+            'dropout_walkin': dropout_walkin,
+            'dropout': dropout_total,  # ✅ Precomputed total
+            'fees_paid': float(fees_paid),
+            'fees_balance': float(fees_balance),
         })
-    
+
     return stats
+
+# views.py
+import calendar
+from datetime import datetime
+from django.shortcuts import render
+from django.db.models import Q, Sum
+from decimal import Decimal
 
 @login_required
 @manager_required
 def monthly_summary_by_counsellor(request):
-    selected_month = request.GET.get('month', None)
+    selected_month = request.GET.get('month', '')
     status_filter = request.GET.get('status', '')
+    
+    # Get current date context
     now = datetime.now()
     current_year = now.year
     current_month = now.month
     
-    if not selected_month:
+    # Validate and parse selected_month
+    try:
+        if selected_month:
+            year, month = map(int, selected_month.split('-'))
+            selected_month = f"{year}-{month:02d}"
+        else:
+            selected_month = f"{current_year}-{current_month:02d}"
+            year, month = current_year, current_month
+    except ValueError:
         selected_month = f"{current_year}-{current_month:02d}"
-    
-    stats = get_monthly_stats_by_counsellor(request, selected_month, status_filter)
-    years = list(range(2025, current_year + 1))
-    
+        year, month = current_year, current_month
+
+    # Get stats with fallback
+    try:
+        stats = get_monthly_stats_by_counsellor(
+            request, 
+            selected_month, 
+            status_filter
+        )
+    except Exception as e:
+        print(f"Error generating stats: {e}")
+        stats = []
+
+    # Generate month choices
+    years = list(range(2020, current_year + 1))  # Fixed year range
     month_choices = []
-    for year in years:
+    for year_opt in years:
         start_month = 1
-        end_month = 12 if year < current_year else current_month
-        for month in range(start_month, end_month + 1):
-            month_label = f"{calendar.month_abbr[month]} {year}"
-            month_value = f"{year}-{str(month).zfill(2)}"
+        end_month = 12 if year_opt < current_year else current_month
+        
+        for m in range(start_month, end_month + 1):
+            month_label = f"{calendar.month_abbr[m]} {year_opt}"
+            month_value = f"{year_opt}-{str(m).zfill(2)}"
             month_choices.append((month_value, month_label))
-    
+
     context = {
         'title': 'Monthly Summary by Counsellor',
         'stats': stats,
@@ -898,7 +977,10 @@ def monthly_summary_by_counsellor(request):
         'current_year': current_year,
         'current_month': current_month,
     }
+    
     return render(request, 'monthly_summary_by_counsellor.html', context)
+
+
 from openpyxl import Workbook
 # ========== Download Monthly Summary by Counsellor Excel ==========
 @login_required(login_url='accounts:login')
@@ -2237,3 +2319,5 @@ class MergeEnquiriesView(View):
             messages.error(request, f"An error occurred: {e}")
 
         return redirect('enquiry:search_by_two_mobiles')
+    
+    
