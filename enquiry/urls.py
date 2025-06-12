@@ -76,7 +76,7 @@ urlpatterns = [
      path('update-education/', views.update_education, name='update_education'),
     path('update-target-fees/', views.update_target_fees, name='update_target_fees'),
     path('inconsistent-joined/', views.InconsistentJoinedEnquiryListView.as_view(), name='inconsistent_joined'),
-    path('enquiry/<int:pk>/mark-joined/', views.mark_joined_batch, name='mark_joined_batch'),
+    path('enquiry/<int:enquiry_id>/mark-joined/', views.mark_joined_batch, name='mark_joined_batch'),
 
     # urls.py
 

@@ -1958,9 +1958,9 @@ from django.http import JsonResponse
 from .models import Enquiry
 
 @require_POST
-def mark_joined_batch(request, pk):
+def mark_joined_batch(request, enquiry_id):
     try:
-        enquiry = Enquiry.objects.get(pk=pk, status='joined', is_joined_batch=False)
+        enquiry = Enquiry.objects.get(pk=enquiry_id, status='joined', is_joined_batch=False)
         enquiry.is_joined_batch = True
         enquiry.save()
         return JsonResponse({'success': True})

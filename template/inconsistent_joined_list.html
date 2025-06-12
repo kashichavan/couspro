@@ -1,1109 +1,1934 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load humanize %}
-{% load custom_filters %}
 
-{% block title %}Waiting For New Batch{% endblock %}
+{% block title %}Smart Enquiry Dashboard{% endblock %}
 
-    {% block extra_css %}
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        :root {
-           --gradient-primary: linear-gradient(135deg, #ff6b35 0%, #f7931e 25%, #ff8c42 50%, #ff7b25 75%, #e65100 100%);
-            --gradient-secondary: linear-gradient(135deg, #ff8a65 0%, #ff7043 25%, #ff5722 50%, #f4511e 75%, #e64a19 100%);
-            --gradient-accent: linear-gradient(135deg, #ffb74d 0%, #ffa726 25%, #ff9800 50%, #ff8f00 75%, #ff6f00 100%);
-            --gradient-warm: linear-gradient(135deg, #ffcc80 0%, #ffb74d 25%, #ffa726 50%, #ff9800 75%, #ff8f00 100%);
-           --gradient-dark: linear-gradient(145deg, #2c3e50 0%, #34495e 100%);
-            --gradient-success: linear-gradient(145deg, #2c3e50 0%, #34495e 100%);
-            --gradient-warning: linear-gradient(135deg, #ffc107 0%, #ffca28 25%, #ffd54f 50%, #ffecb3 75%, #fff3c4 100%);
-            --gradient-info: linear-gradient(135deg, #2196f3 0%, #42a5f5 25%, #64b5f6 50%, #90caf9 75%, #bbdefb 100%);
-            
-            --shadow-orange: 0 8px 32px rgba(255, 107, 53, 0.3);
-            --shadow-warm: 0 12px 40px rgba(255, 152, 0, 0.4);
-        }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+/* Core Dashboard Styles - Enhanced Version */
+*{
+      font-family: 'Outfit', sans-serif;
+}
+:root {
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
+    /* Color System: Orange & White Theme */
+    --primary-color: #FF7F00;
+    --primary-light: #FFA64D;
+    --primary-dark: #E05D00;
+    --primary-bg: #FFF5E6;
+    --success: #10B981;
+    --warning: #FBBF24;
+    --danger: #EF4444;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
 
-        /* Modern Page Header */
-        .page-hero {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 3rem 0;
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .page-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
-        }
-        
-        .page-hero-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .hero-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 3.2rem;
-            margin-bottom: 0.8rem;
-            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #ffffff, #f8f9ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            font-weight: 400;
-            text-shadow: 1px 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .hero-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .stat-item {
-            background: rgba(255,255,255,0.15);
-            padding: 1.5rem;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.2);
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-item:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-colored);
-        }
-        
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-warning);
-        }
-        
-        .stat-number {
-            font-size: 2.2rem;
-            font-weight: 700;
-            display: block;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        .stat-label {
-            font-size: 0.95rem;
-            opacity: 0.85;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
+body {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    background-color: var(--gray-50);
+    color: var(--gray-700);
+}
 
-        /* Modern Table Container */
-        .table-container {
-            background: white;
-            box-shadow: var(--shadow-dark);
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.08);
-            position: relative;
-        }
-        
-        .table-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
-        }
-        
-        .table-header {
-            background: var(--gradient-dark);
-            color: white;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .table-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: skewX(-15deg);
-        }
-        
-        .table-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .table-icon {
-            font-size: 2rem;
-            opacity: 0.9;
-            background: var(--gradient-warning);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+.app-wrapper {
+    padding: 1.25rem 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
 
-        /* Enhanced DataTable Styling */
-        #batchTable {
-            font-family: 'Inter', sans-serif;
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100% !important;
-            background: white;
-        }
-        
-        #batchTable thead {
-            background: var(--gradient-primary);
-            position: relative;
-        }
-        
-        #batchTable thead::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--gradient-orange);
-        }
-        
-        #batchTable thead th {
-            background: transparent;
-            color: white;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.8px;
-            padding: 1.5rem 1.2rem;
-            border: none;
-            position: relative;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-        
-        #batchTable thead th:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 25%;
-            bottom: 25%;
-            width: 1px;
-            background: rgba(255,255,255,0.3);
-        }
-        
-        #batchTable tbody tr {
-            transition: all 0.4s ease;
-            border-bottom: 1px solid #e8ecf0;
-            position: relative;
-            background: white;
-        }
-        
-        #batchTable tbody tr:nth-child(even) {
-            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
-        }
-        
-        #batchTable tbody tr:hover {
-            background: var(--gradient-success) !important;
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: var(--shadow-dark);
-            color: white;
-            z-index: 10;
-        }
-        
-        #batchTable tbody tr:hover td {
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-        
-        #batchTable tbody tr:hover .money {
-            color: white !important;
-        }
-        
-        #batchTable tbody tr:hover .status-badge {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        
-        #batchTable tbody tr:hover a {
-            color: white !important;
-        }
-        
-        #batchTable tbody td {
-            padding: 1.5rem 1.2rem;
-            vertical-align: middle;
-            font-size: 0.95rem;
-            border: none;
-            font-weight: 500;
-            position: relative;
-        }
-        
-        /* Modern Status Badges - Capsule Style */
-.status-badge {
-    display: inline-flex;
+/* Enhanced Dashboard Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 1.2rem; /* More horizontal padding for capsule shape */
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-radius: 999px; /* Perfect capsule shape */
-    border: 1.5px solid rgba(255,255,255,0.2);
-    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(120deg, #fff0e6,#FFF8F3);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
     position: relative;
     overflow: hidden;
-    min-width: max-content;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.05);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.dashboard-title {
+    color: #ff6b00;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-title i {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem;
+    border-radius: 10px;
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-actions .btn {
+    font-weight: 500;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.dashboard-actions .btn:hover {
+    transform: translateY(-2px);
+}
+
+.dashboard-actions .btn i {
+    font-size: 0.875rem;
+}
+.btn-light,.btn-outline-light{
+    background-color: #e45e00;
+    color:#fff
+}
+/* Responsive Card & Table Styles */
+.data-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-header {
+    background: linear-gradient(120deg, #fff0e6,#FFF8F3);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.card-title {
+    color: #ff6b00;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.card-title i {
+    font-size: 1.125rem;
+}
+
+.data-table-wrapper {
+    padding: 1rem;
+}
+
+/* Enhanced Responsive Table Styling */
+.table-responsive {
+    overflow-x: visible;
+}
+
+#enquiryTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+#enquiryTable thead th {
+    background: linear-gradient(to right, var(--primary-bg), white);
+    color: var(--primary-dark);
+    font-weight: 600;
+    padding: 0.85rem 0.5rem;
+    font-size: 0.815rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid var(--primary-light);
+    position: relative;
+    white-space: normal;
+    vertical-align: middle;
+}
+
+#enquiryTable thead th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(to right, var(--primary-color), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+#enquiryTable thead th:hover::after {
+    transform: scaleX(1);
+}
+
+#enquiryTable tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+#enquiryTable tbody tr:last-child {
+    border-bottom: none;
+}
+
+#enquiryTable tbody tr:hover {
+    background-color: var(--primary-bg);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+#enquiryTable td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+    min-width: 50px;
+    word-break: break-word;
+}
+
+/* Card content display */
+.enquiry-card {
+    display: none; /* Hidden by default, shown on mobile */
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--gray-200);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.enquiry-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.enquiry-card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.enquiry-card-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--gray-800);
+}
+
+.enquiry-card-type {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-top: 0.25rem;
+}
+
+.enquiry-card-section {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--gray-100);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.enquiry-card-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.enquiry-card-value {
+    font-size: 0.875rem;
+}
+
+.enquiry-card-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--gray-100);
+}
+
+/* Status Badge Styling */
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.status-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .status-badge::before {
     content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s ease;
-}
-
-.status-badge:hover::before {
-    left: 100%;
-}
-
-.status-waiting {
-    color: #f093fb;
-    background: rgba(240,147,251,0.1);
-    border-color: rgba(240,147,251,0.3);
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
 }
 
 .status-joined {
-    color: #4facfe;
-    background: rgba(79,172,254,0.1);
-    border-color: rgba(79,172,254,0.3);
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
 }
 
-/* Money Display - Capsule Style */
-.money {
-    font-family: 'Space Grotesk', monospace;
-    font-weight: 700;
-    font-size: 0.95rem;
-    position: relative;
-    padding: 0.3rem 0.8rem;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.05);
+.status-joined::before {
+    background-color: var(--success);
 }
 
-.money-positive {
-    color: #00d4aa;
-    background: rgba(0,212,170,0.08);
+.status-pending {
+    background-color: rgba(251, 191, 36, 0.1);
+    color: var(--warning);
 }
 
-.money-negative {
-    color: #ff6b6b;
-    background: rgba(255,107,107,0.08);
+.status-pending::before {
+    background-color: var(--warning);
 }
 
-.money-neutral {
-    color: #4a5568;
-    background: rgba(74,85,104,0.08);
+.status-dropout {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
 }
 
-/* Modern Action Buttons - Capsule Style */
+.status-dropout::before {
+    background-color: var(--danger);
+}
+
+/* Enhanced Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
 .action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--shadow);
+}
+
+.view-btn {
+    background-color: var(--primary-color);
+}
+
+.edit-btn {
+    background-color: var(--success);
+}
+
+/* Enhanced Comment Styling */
+.comment-preview {
+    padding: 0.5rem 0;
+    cursor: pointer;
+    position: relative;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    transition: all 0.2s ease;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.comment-preview:hover {
+    color: var(--primary-dark);
+}
+
+.comment-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, var(--primary-light), transparent);
+    transition: transform 0.3s ease;
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+.comment-preview:hover::after {
+    transform: scaleX(1);
+}
+
+.comment-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    position: relative;
+}
+
+.comment-input {
+    border: 1px solid var(--gray-300);
+    border-radius: 20px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    flex-grow: 1;
+    transition: all 0.3s ease;
+    background-color: var(--gray-50);
+}
+
+.comment-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
+    background-color: white;
+}
+
+.add-comment-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+.add-comment-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: var(--shadow);
+}
+
+/* Enhanced Follow-up Date Styling */
+.followup-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    background-color: var(--primary-bg);
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.followup-date:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.followup-date.urgent {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+
+
+/* Enhanced Modal Styling */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+    color: white;
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.modal-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.btn-close {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    transform: rotate(90deg);
+}
+
+/* Enhanced Comments List */
+.comments-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.comment-item {
+    background-color: var(--gray-50);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+    border-left: 3px solid var(--primary-color);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+    transform: translateX(3px);
+    box-shadow: var(--shadow);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-500);
+}
+
+.comment-user {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.comment-text {
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Enhanced Alert Styling */
+#alertContainer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    max-width: 350px;
+}
+
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateX(20px);
+    animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border-left: 4px solid var(--success);
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border-left: 4px solid var(--danger);
+}
+
+/* DataTables Customization */
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid var(--gray-300);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    background-color: var(--gray-50);
+    transition: all 0.3s ease;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
+    background-color: white;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 0.5rem 1rem; /* Increased from 0.375rem 0.75rem */
+    font-size: 1rem; /* Increased from 0.875rem */
+    background-color: var(--gray-50);
+    transition: all 0.3s ease;
+    height: auto; /* Ensure proper height calculation */
+    min-height: 2.5rem; /* Add minimum height if needed */
+}
+
+/* Keep the focus styles consistent with new sizing */
+.dataTables_wrapper .dataTables_length select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.1);
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(to right, var(--primary-color), var(--primary-light));
+    border: none;
+    color: white !important;
+    font-weight: 500;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--primary-bg);
+    color: var(--primary-dark) !important;
+    border: 1px solid var(--primary-light);
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 127, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--gray-500);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--gray-400);
+}
+
+.empty-state h4 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--gray-600);
+}
+
+.empty-state p {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    #enquiryTable td, #enquiryTable th {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 992px) {
+    .dashboard-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .dashboard-title {
+        justify-content: center;
+        font-size: 1.35rem;
+    }
+    
+    .dashboard-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    .card-title {
+        justify-content: center;
+        font-size: 1.15rem;
+    }
+    
+    .data-table-wrapper {
+        padding: 0.75rem;
+    }
+    
+    /* Increase table font size for better touch */
+    #enquiryTable td {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Card view for mobile */
+    .table-view {
+        display: none;
+    }
+    
+    .card-view {
+        display: block;
+    }
+    
+    .app-wrapper {
+        padding: 0.75rem;
+    }
+    
+    .dashboard-header {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dashboard-title {
+        font-size: 1.25rem;
+    }
+    
+    .dashboard-actions .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem;
+    }
+    
+    .data-table-wrapper {
+        padding: 0.5rem;
+    }
+}
+
+@media (min-width: 769px) {
+    /* Table view for desktop */
+    .table-view {
+        display: block;
+    }
+    
+    .card-view {
+        display: none;
+    }
+}
+
+/* DataTables Responsive Overrides */
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+    background-color: var(--primary-color) !important;
+}
+
+.dt-responsive {
+    width: 100% !important;
+}
+
+.dtr-details {
+    width: 100%;
+}
+
+.cell-fit {
+    width: 1%;
+    white-space: nowrap;
+}
+
+/* Improvements for comment column */
+.comment-column {
+    max-width: 200px;
+}
+
+@media (max-width: 992px) {
+    .comment-column {
+        max-width: 150px;
+    }
+}
+.loader-gear {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.loader-gear i {
+    font-size: 3rem;
+    color: #ffaa00;
+}
+.loader-gear p {
+    margin: 0;
+    font-weight: bold;
+    color: #333;
+}
+/* Compact Capsule Button */
+.capsule-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    padding: 0.6rem 1.4rem;
-    border: none;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
+    padding: 0.3rem 0.8rem; /* Smaller padding for compact size */
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem; /* Slightly smaller text */
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-radius: 999px; /* Capsule shape */
-    min-width: 120px;
-    height: 40px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    background: rgba(255,255,255,0.05);
+    color: white;
+    background: linear-gradient(135deg, #28a745, #218838); /* Success gradient */
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    min-width: 80px;
+    height: 32px;
 }
 
-.action-btn::before {
+/* Shine overlay for gradient effect */
+.capsule-button::before {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s ease;
+    background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 50%
+    );
+    transition: left 0.3s ease;
+    z-index: 0;
 }
 
-.action-btn:hover::before {
+/* Hover effect */
+.capsule-button:hover::before {
     left: 100%;
 }
-.fa-phone-alt{
-    transform: rotate(84deg);
-}
-.btn-success-modern {
-    background: var(--gradient-warning);
-    color: #2d3748;
-    box-shadow: 0 4px 15px rgba(67,233,123,0.3);
-    border: 1.5px solid transparent;
+
+/* Button text container */
+.capsule-button .btn-text {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem; /* Reduced spacing for small size */
+    position: relative;
+    z-index: 2;
+    font-size: 0.75rem;
 }
 
-.btn-success-modern:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(67,233,123,0.4);
-    color: #2d3748;
-    border-color: rgba(255,255,255,0.4);
+/* Hover animation */
+.capsule-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
-.btn-info-modern {
-    background: var(--gradient-success);
-    color: white;
-    box-shadow: 0 4px 15px rgba(79,172,254,0.3);
-    border: 1.5px solid transparent;
+/* Active state */
+.capsule-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-info-modern:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(79,172,254,0.4);
-    color: white;
-    border-color: rgba(255,255,255,0.4);
+/* Color Variants */
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #218838);
 }
 
-/* Loading States - Adjusted */
-.btn-loading {
-    pointer-events: none;
-    opacity: 0.8;
-    transform: scale(0.95);
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
 }
 
-.btn-loading .btn-text {
-    opacity: 0;
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
 }
 
-.btn-loading::after {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    margin: auto;
-    border: 2.5px solid transparent;
-    border-top-color: currentColor;
-    border-right-color: currentColor;
-    animation: spin 1s linear infinite;
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .action-btn {
-        min-width: 100px;
-        font-size: 0.75rem;
-        padding: 0.5rem 1.2rem;
-    }
-    
-    .status-badge {
-        font-size: 0.7rem;
-        padding: 0.4rem 1rem;
-    }
-    
-    .money {
-        font-size: 0.85rem;
-        padding: 0.25rem 0.7rem;
-    }
+/* Optional: Icon-only version */
+.icon-button {
+    padding: 0.3rem;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 9999px;
 }
-       
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* DataTables Custom Styling */
-        .dataTables_wrapper {
-            padding: 2rem;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        }
-        
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 2rem;
-        }
-        
-        .dataTables_wrapper .dataTables_length select {
-            border: 2px solid #e2e8f0;
-            padding: 0.6rem 1rem;
-            background: white;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .dataTables_wrapper .dataTables_length select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
-            outline: none;
-        }
-        
-        .dataTables_wrapper .dataTables_filter input {
-            border: 2px solid #e2e8f0;
-            padding: 0.8rem 1.5rem;
-            width: 350px;
-            background: white;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            box-shadow: var(--shadow-light);
-        }
-        
-        .dataTables_wrapper .dataTables_filter input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
-            outline: none;
-            transform: translateY(-1px);
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            margin: 0 3px;
-            padding: 0.8rem 1.2rem;
-            border: 2px solid #e2e8f0;
-            background: white;
-            color: #4a5568;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background: var(--gradient-primary);
-            color: white;
-            border-color: transparent;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-colored);
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: var(--gradient-primary);
-            color: white;
-            border-color: transparent;
-            box-shadow: var(--shadow-colored);
-        }
-        
-        .dataTables_wrapper .dataTables_info {
-            font-weight: 600;
-            color: #4a5568;
-            padding: 1rem 0;
-        }
-        
-        /* Success Animation */
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: translateX(0) scale(1); }
-            50% { opacity: 0.5; transform: translateX(20px) scale(0.95); }
-            100% { opacity: 0; transform: translateX(100px) scale(0.8); }
-        }
-        
-        .row-removing {
-            animation: fadeOut 0.6s ease-out forwards;
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: var(--gradient-primary);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .empty-state::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
-        }
-        
-        .empty-state-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .empty-state-icon {
-            font-size: 5rem;
-            margin-bottom: 1.5rem;
-            opacity: 0.8;
-            background: var(--gradient-warning);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .empty-state-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        .empty-state-text {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            line-height: 1.6;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        /* Avatar Circle */
-        .avatar-circle {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-orange);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1rem;
-            flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .avatar-circle::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(45deg);
-            transition: transform 0.5s ease;
-        }
-        
-        .avatar-circle:hover::before {
-            transform: rotate(45deg) translate(100%, 100%);
-        }
-        
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 120px;
-            right: 30px;
-            z-index: 1055;
-        }
-        
-        .custom-toast {
-            background: white;
-            box-shadow: var(--shadow-dark);
-            border: none;
-            overflow: hidden;
-            min-width: 350px;
-        }
-        
-        .toast-success {
-            border-left: 5px solid #00d4aa;
-            background: var(--gradient-success);
-            color: white;
-        }
-        
-        .toast-error {
-            border-left: 5px solid #ff6b6b;
-            background: var(--gradient-secondary);
-            color: white;
-        }
-        
-        .toast-success .toast-header,
-        .toast-error .toast-header {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .toast-success .toast-body,
-        .toast-error .toast-body {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            font-weight: 600;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-stats {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .stat-item {
-                padding: 1.2rem;
-            }
-            
-            .table-header {
-                padding: 1.5rem;
-            }
-            
-            .table-title {
-                font-size: 1.4rem;
-            }
-            
-            .dataTables_wrapper {
-                padding: 1rem;
-            }
-            
-            .dataTables_wrapper .dataTables_filter input {
-                width: 100%;
-            }
-            
-            .action-btn {
-                padding: 0.6rem 1rem;
-                font-size: 0.8rem;
-                min-width: 120px;
-            }
-            
-            #batchTable thead th,
-            #batchTable tbody td {
-                padding: 1rem 0.8rem;
-            }
-        }
-        
-        /* Additional Visual Effects */
-        .page-hero, .table-container, .action-btn, .status-badge {
-            animation: slideInUp 0.6s ease-out;
-        }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Ripple Effect */
-        @keyframes ripple {
-            to {
-                transform: scale(2.5);
-                opacity: 0;
-            }
-        }
-        
-        .ripple-effect {
-            position: relative;
-            overflow: hidden;
-        }
-        .hover-text:hover{
-            color:#fff !important
-        }
-    </style>
-{% endblock %}  
+</style>
 
+{% endblock %}
 {% block content %}
-<!-- Modern Page Hero -->
+<div class="app-wrapper">
 
-
-<!-- Modern Table Container -->
-<div class="table-container">
-    <div class="table-header">
-        <h3 class="table-title">
-            <i class="fas fa-graduation-cap table-icon"></i>
-            Student Batch Management
-        </h3>
+    <!-- Global Page Loader -->
+<div id="globalLoader" class="loader-overlay">
+    <div class="loader-gear">
+        <i class="fas fa-cog fa-spin"></i>
+        <p>Loading...</p>
+    </div>
+</div>
+    
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-comments"></i> 
+            Students Waiting For New Batch
+        </h1>
+        <div class="dashboard-actions">
+            <a href="{% url 'enquiry:add_enquiry' %}" class="btn btn-light">
+                <i class="fas fa-plus"></i> New Enquiry
+            </a>
+            <a href="{% url 'enquiry:bulk_enquiry_upload' %}" class="btn btn-outline-light">
+                <i class="fas fa-file-import"></i> Import
+            </a>
+        </div>
     </div>
     
-    <div class="table-responsive p-4">
-        {% if enquiries %}
-        <table id="batchTable" class="table table-hover" style="width:100%">
-            <thead>
-                <tr>
-                    <th><i class="fas fa-user"></i> Student Name</th>
-                    <th><i class="fas fa-user-tie"></i> Counsellor</th>
-                    <th><i class="fas fa-phone"></i> Contact</th>
-                    <th><i class="fas fa-target"></i> Target Fees</th>
-                    <th><i class="fas fa-money-bill-wave"></i> Fees Paid</th>
-                    <th><i class="fas fa-balance-scale"></i> Balance</th>
-                    <th><i class="fas fa-flag"></i> Batch Status</th>
-                    <th><i class="fas fa-cogs"></i> Actions</th>
-                    <th><i class="fas fa-eye"></i> Profile</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for enquiry in enquiries %}
-                <tr id="row-{{ enquiry.id }}" data-fees-paid="{{ enquiry.fees_paid|default:0 }}" data-target-fees="{{ enquiry.target_fees|default:0 }}">
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-circle me-2">
-                                {{ enquiry.name|first|upper }}
-                            </div>
-                            <strong>{{ enquiry.name }}</strong>
-                        </div>
-                    </td>
-                    <td>
-                        <span>{{ enquiry.counsellor.name }}</span>
-                    </td>
-                    <td>
-                        <a href="tel:{{ enquiry.mobile }}" class="text-decoration-none">
-                            <i class="fas fa-phone-alt text-success"></i>
-                            {{ enquiry.mobile }}
-                        </a>
-                    </td>
-                    <td>
-                        <span class="money money-neutral">
-                            ₹{{ enquiry.target_fees|default:0|floatformat:0 }}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="money money-positive">
-                            ₹{{ enquiry.fees_paid|default:0|floatformat:0 }}
-                        </span>
-                    </td>
-                    <td>
-                        {% with balance=enquiry.fees_balance|default:enquiry.target_fees|default:0|floatformat:0|add:"-"|add:enquiry.fees_paid|default:0 %}
-                        <span class="money {% if balance > 0 %}money-negative{% elif balance < 0 %}money-positive{% else %}money-neutral{% endif %}">
-                            ₹{% if enquiry.fees_balance is not None %}{{ enquiry.fees_balance|floatformat:0 }}{% else %}{{ enquiry.target_fees|default:0|add:enquiry.fees_paid|default:0|mul:-1|floatformat:0 }}{% endif %}
-                        </span>
-                        {% endwith %}
-                    </td>
-                    <td>
-                        <span class="status-badge status-waiting">
-                            <i class="fas fa-clock"></i>
-                            Waiting
-                        </span>
-                    </td>
-                    <td>
-                        <button class="action-btn btn-success-modern" onclick="markAsJoined({{ enquiry.id }}, this)">
-                            <span class="btn-text">
-                                <i class="fas fa-check"></i>
-                                Mark Joined
-                            </span>
-                        </button>
-                    </td>
-                    <td>
-                        <a href="{% url 'enquiry:enquiry_details' enquiry.id %}" target="_blank" class="action-btn btn-info-modern">
-                            <i class="fas fa-external-link-alt"></i>
-                            View Profile
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-state">
-            <div class="empty-state-icon">
-                <i class="fas fa-users-slash"></i>
+    <!-- Alerts container -->
+    <div id="alertContainer"></div>
+    
+    <!-- Enquiry Table Card -->
+    <div class="data-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-list"></i> Enquiries
+            </h2>
+            <div class="d-flex gap-2">
+                <button id="refreshTable" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button id="exportCSV" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-download"></i> Export
+                </button>
             </div>
-            <h3 class="empty-state-title">No Students Waiting</h3>
-            <p class="empty-state-text">
-                There are currently no students waiting for new batches.<br>
-                Students will appear here once they're ready to join upcoming batches.
-            </p>
         </div>
-        {% endif %}
+        <div class="card-body p-0">
+            <div class="data-table-wrapper">
+                <table id="enquiryTable" class="display nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Course</th>
+                            <th>Batch-Status</th>
+                            <th>Counsellor</th>
+                            <th>Follow Up</th>
+                            <th>Comments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enquiry in enquiries %}
+                        <tr id="enquiry-row-{{ enquiry.id }}">
+                            <td>
+                                <div class="fw-semibold">{{ enquiry.name }}</div>
+                                <div class="text-muted small">{{ enquiry.get_enquiry_type_display }}</div>
+                            </td>
+                            <td>{{ enquiry.mobile }}</td>
+                            <td>{{ enquiry.get_subject_display }}</td>
+                            <td>
+    <button class="capsule-button btn-success-modern" onclick="markAsJoined({{ enquiry.id }}, this)">
+        <span class="btn-text">
+            <i class="fas fa-check"></i>
+            Mark Joined
+        </span>
+    </button>
+</td>
+                            <td>
+                                <div class="fw-semibold">{{ enquiry.counsellor.name }}</div>
+                                <div class="text-muted small">{{ enquiry.counsellor.department }}</div>
+                            </td>
+                            <td>
+                                <div class="followup-date {% if enquiry.followup_date <= today %}urgent{% endif %}"
+                                     data-enquiry-id="{{ enquiry.id }}">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {% if enquiry.followup_date %}
+                                        {{ enquiry.followup_date|date:"M d" }}
+                                    {% else %}
+                                        Set Date
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div id="comment-container-{{ enquiry.id }}">
+                                    {% with enquiry.comments.all|first as comment %}
+                                        {% if comment %}
+                                            <div class="comment-preview" 
+                                                 title="{{ comment.comment }}"
+                                                 data-enquiry-id="{{ enquiry.id }}">
+                                                {{ comment.comment|truncatechars:30 }}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">No comments</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                                <div class="comment-input-group">
+                                    <input type="text" 
+                                           id="comment-input-{{ enquiry.id }}" 
+                                           class="comment-input" 
+                                           placeholder="Add comment...">
+                                    <button class="add-comment-btn" 
+                                            data-enquiry-id="{{ enquiry.id }}">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'enquiry:enquiry_details' enquiry.id %}" 
+                                       class="action-btn view-btn" 
+                                       title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'enquiry:edit_enquiry' enquiry.pk %}" 
+                                       class="action-btn edit-btn" 
+                                       title="Edit Enquiry">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
+                                    <a href="https://wa.me/91{{ enquiry.mobile }}" target="_blank" 
+   class="btn btn-success btn-sm rounded-circle d-flex justify-content-center align-items-center"
+   style="width: 32px; height: 32px;">
+    <i class="fab fa-whatsapp"></i>
+</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
+<!-- Comments Modal -->
+<div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentsModalLabel">
+                    <i class="fas fa-comments me-2"></i> 
+                    Enquiry Comments
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="comments-container" id="commentsList">
+                    <!-- Comments loaded dynamically -->
+                </div>
+                <div class="comment-input-container mt-3">
+                    <div class="input-group">
+                        <input type="text" id="modalCommentInput" class="form-control" 
+                               placeholder="Type your comment...">
+                        <button class="btn btn-primary" type="button" id="addCommentModalBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<style>
-.avatar-circle {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-}
-</style>
+<!-- Date Picker Modal -->
+<div class="modal fade" id="datePickerModal" tabindex="-1" aria-labelledby="datePickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="datePickerModalLabel">
+                    <i class="fas fa-calendar-alt me-2"></i> Set Follow-up Date
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Updated input field -->
+                <input type="text" class="form-control" id="followupDateInput" placeholder="Select a date">
+                <input type="hidden" id="currentEnquiryId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveFollowupDate">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"> 
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="fas fa-rupee-sign me-2"></i> Record Initial Payment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="paymentEnquiryId">
+
+                <!-- Target Fees -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Target Fees (Total Course Fee)</label>
+                    <input type="number" class="form-control" id="targetFees" min="0" step="any">
+                </div>
+
+                <!-- Payment Amount -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Payment Amount <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="paymentAmount" min="0" step="any" required>
+                </div>
+
+                <!-- Remaining Balance (auto-calculated) -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Remaining Balance</label>
+                    <input type="number" class="form-control" id="remainingBalance" readonly>
+                </div>
+
+                <!-- Due Date (shown only if balance > 0) -->
+                <div class="mb-3 d-none" id="dueDateContainer">
+                    <label class="form-label fw-semibold">Due Date</label>
+                    <input type="date" class="form-control" id="dueDate">
+                </div>
+
+                <!-- Alert Box -->
+                <div id="paymentAlert" class="alert d-none mt-2"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePayment">Record Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-
 <script>
-$(document).ready(function() {
-    // Initialize DataTable with modern styling
-    $('#batchTable').DataTable({
-        responsive: true,
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-        order: [[0, 'asc']],
-        language: {
-            search: "",
-            searchPlaceholder: "🔍 Search students...",
-            lengthMenu: "Show _MENU_ entries per page",
-            info: "Showing _START_ to _END_ of _TOTAL_ students",
-            infoEmpty: "No students found",
-            infoFiltered: "(filtered from _MAX_ total students)",
-            paginate: {
-                first: "⏮️",
-                previous: "⬅️", 
-                next: "➡️",
-                last: "⏭️"
+(function() {
+    'use strict';
+    
+    // Global variables
+    let enquiryTable;
+    let currentEnquiryId = null;
+    
+    // Initialize when document is ready
+    $(document).ready(function() {
+        initializeDataTable();
+        setupEventListeners();
+        
+        // Set current date as default for date picker
+        setDefaultFollowupDate();
+    });
+    
+    function initializeDataTable() {
+        enquiryTable = $('#enquiryTable').DataTable({
+            responsive: true,
+            stateSave: true,
+            scrollX: true,
+            language: {
+                search: "",
+                searchPlaceholder: "Search enquiries...",
+                paginate: {
+                    previous: '<i class="fas fa-chevron-left"></i>',
+                    next: '<i class="fas fa-chevron-right"></i>'
+                },
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
             },
-            emptyTable: "No students waiting for new batch"
-        },
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-        columnDefs: [
-            { 
-                targets: [7, 8], 
-                orderable: false,
-                className: 'text-center'
-            },
-            {
-                targets: [3, 4, 5],
-                className: 'text-end'
+            pageLength: 25,
+            order: [[5, 'asc']], // Sort by follow-up date
+            columnDefs: [
+                { orderable: false, targets: [6, 7] }, // Disable sorting for comments and actions
+                { responsivePriority: 1, targets: [0, 3, 5, 7] } // Priority columns
+            ]
+        });
+        
+        // Export CSV functionality
+        $('#exportCSV').on('click', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const fileName = `enquiries_export_${today}.csv`;
+            
+            // Get visible data from the table
+            const data = [];
+            const headers = [];
+            
+            // Get headers
+            $('#enquiryTable thead th').each(function(index) {
+                if (index < 6) { // Skip comments and actions columns
+                    headers.push($(this).text());
+                }
+            });
+            
+            // Get data
+            enquiryTable.rows().every(function() {
+                const rowData = this.data();
+                const cleanRow = [];
+                
+                // Extract text content only from first 6 columns
+                for (let i = 0; i < 6; i++) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = rowData[i];
+                    cleanRow.push(tempDiv.textContent.trim());
+                }
+                
+                data.push(cleanRow);
+            });
+            
+            // Create CSV content
+            let csvContent = headers.join(',') + '\n';
+            data.forEach(row => {
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // Refresh button
+        $('#refreshTable').on('click', function() {
+            const btn = $(this);
+            btn.html('<i class="fas fa-spinner fa-spin"></i>');
+            btn.prop('disabled', true);
+            
+            // Reload the page
+            window.location.reload();
+        });
+    }
+    
+    function setupEventListeners() {
+        // Comment click handler
+        $(document).on('click', '.comment-preview', function() {
+            currentEnquiryId = $(this).data('enquiry-id');
+            loadComments(currentEnquiryId);
+            $('#commentsModal').modal('show');
+        });
+        
+        // Add comment from modal
+        $('#addCommentModalBtn').on('click', function() {
+            const commentText = $('#modalCommentInput').val().trim();
+            if (commentText) {
+                submitComment(currentEnquiryId, commentText, $('#modalCommentInput'));
             }
-        ],
-        drawCallback: function() {
-            // Update stats after table redraw
-            updateStats();
-        }
-    });
-    
-    // Initialize stats
-    updateStats();
-});
+        });
+        
+        // Add comment from table
+        $(document).on('click', '.add-comment-btn', function() {
+            const enquiryId = $(this).data('enquiry-id');
+            const input = $(`#comment-input-${enquiryId}`);
+            const commentText = input.val().trim();
+            if (commentText) {
+                submitComment(enquiryId, commentText, input);
+            }
+        });
+        
+        // Enter key to submit comments
+        $(document).on('keypress', '.comment-input, #modalCommentInput', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                const $input = $(this);
+                const commentText = $input.val().trim();
+                
+                if (commentText) {
+                    const enquiryId = $input.attr('id') === 'modalCommentInput' 
+                        ? currentEnquiryId 
+                        : $input.attr('id').split('-')[2];
+                    
+                    submitComment(enquiryId, commentText, $input);
+                }
+            }
+        });
+        
+        // Follow-up date click handler
+        $(document).on('click', '.followup-date', function() {
+            currentEnquiryId = $(this).data('enquiry-id');
+            $('#currentEnquiryId').val(currentEnquiryId);
+            $('#datePickerModal').modal('show');
+        });
+        
+        // Save follow-up date
+        $('#saveFollowupDate').on('click', function() {
+            const followupDate = $('#followupDateInput').val();
+            const enquiryId = $('#currentEnquiryId').val();
+            
+            if (followupDate) {
+                updateFollowupDate(enquiryId, followupDate);
+            }
+        });
+        
+        // Status badge click handler
+        $(document).on('click', '.status-badge', function() {
+            currentEnquiryId = $(this).data('enquiry-id');
+            const currentStatus = $(this).data('status');
+            
+            $('#statusEnquiryId').val(currentEnquiryId);
+            $('#statusSelect').val(currentStatus);
+            $('#statusModal').modal('show');
+        });
+        
+        // Save status
+        $('#saveStatus').on('click', function() {
+            const enquiryId = $('#statusEnquiryId').val();
+            const newStatus = $('#statusSelect').val();
+            const statusNote = $('#statusNote').val().trim();
+            
+            updateStatus(enquiryId, newStatus, statusNote);
+        });
 
-function updateStats() {
-    let totalFees = 0;
-    let totalPaid = 0;
-    let studentCount = 0;
-    
-    $('#batchTable tbody tr:visible').each(function() {
-        if (!$(this).hasClass('odd') && !$(this).hasClass('even')) return;
+        // Save payment button handler
+        $('#savePayment').on('click', function() {
+            const enquiryId = $('#paymentEnquiryId').val();
+            const paymentAmount = parseFloat($('#paymentAmount').val());
+            const targetFees = parseFloat($('#targetFees').val()) || null;
+            
+            if (isNaN(paymentAmount) || paymentAmount <= 0) {
+                showPaymentAlert('Please enter a valid payment amount', 'danger');
+                return;
+            }
+            
+            submitPayment(enquiryId, paymentAmount, targetFees);
+        });
         
-        const feesPaid = parseFloat($(this).data('fees-paid')) || 0;
-        const targetFees = parseFloat($(this).data('target-fees')) || 0;
-        
-        totalFees += targetFees;
-        totalPaid += feesPaid;
-        studentCount++;
-    });
-    
-    const avgPayment = totalFees > 0 ? ((totalPaid / totalFees) * 100) : 0;
-    
-    // Animate the stat updates
-    animateValue('totalStudents', 0, studentCount, 1000);
-    animateValue('totalFees', 0, totalPaid, 1000, '₹');
-    animateValue('avgPayment', 0, avgPayment, 1000, '', '%');
-}
+        // Reset payment modal when closed
+        $('#paymentModal').on('hidden.bs.modal', function() {
+            $('#paymentAmount').val('');
+            $('#targetFees').val('');
+            $('#paymentAlert').addClass('d-none').html('');
+        });
+    }
 
-function animateValue(elementId, start, end, duration, prefix = '', suffix = '') {
-    const element = document.getElementById(elementId);
-    const startTime = performance.now();
-    
-    function updateValue(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const current = start + (end - start) * easeOutQuart;
-        
-        if (suffix === '%') {
-            element.textContent = prefix + current.toFixed(1) + suffix;
-        } else if (prefix === '₹') {
-            element.textContent = prefix + Math.floor(current).toLocaleString('en-IN');
+    // Calculate balance and due date
+    const targetInput = document.getElementById("targetFees");
+    const amountInput = document.getElementById("paymentAmount");
+    const balanceInput = document.getElementById("remainingBalance");
+    const dueDateContainer = document.getElementById("dueDateContainer");
+    const dueDateInput = document.getElementById("dueDate");
+
+    function calculateBalanceAndDueDate() {
+        const target = parseFloat(targetInput.value) || 0;
+        const amount = parseFloat(amountInput.value) || 0;
+        const balance = target - amount;
+
+        balanceInput.value = balance.toFixed(2);
+
+        if (balance > 0) {
+            dueDateContainer.classList.remove("d-none");
+
+            // Auto fill due date = today + 7 days
+            const due = new Date();
+            due.setDate(due.getDate() + 7);
+            dueDateInput.value = due.toISOString().split("T")[0];
         } else {
-            element.textContent = prefix + Math.floor(current) + suffix;
+            dueDateContainer.classList.add("d-none");
+            dueDateInput.value = '';
         }
+    }
+
+    // Event Listeners for payment calculation
+    if (targetInput && amountInput) {
+        targetInput.addEventListener("input", calculateBalanceAndDueDate);
+        amountInput.addEventListener("input", calculateBalanceAndDueDate);
+    }
+
+    // Fixed Mark as Joined function
+window.markAsJoined = function(enquiryId, buttonElement) {
+    console.log('markAsJoined called with enquiryId:', enquiryId);
+    
+    // Add loading state
+    const originalHtml = buttonElement.innerHTML;
+    buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    buttonElement.disabled = true;
+    
+    // Construct the URL dynamically with the actual enquiryId
+    const url = `/enquiry/${enquiryId}/mark-joined/`;
+    
+    // Make the AJAX request
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: {
+            enquiry_id: enquiryId,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function(response) {
+            console.log('Response received:', response);
+            if (response.success) {
+                // Show success message
+                showAlert('Student successfully marked as joined! 🎉', 'success');
+                
+                // Update the button to show joined status
+                buttonElement.innerHTML = '<i class="fas fa-check-circle"></i> Joined';
+                buttonElement.className = 'btn btn-success btn-sm';
+                buttonElement.disabled = true;
+                
+                // Optional: Remove the row after a delay
+                setTimeout(function() {
+                    const row = document.getElementById(`enquiry-row-${enquiryId}`);
+                    if (row && enquiryTable) {
+                        enquiryTable.row(row).remove().draw();
+                    }
+                }, 2000);
+                
+            } else {
+                showAlert(response.error || 'Failed to update student status', 'danger');
+                buttonElement.innerHTML = originalHtml;
+                buttonElement.disabled = false;
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            showAlert('An error occurred. Please try again.', 'danger');
+            buttonElement.innerHTML = originalHtml;
+            buttonElement.disabled = false;
+        }
+    });
+};
+
+    // Function to submit payment
+    function submitPayment(enquiryId, paymentAmount, targetFees) {
+        const btn = $('#savePayment');
+        btn.prop('disabled', true);
+
+        const dueDate = $('#dueDate').val();
+
+        $.ajax({
+            url: '{% url "enquiry:update_payment" %}',
+            method: 'POST',
+            data: {
+                enquiry_id: enquiryId,
+                payment_amount: paymentAmount,
+                target_fees: targetFees,
+                due_date: dueDate,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showPaymentAlert('Payment recorded successfully!', 'success');
+                    setTimeout(() => {
+                        $('#paymentModal').modal('hide');
+                        const badge = $(`.status-badge[data-enquiry-id="${enquiryId}"]`);
+                        badge.removeClass().addClass('status-badge status-joined')
+                             .text('Joined')
+                             .data('status', 'joined');
+                    }, 1500);
+                } else {
+                    showPaymentAlert(response.error || 'Failed to record payment', 'danger');
+                }
+            },
+            error: function() {
+                showPaymentAlert('An error occurred', 'danger');
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    }
+
+    // Function to show alerts in payment modal
+    function showPaymentAlert(message, type) {
+        const alert = $('#paymentAlert');
+        alert.removeClass('d-none')
+             .removeClass('alert-success alert-danger alert-info')
+             .addClass(`alert-${type}`)
+             .html(`<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i> ${message}`);
+    }
+    
+    // Function to load comments for an enquiry
+    function loadComments(enquiryId) {
+        $('#commentsList').html('<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i></div>');
         
-        if (progress < 1) {
-            requestAnimationFrame(updateValue);
+        $.ajax({
+            url: '{% url "enquiry:get_comments" %}',
+            data: { enquiry_id: enquiryId },
+            success: function(response) {
+                $('#commentsList').html(response);
+            },
+            error: function() {
+                $('#commentsList').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Failed to load comments
+                    </div>
+                `);
+            }
+        });
+    }
+    
+    // Function to submit a comment
+    function submitComment(enquiryId, commentText, inputField) {
+        inputField.prop('disabled', true);
+        
+        $.ajax({
+            url: '{% url "enquiry:add_comment" %}',
+            method: 'POST',
+            data: {
+                enquiry_id: enquiryId,
+                comment: commentText,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Clear the input
+                    inputField.val('');
+                    
+                    // Update the comment preview in the table
+                    $(`#comment-container-${enquiryId}`).html(`
+                        <div class="comment-preview" 
+                             title="${commentText}"
+                             data-enquiry-id="${enquiryId}">
+                            ${response.truncated_comment}
+                        </div>
+                    `);
+                    
+                    // If comments modal is open, reload comments
+                    if ($('#commentsModal').is(':visible')) {
+                        loadComments(enquiryId);
+                    }
+                    
+                    showAlert('Comment added successfully', 'success');
+                } else {
+                    showAlert(response.message || 'Failed to add comment', 'danger');
+                }
+            },
+            error: function() {
+                showAlert('An error occurred', 'danger');
+            },
+            complete: function() {
+                inputField.prop('disabled', false).focus();
+            }
+        });
+    }
+    
+    // Function to update follow-up date
+    function updateFollowupDate(enquiryId, followupDate) {
+        $('#saveFollowupDate').prop('disabled', true);
+        
+        $.ajax({
+            url: '{% url "enquiry:update_followup_date" %}',
+            method: 'POST',
+            data: {
+                enquiry_id: enquiryId,
+                followup_date: followupDate,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Format date for display
+                    const dateObj = new Date(followupDate);
+                    const month = dateObj.toLocaleString('default', { month: 'short' });
+                    const day = dateObj.getDate();
+                    
+                    // Update the follow-up date display
+                    const dateDisplay = $(`.followup-date[data-enquiry-id="${enquiryId}"]`);
+                    dateDisplay.html(`<i class="fas fa-calendar-alt"></i> ${month} ${day}`);
+                    
+                    // Check if date is in the past
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    dateObj.setHours(0, 0, 0, 0);
+                    
+                    if (dateObj <= today) {
+                        dateDisplay.addClass('urgent');
+                    } else {
+                        dateDisplay.removeClass('urgent');
+                    }
+                    
+                    $('#datePickerModal').modal('hide');
+                    showAlert('Follow-up date updated', 'success');
+                } else {
+                    showAlert(response.message || 'Failed to update date', 'danger');
+                }
+            },
+            error: function() {
+                showAlert('An error occurred', 'danger');
+            },
+            complete: function() {
+                $('#saveFollowupDate').prop('disabled', false);
+            }
+        });
+    }
+    
+    function updateStatus(enquiryId, newStatus, statusNote) {
+        $('#saveStatus').prop('disabled', true);
+        
+        $.ajax({
+            url: '{% url "enquiry:update_status" %}',
+            method: 'POST',
+            data: {
+                enquiry_id: enquiryId,
+                new_status: newStatus,
+                status_note: statusNote,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // If status is set to joined, open payment modal
+                    if (newStatus === 'joined') {
+                        $('#statusModal').modal('hide');
+                        $('#paymentEnquiryId').val(enquiryId);
+                        $('#paymentModal').modal('show');
+                    } else {
+                        // Update status for other cases
+                        const badge = $(`.status-badge[data-enquiry-id="${enquiryId}"]`);
+                        badge.removeClass()
+                             .addClass(`status-badge status-${newStatus}`)
+                             .text(response.new_status_display)
+                             .data('status', newStatus);
+                        
+                        $('#statusModal').modal('hide');
+                        showAlert('Status updated', 'success');
+                    }
+                    
+                    // Clear the status note field
+                    $('#statusNote').val('');
+                } else {
+                    showAlert(response.message || 'Failed to update status', 'danger');
+                }
+            },
+            error: function() {
+                showAlert('An error occurred', 'danger');
+            },
+            complete: function() {
+                $('#saveStatus').prop('disabled', false);
+            }
+        });
+    }
+    
+    // Show alert message
+    function showAlert(message, type) {
+        const alertId = `alert-${Date.now()}`;
+        const alert = $(`
+            <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show mb-3">
+                <div class="d-flex align-items-center">
+                    ${type === 'success' ? '<i class="fas fa-check-circle me-2"></i>' : ''}
+                    ${type === 'danger' ? '<i class="fas fa-exclamation-circle me-2"></i>' : ''}
+                    ${message}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `);
+        
+        $('#alertContainer').prepend(alert);
+        
+        // Auto-dismiss after 3 seconds
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            $(`#${alertId}`).fadeOut(300, function() {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+    
+    // Set default follow-up date to today
+    function setDefaultFollowupDate() {
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        $('#followupDateInput').val(formattedDate);
+        
+        // Initialize date picker if you're using one (like Flatpickr)
+        if (typeof flatpickr !== 'undefined') {
+            flatpickr('#followupDateInput', {
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                defaultDate: today
+            });
         }
     }
     
-    requestAnimationFrame(updateValue);
-}
-
-function markAsJoined(enquiryId, buttonElement) {
-    // Add loading state
-    buttonElement.classList.add('btn-loading');
+    // Hide global loader when page is fully loaded
+    $(window).on('load', function() {
+        $('#globalLoader').fadeOut(300);
+    });
     
-    fetch(`/enquiry/${enquiryId}/mark-joined/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Show success toast
-            showToast('Student successfully marked as joined! 🎉', 'success');
-            
-            // Animate row removal
-            const row = document.getElementById(`row-${enquiryId}`);
-            if (row) {
-                row.classList.add('row-removing');
-                setTimeout(() => {
-                    // Remove from DataTable
-                    $('#batchTable').DataTable().row(row).remove().draw();
-                    updateStats();
-                }, 500);
-            }
-        } else {
-            showToast(data.error || 'Failed to update student status', 'error');
-            buttonElement.classList.remove('btn-loading');
+    // Show loader on page navigation
+    $(document).on('click', 'a:not([target="_blank"])', function() {
+        if (this.href && !this.href.includes('#') && !$(this).hasClass('no-loader')) {
+            $('#globalLoader').fadeIn(200);
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('An error occurred. Please try again.', 'error');
-        buttonElement.classList.remove('btn-loading');
     });
-}
-
-function showToast(message, type = 'success') {
-    const toastContainer = document.getElementById('toastContainer');
-    const toastId = 'toast-' + Date.now();
-    const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
     
-    const toastHTML = `
-        <div id="${toastId}" class="toast custom-toast toast-${type}" role="alert">
-            <div class="toast-header">
-                <i class="fas ${iconClass} me-2" style="color: ${type === 'success' ? '#00b894' : '#e17055'}"></i>
-                <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        </div>
-    `;
+    // Utility function to format currency
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
     
-    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-    
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
-    toast.show();
-    
-    // Remove from DOM after hiding
-    toastElement.addEventListener('hidden.bs.toast', () => {
-        toastElement.remove();
-    });
-}
-
-// Add some interactive features
-document.addEventListener('DOMContentLoaded', function() {
-    // Add ripple effect to buttons
-    document.querySelectorAll('.action-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.cssText = `
-                position: absolute;
-                width: ${size}px;
-                height: ${size}px;
-                left: ${x}px;
-                top: ${y}px;
-                background: rgba(255,255,255,0.5);
-                border-radius: 50%;
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                pointer-events: none;
-            `;
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
+    // Utility function to format dates
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
+    }
+    
+    // Handle form validation
+    function validatePaymentForm() {
+        const paymentAmount = parseFloat($('#paymentAmount').val());
+        const targetFees = parseFloat($('#targetFees').val());
+        
+        if (isNaN(paymentAmount) || paymentAmount <= 0) {
+            showPaymentAlert('Please enter a valid payment amount', 'danger');
+            return false;
+        }
+        
+        if (targetFees && paymentAmount > targetFees) {
+            showPaymentAlert('Payment amount cannot exceed target fees', 'warning');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Enhanced error handling for AJAX requests
+    function handleAjaxError(xhr, status, error) {
+        console.error('AJAX Error:', {
+            status: status,
+            error: error,
+            response: xhr.responseText
+        });
+        
+        let errorMessage = 'An unexpected error occurred';
+        
+        if (xhr.status === 403) {
+            errorMessage = 'Access denied. Please refresh and try again.';
+        } else if (xhr.status === 404) {
+            errorMessage = 'Requested resource not found';
+        } else if (xhr.status === 500) {
+            errorMessage = 'Server error. Please try again later.';
+        }
+        
+        showAlert(errorMessage, 'danger');
+    }
+    
+    // Keyboard shortcuts
+    $(document).on('keydown', function(e) {
+        // Ctrl+N for new enquiry
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            window.location.href = "{% url 'enquiry:add_enquiry' %}";
+        }
+        
+        // Ctrl+R for refresh
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            $('#refreshTable').click();
+        }
+        
+        // Escape to close modals
+        if (e.key === 'Escape') {
+            $('.modal.show').modal('hide');
+        }
     });
     
-    // Add CSS for ripple animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(2);
-                opacity: 0;
+    // Initialize tooltips if Bootstrap is available
+    if (typeof bootstrap !== 'undefined') {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    // Auto-save draft comments (optional feature)
+    let commentDraftTimeout;
+    $(document).on('input', '.comment-input, #modalCommentInput', function() {
+        const $input = $(this);
+        const enquiryId = $input.attr('id') === 'modalCommentInput' 
+            ? currentEnquiryId 
+            : $input.attr('id').split('-')[2];
+        
+        clearTimeout(commentDraftTimeout);
+        commentDraftTimeout = setTimeout(() => {
+            // Save draft to localStorage if needed
+            if (typeof Storage !== 'undefined') {
+                localStorage.setItem(`comment_draft_${enquiryId}`, $input.val());
             }
+        }, 1000);
+    });
+    
+    // Load comment drafts on page load
+    function loadCommentDrafts() {
+        if (typeof Storage !== 'undefined') {
+            $('.comment-input').each(function() {
+                const enquiryId = $(this).attr('id').split('-')[2];
+                const draft = localStorage.getItem(`comment_draft_${enquiryId}`);
+                if (draft) {
+                    $(this).val(draft);
+                }
+            });
         }
-        .action-btn {
-            position: relative;
-            overflow: hidden;
+    }
+    
+    // Clear comment draft after successful submission
+    function clearCommentDraft(enquiryId) {
+        if (typeof Storage !== 'undefined') {
+            localStorage.removeItem(`comment_draft_${enquiryId}`);
         }
-    `;
-    document.head.appendChild(style);
-});
+    }
+    
+    // Load drafts when page is ready
+    $(document).ready(function() {
+        loadCommentDrafts();
+    });
+    
+})(); // End of IIFE (Immediately Invoked Function Expression)
 </script>
+
 {% endblock %}
