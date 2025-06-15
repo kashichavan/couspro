@@ -4,361 +4,768 @@
 
 {% block title %}{{ title }} - Enquiry Portal{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<style>
-/* Global Variables */
-:root {
-    --primary-orange: #ff7f00;
-    --dark-orange: #e67300;
-    --light-orange: #ffae42;
-    --orange-50: #fff5e6;
-    --orange-100: #ffe0b3;
-    --gray-50: #f8f9fa;
-    --gray-100: #f1f3f4;
-    --gray-600: #6c757d;
-    --gray-900: #212529;
-    --success-color: #10b981;
-    --danger-color: #ef4444;
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
-    --border-radius: 12px;
-    --border-radius-sm: 8px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ <style>
+        /* ====================================
+           BATCH MANAGEMENT - ORANGE THEME CSS
+           ==================================== */
+
+        /* Reset and Base Styles */
+        .batch-management * {
+            box-sizing: border-box;
+        }
+
+        .batch-management {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fefefe;
+        }
+
+        /* ====================================
+           HEADER SECTION
+           ==================================== */
+        .batch-header {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(255, 140, 66, 0.3);
+        }
+
+        .batch-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .batch-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .batch-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .batch-info-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .batch-info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        /* ====================================
+           NAVIGATION TABS
+           ==================================== */
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 0;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            color: #6c757d;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #ff6b35;
+            background-color: #fff5f2;
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #ff6b35;
+            background-color: white;
+            border-bottom: 3px solid #ff6b35;
+        }
+
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff8c42, #ff6b35);
+            border-radius: 2px;
+        }
+
+        /* ====================================
+           TAB CONTENT
+           ==================================== */
+        .tab-content {
+            background: white;
+            border-radius: 0 12px 12px 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            min-height: 400px;
+        }
+
+        /* ====================================
+           CONTROLS BAR
+           ==================================== */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .controls-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        /* Search Box */
+        .search-box {
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #fff5f2;
+            min-width: 280px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #ff6b35;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            transform: scale(1.02);
+        }
+
+        .search-box::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .action-btn-primary {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+            color: white;
+        }
+
+        .action-btn-primary:hover {
+            background: linear-gradient(135deg, #ff7b28 0%, #ff5722 100%);
+        }
+
+        .action-btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .action-btn-danger:hover {
+            background: linear-gradient(135deg, #ff5252 0%, #dc4c41 100%);
+        }
+
+        .action-btn-outline {
+            background: white;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+        }
+
+        .action-btn-outline:hover {
+            background: #ff6b35;
+            color: white;
+        }
+
+        /* ====================================
+           TABLE STYLES
+           ==================================== */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .table {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+        }
+
+        .table thead th {
+            border: none;
+            font-weight: 700;
+            color: #ff6b35;
+            padding: 1.25rem 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(255, 140, 66, 0.05) !important;
+            transform: scale(1.01);
+        }
+
+        .table tbody tr.selected {
+            background-color: rgba(255, 140, 66, 0.1) !important;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:first-child td {
+            border-top: none;
+        }
+
+        /* Table Cell Specific Styles */
+        .student-name {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .student-mobile {
+            color: #6c757d;
+            font-family: 'Courier New', monospace;
+        }
+
+        .amount {
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            text-align: right;
+        }
+
+        .amount-success {
+            color: #28a745;
+        }
+
+        .amount-danger {
+            color: #dc3545;
+        }
+
+        .amount-warning {
+            color: #ff6b35;
+        }
+
+        /* Due Date Badges */
+        .due-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: #fff5f2;
+            color: #ff6b35;
+            border: 1px solid #ffccc7;
+        }
+
+        .due-badge-danger {
+            background: #ffebee;
+            color: #d32f2f;
+            border-color: #ffcdd2;
+            animation: pulse-danger 2s infinite;
+        }
+
+        .due-badge-warning {
+            background: #fff3e0;
+            color: #f57c00;
+            border-color: #ffcc02;
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ====================================
+           ACTION BUTTONS IN TABLE
+           ==================================== */
+        .btn-group-sm .btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            margin-right: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group-sm .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-outline-primary {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #ff6b35;
+            border-color: #ff6b35;
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+
+        /* ====================================
+           PAGINATION
+           ==================================== */
+        .table-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: #fff5f2;
+            border-top: 1px solid #e9ecef;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .pagination-btn {
+            background: white;
+            border: 2px solid #e9ecef;
+            color: #6c757d;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #ff6b35;
+            color: #ff6b35;
+            transform: translateY(-1px);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #assigned-page-info,
+        #unassigned-page-info {
+            font-weight: 600;
+            color: #ff6b35;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        /* ====================================
+           NO RESULTS MESSAGE
+           ==================================== */
+        .no-results {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6c757d;
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: #ffccc7;
+            margin-bottom: 1rem;
+        }
+
+        .no-results p {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* ====================================
+           PAYMENT SUMMARY
+           ==================================== */
+        .payment-summary {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            box-shadow: 0 8px 32px rgba(255, 140, 66, 0.3);
+        }
+
+        .payment-summary h5 {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .payment-summary .table {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .payment-summary .table th,
+        .payment-summary .table td {
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .payment-summary .table thead th {
+            background: rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-summary .table tbody td {
+            font-size: 1.1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ====================================
+           CHECKBOXES
+           ==================================== */
+        input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: #ff6b35;
+            cursor: pointer;
+        }
+
+        /* ====================================
+           ANIMATIONS
+           ==================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-pane {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .table tbody tr {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* ====================================
+           RESPONSIVE DESIGN
+           ==================================== */
+        @media (max-width: 768px) {
+            .batch-header {
+                padding: 1.5rem;
+            }
+            
+            .batch-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .batch-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .tab-content {
+                padding: 1rem;
+            }
+            
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .table-pagination {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .pagination-controls {
+                justify-content: center;
+            }
+        }
+
+
+
+.nav-tabs {
+   border-bottom: 2px solid #f8d7b0;
+   margin-bottom: 1.5rem;
 }
 
-/* Base Styles */
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--gray-50);
-    color: var(--gray-900);
-    line-height: 1.6;
+.nav-tabs .nav-item {
+   margin-bottom: -2px;
 }
 
-/* Table Styles */
-.table th, 
-.table td {
-    vertical-align: middle;
-    border-top: 1px solid var(--gray-100);
-    border-bottom: 1px solid var(--gray-100);
-    padding: 1rem 1.25rem;
+.nav-tabs .nav-link {
+   border: 2px solid transparent;
+   border-radius: 0.5rem 0.5rem 0 0;
+   padding: 0.75rem 1.5rem;
+   color: #ff7f00;
+   background-color: #fff7f0;
+   font-weight: 500;
+   transition: all 0.3s ease;
+   position: relative;
+   overflow: hidden;
 }
 
-.table thead th {
-    background-color: var(--orange-50);
-    color: var(--dark-orange);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.table-hover tbody tr:hover {
-    background-color: var(--orange-50);
-    transform: scale(1.01);
-}
-
-/* Search Input */
-#searchUnassigned {
-    max-width: 300px;
-    border: 2px solid var(--gray-100);
-    border-radius: var(--border-radius-sm);
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-}
-
-#searchUnassigned:focus {
-    border-color: var(--primary-orange);
-    box-shadow: 0 0 0 0.2rem rgba(255, 127, 0, 0.1);
-}
-
-/* Button Styling */
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-    border-radius: var(--border-radius-sm);
+.nav-tabs .nav-link:hover {
+   border-color: #fbc490;
+   background-color: #ffe9d6;
+   color: #cc6600;
+   transform: translateY(-2px);
 }
 
 .nav-tabs .nav-link.active {
-    background-color: var(--primary-orange);
+   color: #ffffff;
+   background: linear-gradient(135deg, #ffa500 0%, #ff6a00 100%);
+   border-color: #ffa500;
+   box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+}
+
+.nav-tabs .nav-link.active::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: -100%;
+   width: 100%;
+   height: 100%;
+   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+   transition: left 0.5s;
+}
+
+.nav-tabs .nav-link.active:hover::before {
+   left: 100%;
+}
+
+.nav-tabs .nav-link:focus {
+   outline: none;
+   box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.25);
+}
+
+@media (max-width: 576px) {
+   .nav-tabs .nav-link {
+       padding: 0.5rem 1rem;
+       font-size: 0.9rem;
+   }
+}
+
+/* Gradient background card */
+
+
+.gradient-card {
+    background: linear-gradient(135deg, #ff7a18, #fcd757);
+    border-radius: 1rem;
     color: white;
-    border: none;
-    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.3s ease;
+}
+.gradient-card:hover {
+    box-shadow: 0 10px 30px rgba(255, 123, 24, 0.3);
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
-    border: none;
-    color: white;
-    transition: var(--transition);
+.text-gradient {
+    background: linear-gradient(to right, #ff7a18, #ffae00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-outline-secondary {
-    border: 2px solid var(--gray-600);
-    color: var(--gray-600);
-    transition: var(--transition);
-}
-
-.btn-outline-secondary:hover {
-    background-color: var(--gray-600);
-    color: white;
-    border-color: var(--gray-600);
-}
-
-/* Payment Summary Table */
-.table-bordered {
-    border: 1px solid var(--gray-100);
-}
-
-.table-bordered th,
-.table-bordered td {
-    border: 1px solid var(--gray-100);
-}
-
-.table-bordered thead th {
-    background-color: var(--gray-100);
-    color: var(--gray-900);
-}
-
-/* Student Info Card */
-.student-info {
+/* Info chips */
+.info-chip {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1.2rem 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex: 1 1 250px;
+    border: 1px solid #f3f3f3;
+    transition: all 0.2s ease-in-out;
 }
 
-.student-avatar {
+.info-chip:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 18px rgba(255, 122, 24, 0.1);
+}
+
+.chip-icon {
     width: 48px;
     height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 1.125rem;
-    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
-    flex-shrink: 0;
+    font-size: 1.4rem;
 }
 
-.student-details h6 {
-    margin: 0;
-    font-weight: 600;
-    color: var(--gray-900);
-    font-size: 0.95rem;
+.chip-label {
+    font-size: 0.85rem;
+    color: #888;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
 }
 
-.student-details .text-muted {
-    font-size: 0.8rem;
-    margin: 0;
-}
-
-/* Amount Display */
-.amount {
-    font-weight: 600;
-    font-family: 'Courier New', monospace;
-}
-
-.amount-success {
-    color: var(--success-color);
-}
-
-.amount-danger {
-    color: var(--danger-color);
-}
-
-/* Due Date Badge */
-.due-badge {
-    padding: 0.375rem 0.75rem;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background-color: var(--orange-50);
-    color: var(--dark-orange);
-    border: 1px solid var(--orange-100);
-}
-
-.due-badge-danger {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--danger-color);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-action {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    font-size: 0.875rem;
-    transition: var(--transition);
-}
-
-.btn-action-outline {
-    background-color: transparent;
-    border: 2px solid var(--primary-orange);
-    color: var(--primary-orange);
-}
-
-.btn-action-outline:hover {
-    background-color: var(--primary-orange);
-    color: white;
-    transform: scale(1.1);
-}
-
-/* Modal Styling */
-.modal-content {
-    border: none;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-lg);
-}
-
-.modal-header {
-    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
-    color: white;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    padding: 1.5rem 2rem;
-}
-
-.modal-title {
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.modal-body {
-    padding: 2rem;
-}
-
-.modal-footer {
-    padding: 1.5rem 2rem;
-    border-top: 1px solid var(--gray-100);
-}
-
-/* Form Controls */
-.form-control {
-    border: 2px solid var(--gray-100);
-    border-radius: var(--border-radius-sm);
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    transition: var(--transition);
-}
-
-.form-control:focus {
-    border-color: var(--primary-orange);
-    box-shadow: 0 0 0 0.2rem rgba(255, 127, 0, 0.1);
-}
-
-.input-group-text {
-    background-color: var(--orange-50);
-    border: 2px solid var(--gray-100);
-    color: var(--dark-orange);
-    font-weight: 500;
-}
-
-/* Toast Notifications */
-.toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
-
-.toast {
-    border: none;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(10px);
-}
-
-.toast-header {
-    border-bottom: none;
+.chip-value {
+    font-size: 1.3rem;
     font-weight: 600;
 }
 
-/* Animations */
-.fade-in {
-    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+.text-orange {
+    color: #ff7a18;
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 
-.slide-in {
-    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
+    </style>
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .student-info {
-        gap: 0.75rem;
-    }
-
-    .student-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    .table {
-        min-width: 800px;
-    }
-}
-</style>
-
+{% endblock %}
+{% block content %}
 
 <!-- ✅ Local DataTables CSS -->
-<link rel="stylesheet" href="{% static 'vendor/datatables/css/dataTables.bootstrap5.min.css' %}" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <!-- ✅ Flatpickr CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<h2>Batch: {{ batch.code }} - {{ batch.subject }}</h2>
-<p><strong>Trainer:</strong> {{ batch.trainer }} | <strong>Tracker:</strong> {{ batch.tracker }}</p>
-<p><strong>Remarks:</strong> {{ batch.remarks }}</p>
+<div class="container my-4">
+    <!-- Batch Header with Orange-White Gradient -->
+    <div class="gradient-card mb-4 p-4 shadow">
+        <h2 class="text-white mb-3">
+            <i class="fas fa-layer-group me-2"></i>Batch: {{ batch.code }} - {{ batch.subject }}
+        </h2>
+        <p class="text-50 mb-1"><strong>Trainer:</strong> {{ batch.trainer }}</p>
+        <p class="text-50 mb-1"><strong>Tracker:</strong> {{ batch.tracker }}</p>
+        <p class="text-50"><strong>Remarks:</strong> {{ batch.remarks }}</p>
+    </div>
+
+    {% if assigned %}
+    <!-- Payment Summary Title -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="text-gradient fw-bold mb-0">
+            <i class="fas fa-wallet me-2"></i>Batch Payment Summary
+        </h4>
+    </div>
+
+    <!-- Info Chips Row -->
+    <div class="d-flex flex-wrap gap-3">
+        <!-- Total Target -->
+        <div class="info-chip shadow">
+            <div class="chip-icon bg-light text-warning"><i class="fas fa-bullseye"></i></div>
+            <div>
+                <div class="chip-label">Total Target</div>
+                <div class="chip-value text-orange">₹{{ batch_payment_summary.total_target }}</div>
+            </div>
+        </div>
+
+        <!-- Total Paid -->
+        <div class="info-chip shadow">
+            <div class="chip-icon bg-light text-success"><i class="fas fa-check-circle"></i></div>
+            <div>
+                <div class="chip-label">Total Paid</div>
+                <div class="chip-value text-success">₹{{ batch_payment_summary.total_paid }}</div>
+            </div>
+        </div>
+
+        <!-- Total Balance -->
+        <div class="info-chip shadow">
+            <div class="chip-icon bg-light text-danger"><i class="fas fa-hourglass-half"></i></div>
+            <div>
+                <div class="chip-label">Total Balance</div>
+                <div class="chip-value text-danger">₹{{ batch_payment_summary.total_balance }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+
 
 <ul class="nav nav-tabs" id="batchTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -379,66 +786,86 @@ body {
         {% if assigned %}
         <form method="post" action="{% url 'batch:bulk_remove_from_batch' batch.id %}" id="bulk-remove-form">
             {% csrf_token %}
-            <div class="mb-2">
+            <div class="mb-3 d-flex justify-content-between align-items-center">
                 <button type="submit" class="btn btn-danger btn-sm">Remove Selected</button>
+                <input type="text" id="searchAssigned" class="search-box" style="width: 250px;" placeholder="Search assigned students...">
             </div>
-            <table id="assigned-table" class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="select_all_assigned"></th>
-                        <th>Name</th>
-                        <th>Contact</th>
-                        <th>Target Fees</th>
-                        <th>Paid</th>
-                        <th>Balance</th>
-                        <th>Due Date</th> <!-- ✅ New column -->
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in assigned %}
-                    {% with payment=payment_data|get_item:student.id %}
-                    <tr data-id="{{ student.id }}" 
-                        data-name="{{ student.name }}"
-                        data-balance="{{ payment.balance|default:0 }}"
-                        data-due-date="{{ student.due_date|date:'Y-m-d' }}">
-                        <td><input type="checkbox" name="enquiry_ids" value="{{ student.id }}"></td>
-                        <td>{{ student.name }}</td>
-                        <td>{{ student.mobile }}</td>
-                        <td class="amount">₹{{ payment.target|default:"0.00" }}</td>
-                        <td class="amount amount-success">₹{{ payment.paid|default:"0.00" }}</td>
-                        <td class="amount amount-danger">₹{{ payment.balance|default:"0.00" }}</td>
-                        <td>
-                            {% if student.due_date %}
-                                <span class="due-badge {% if student.due_date < today %}due-badge-danger{% endif %}">
-                                    {{ student.due_date|date:"d M, Y" }}
-                                </span>
-                            {% else %}
-                                <span class="text-muted">N/A</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-primary update-payment-btn" 
-                                        data-bs-toggle="modal" data-bs-target="#updatePaymentModal"
-                                        title="Update Payment">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary update-date-btn"
-                                        data-bs-toggle="modal" data-bs-target="#updateDueDateModal"
-                                        title="Update Due Date">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
-                                <button type="button" class="btn btn-danger" onclick="submitSingleRemove({{ batch.id }}, {{ student.id }})">
-                                    Remove
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endwith %}
-                    {% endfor %}
-                </tbody>
-            </table>
+            
+            <div class="table-container">
+                <table id="assigned-table" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select_all_assigned"></th>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Target Fees</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assigned-tbody">
+                        {% for student in assigned %}
+                        {% with payment=payment_data|get_item:student.id %}
+                        <tr class="student-row" data-id="{{ student.id }}" 
+                            data-name="{{ student.name }}"
+                            data-mobile="{{ student.mobile }}"
+                            data-balance="{{ payment.balance|default:0 }}"
+                            data-due-date="{{ student.due_date|date:'Y-m-d' }}">
+                            <td><input type="checkbox" name="enquiry_ids" value="{{ student.id }}"></td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.mobile }}</td>
+                            <td class="amount">₹{{ payment.target|default:"0.00" }}</td>
+                            <td class="amount amount-success">₹{{ payment.paid|default:"0.00" }}</td>
+                            <td class="amount amount-danger">₹{{ payment.balance|default:"0.00" }}</td>
+                            <td>
+                                {% if student.due_date %}
+                                    <span class="due-badge {% if student.due_date < today %}due-badge-danger{% endif %}">
+                                        {{ student.due_date|date:"d M, Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary update-payment-btn" 
+                                            data-bs-toggle="modal" data-bs-target="#updatePaymentModal"
+                                            title="Update Payment">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary update-date-btn"
+                                            data-bs-toggle="modal" data-bs-target="#updateDueDateModal"
+                                            title="Update Due Date">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger" onclick="submitSingleRemove({{ batch.id }}, {{ student.id }})">
+                                        Remove
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div id="assigned-no-results" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>No students found matching your search.</p>
+                </div>
+            </div>
+            
+            <div class="table-pagination">
+                <div class="pagination-info" id="assigned-info">
+                    Showing <span id="assigned-start">1</span> to <span id="assigned-end">{{ assigned|length }}</span> of <span id="assigned-total">{{ assigned|length }}</span> students
+                </div>
+                <div class="pagination-controls">
+                    <button type="button" class="pagination-btn" id="assigned-prev" onclick="changePage('assigned', -1)">‹ Previous</button>
+                    <span id="assigned-page-info">Page 1</span>
+                    <button type="button" class="pagination-btn" id="assigned-next" onclick="changePage('assigned', 1)">Next ›</button>
+                </div>
+            </div>
         </form>
         {% else %}
         <div class="alert alert-info">No students assigned to this batch.</div>
@@ -450,34 +877,52 @@ body {
         {% if unassigned %}
         <form method="post" action="{% url 'batch:bulk_assign_to_batch' batch.id %}" id="bulk-assign-form">
             {% csrf_token %}
-            <div class="d-flex justify-content-between mb-2">
+            <div class="mb-3 d-flex justify-content-between align-items-center">
                 <button type="submit" class="btn btn-primary btn-sm">Assign Selected</button>
-                <input type="text" id="searchUnassigned" class="form-control form-control-sm w-25" placeholder="Search by name or mobile">
+                <input type="text" id="searchUnassigned" class="search-box" style="width: 250px;" placeholder="Search by name or mobile...">
             </div>
-            <table id="unassigned-table" class="table table-striped">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="select_all_unassigned"></th>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in unassigned %}
-                    <tr>
-                        <td><input type="checkbox" name="enquiry_ids" value="{{ student.id }}"></td>
-                        <td>{{ student.name }}</td>
-                        <td>{{ student.mobile }}</td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-primary" onclick="submitSingleAssign({{ batch.id }}, {{ student.id }})">
-                                Assign
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            
+            <div class="table-container">
+                <table id="unassigned-table" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select_all_unassigned"></th>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="unassigned-tbody">
+                        {% for student in unassigned %}
+                        <tr class="student-row" data-name="{{ student.name }}" data-mobile="{{ student.mobile }}">
+                            <td><input type="checkbox" name="enquiry_ids" value="{{ student.id }}"></td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.mobile }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="submitSingleAssign({{ batch.id }}, {{ student.id }})">
+                                    Assign
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div id="unassigned-no-results" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>No students found matching your search.</p>
+                </div>
+            </div>
+            
+            <div class="table-pagination">
+                <div class="pagination-info" id="unassigned-info">
+                    Showing <span id="unassigned-start">1</span> to <span id="unassigned-end">{{ unassigned|length }}</span> of <span id="unassigned-total">{{ unassigned|length }}</span> students
+                </div>
+                <div class="pagination-controls">
+                    <button type="button" class="pagination-btn" id="unassigned-prev" onclick="changePage('unassigned', -1)">‹ Previous</button>
+                    <span id="unassigned-page-info">Page 1</span>
+                    <button type="button" class="pagination-btn" id="unassigned-next" onclick="changePage('unassigned', 1)">Next ›</button>
+                </div>
+            </div>
         </form>
         {% else %}
         <div class="alert alert-info">No unassigned students available.</div>
@@ -485,31 +930,10 @@ body {
     </div>
 </div>
 
-<!-- ✅ Batch Payment Summary -->
-{% if assigned %}
-<div class="mt-4">
-    <h5>Batch Payment Summary</h5>
-    <table class="table table-bordered w-50">
-        <thead>
-            <tr>
-                <th>Total Target Fees</th>
-                <th>Total Paid</th>
-                <th>Total Balance</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>₹{{ batch_payment_summary.total_target }}</td>
-                <td>₹{{ batch_payment_summary.total_paid }}</td>
-                <td>₹{{ batch_payment_summary.total_balance }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-{% endif %}
+
 
 <!-- ✅ Toast Container -->
-<div class="toast-container"></div>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11"></div>
 
 <!-- ✅ Update Payment Modal -->
 <div class="modal fade" id="updatePaymentModal" tabindex="-1" aria-labelledby="updatePaymentModalLabel" aria-hidden="true">
@@ -520,7 +944,7 @@ body {
                     <i class="fas fa-money-bill-wave"></i>
                     Update Payment
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="updatePaymentForm">
@@ -562,7 +986,7 @@ body {
                     <i class="fas fa-calendar-alt"></i>
                     Update Due Date
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="updateDueDateForm">
@@ -599,309 +1023,1053 @@ body {
 <!-- ✅ Hidden CSRF Token for JS -->
 <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf_token">
 
-<!-- ✅ Vendor Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>    
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
-<script src="{% static 'vendor/datatables/js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'vendor/datatables/js/dataTables.bootstrap5.min.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+{% endblock %}
 
-<!-- ✅ Main Script -->
+
+
+{% block extra_js %}
+<!-- ✅ Batch Detail Script - Fully Isolated -->
 <script>
-// ✅ Reusable Functions
-function showToast(title, message, type = 'info') {
-    const toastContainer = document.querySelector('.toast-container');
-    const toastId = 'toast-' + Date.now();
-    const typeConfig = {
-        success: { bg: 'bg-success', icon: 'fa-check-circle' },
-        error: { bg: 'bg-danger', icon: 'fa-exclamation-circle' },
-        warning: { bg: 'bg-warning', icon: 'fa-exclamation-triangle' },
-        info: { bg: 'bg-info', icon: 'fa-info-circle' }
-    };
-    const config = typeConfig[type] || typeConfig.info;
+(function() {
+    'use strict';
     
-    const toastHTML = `
-        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-            <div class="toast-header ${config.bg} text-white">
-                <i class="fas ${config.icon} me-2"></i>
-                <strong class="me-auto">${title}</strong>
-                <small>Just now</small>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        </div>
-    `;
+    // ✅ Create isolated namespace to prevent conflicts
+    window.BatchDetailManager = window.BatchDetailManager || {};
     
-    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-    new bootstrap.Toast(document.getElementById(toastId)).show();
-    
-    document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
-        this.remove();
-    });
-}
+    // ✅ Check dependencies
+    if (typeof $ === 'undefined') {
+        console.warn('jQuery not loaded, batch functionality may not work');
+        return;
+    }
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    // ✅ Private scope variables
+    const BATCH_NAMESPACE = 'batch-detail-';
+    
+    const BatchManager = {
+        // ✅ Namespaced configuration
+        config: {
+            currentPage: {
+                assigned: 1,
+                unassigned: 1
+            },
+            rowsPerPage: 10,
+            filteredData: {
+                assigned: [],
+                unassigned: []
+            },
+            debounceTimers: {},
+            initialized: false
+        },
+        
+        // ✅ Utility Functions
+        utils: {
+            showToast: function(title, message, type = 'info') {
+                const toastContainer = document.querySelector('.toast-container');
+                if (!toastContainer) {
+                    console.warn('Toast container not found');
+                    return;
+                }
+                
+                const toastId = BATCH_NAMESPACE + 'toast-' + Date.now();
+                const typeConfig = {
+                    success: { bg: 'bg-success', icon: 'fa-check-circle' },
+                    error: { bg: 'bg-danger', icon: 'fa-exclamation-circle' },
+                    warning: { bg: 'bg-warning', icon: 'fa-exclamation-triangle' },
+                    info: { bg: 'bg-info', icon: 'fa-info-circle' }
+                };
+                const config = typeConfig[type] || typeConfig.info;
+                
+                const toastHTML = `
+                    <div id="${toastId}" class="toast ${BATCH_NAMESPACE}toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="toast-header ${config.bg} text-white">
+                            <i class="fas ${config.icon} me-2"></i>
+                            <strong class="me-auto">${title}</strong>
+                            <small>Just now</small>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById(toastId);
+                if (toastElement && typeof bootstrap !== 'undefined') {
+                    const bsToast = new bootstrap.Toast(toastElement);
+                    bsToast.show();
+                    
+                    toastElement.addEventListener('hidden.bs.toast', function() {
+                        this.remove();
+                    });
+                }
+            },
+
+            getCookie: function(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.startsWith(name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            },
+
+            formatDateForDisplay: function(dateString) {
+                if (!dateString) return '';
+                try {
+                    return new Date(dateString).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: '2-digit' 
+                    });
+                } catch (e) {
+                    return dateString;
+                }
+            },
+
+            debounce: function(func, wait, key) {
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(BatchManager.config.debounceTimers[key]);
+                        delete BatchManager.config.debounceTimers[key];
+                        func.apply(this, args);
+                    };
+                    clearTimeout(BatchManager.config.debounceTimers[key]);
+                    BatchManager.config.debounceTimers[key] = setTimeout(later, wait);
+                };
+            },
+
+            isValidElement: function(element) {
+                return element && element.nodeType === Node.ELEMENT_NODE;
             }
-        }
-    }
-    return cookieValue;
-}
-
-function formatDateForDisplay(dateString) {
-    return new Date(dateString).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: '2-digit' 
-    });
-}
-
-// ✅ Table Interaction Handlers
-document.querySelectorAll('.custom-table tbody tr').forEach(row => {
-    row.addEventListener('mouseenter', () => {
-        row.style.transform = 'scale(1.02)';
-        row.style.zIndex = '1';
-    });
-    row.addEventListener('mouseleave', () => {
-        row.style.transform = '';
-        row.style.zIndex = '';
-    });
-});
-
-// ✅ Payment Update Handlers
-const paymentModal = new bootstrap.Modal(document.getElementById('updatePaymentModal'));
-document.querySelectorAll('.update-payment-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const studentId = row.dataset.id;
-        const balance = row.dataset.balance;
-        
-        document.getElementById('payment_enquiry_id').value = studentId;
-        document.getElementById('balanceFees').value = parseFloat(balance).toFixed(0);
-        document.getElementById('paymentAmount').value = '';
-        
-        paymentModal.show();
-        setTimeout(() => document.getElementById('paymentAmount').focus(), 300);
-    });
-});
-
-document.getElementById('submitPayment').addEventListener('click', function() {
-    const enquiryId = document.getElementById('payment_enquiry_id').value;
-    const paymentAmountInput = document.getElementById('paymentAmount');
-    const paymentAmount = paymentAmountInput.value;
-    const balanceFees = parseFloat(document.getElementById('balanceFees').value);
-    
-    if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
-        showToast('Validation Error', 'Please enter a valid payment amount', 'error');
-        return;
-    }
-    
-    if (parseFloat(paymentAmount) > balanceFees) {
-        showToast('Validation Error', 'Payment amount cannot exceed balance fees', 'error');
-        return;
-    }
-    
-    const submitBtn = this;
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-    submitBtn.disabled = true;
-    
-    fetch('{% url "enquiry:update_payment" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCookie('csrftoken')
         },
-        body: `enquiry_id=${encodeURIComponent(enquiryId)}&payment_amount=${encodeURIComponent(paymentAmount)}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            updatePaymentInTable(enquiryId, data);
-            showToast('Success', 'Payment updated successfully!', 'success');
-            paymentModal.hide();
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showToast('Error', data.message || 'Failed to update payment', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Network Error', 'Please check your connection and try again', 'error');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-});
 
-function updatePaymentInTable(enquiryId, data) {
-    const row = document.querySelector(`tr[data-id="${enquiryId}"]`);
-    if (row) {
-        const balanceCell = row.querySelector('td:nth-child(6) .amount-danger');
-        const paidCell = row.querySelector('td:nth-child(5) .amount-success');
-        
-        if (balanceCell && paidCell) {
-            balanceCell.textContent = `₹${parseFloat(data.new_balance).toFixed(0)}`;
-            paidCell.textContent = `₹${parseFloat(data.new_paid).toFixed(0)}`;
-            row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-            setTimeout(() => row.style.backgroundColor = '', 2000);
-        }
-    }
-}
-
-// ✅ Due Date Update Handlers
-const dateModal = new bootstrap.Modal(document.getElementById('updateDueDateModal'));
-document.querySelectorAll('.update-date-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const studentId = row.dataset.id;
-        const studentName = row.dataset.name;
-        const dueDate = row.dataset.dueDate;
-        
-        document.getElementById('duedate_student_id').value = studentId;
-        document.getElementById('dueDateStudentName').value = studentName;
-        document.getElementById('currentDueDate').value = formatDateForDisplay(dueDate);
-        document.getElementById('newDueDate').value = '';
-        
-        dateModal.show();
-    });
-});
-
-document.getElementById('submitDueDate').addEventListener('click', function() {
-    const studentId = document.getElementById('duedate_student_id').value;
-    const newDueDate = document.getElementById('newDueDate').value;
-    
-    if (!newDueDate) {
-        showToast('Validation Error', 'Please select a new due date', 'error');
-        return;
-    }
-    
-    const submitBtn = this;
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
-    submitBtn.disabled = true;
-    
-    fetch('{% url "enquiry:update_due_date" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCookie('csrftoken')
+        // ✅ Search functionality
+        search: {
+            performSearch: function(tableType) {
+                if (!['assigned', 'unassigned'].includes(tableType)) return;
+                
+                const searchInput = document.getElementById(`search${tableType.charAt(0).toUpperCase() + tableType.slice(1)}`);
+                if (!BatchManager.utils.isValidElement(searchInput)) return;
+                
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
+                const noResultsDiv = document.getElementById(`${tableType}-no-results`);
+                
+                let visibleRows = [];
+                let hasVisibleRows = false;
+                
+                rows.forEach(row => {
+                    const name = (row.dataset.name || '').toLowerCase();
+                    const mobile = (row.dataset.mobile || '').toLowerCase();
+                    const isMatch = name.includes(searchTerm) || mobile.includes(searchTerm);
+                    
+                    if (isMatch) {
+                        visibleRows.push(row);
+                        hasVisibleRows = true;
+                    }
+                });
+                
+                // Store filtered data
+                BatchManager.config.filteredData[tableType] = visibleRows;
+                BatchManager.config.currentPage[tableType] = 1;
+                
+                // Show/hide results
+                if (hasVisibleRows) {
+                    if (noResultsDiv) noResultsDiv.style.display = 'none';
+                    BatchManager.pagination.displayPage(tableType);
+                } else {
+                    if (noResultsDiv) noResultsDiv.style.display = 'block';
+                    BatchManager.pagination.hideAllRows(tableType);
+                    BatchManager.pagination.updatePaginationInfo(tableType, 0, 0, 0);
+                }
+            }
         },
-        body: `student_id=${studentId}&new_due_date=${newDueDate}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            updateDueDateInTable(studentId, newDueDate);
-            showToast('Success', 'Due date updated successfully!', 'success');
-            dateModal.hide();
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showToast('Error', data.message || 'Failed to update due date', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Network Error', 'Please check your connection and try again', 'error');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-});
 
-function updateDueDateInTable(studentId, newDueDate) {
-    const row = document.querySelector(`tr[data-id="${studentId}"]`);
-    if (row) {
-        const dueDateCell = row.querySelector('.due-badge');
-        if (dueDateCell) {
-            dueDateCell.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${formatDateForDisplay(newDueDate)}`;
-            dueDateCell.className = 'due-badge';
+        // ✅ Pagination functionality
+        pagination: {
+            hideAllRows: function(tableType) {
+                const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
+                rows.forEach(row => {
+                    if (BatchManager.utils.isValidElement(row)) {
+                        row.style.display = 'none';
+                    }
+                });
+            },
+
+            displayPage: function(tableType) {
+                const data = BatchManager.config.filteredData[tableType] || [];
+                const currentPage = BatchManager.config.currentPage[tableType] || 1;
+                const rowsPerPage = BatchManager.config.rowsPerPage;
+                
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = Math.min(startIndex + rowsPerPage, data.length);
+                
+                // Hide all rows first
+                this.hideAllRows(tableType);
+                
+                // Show rows for current page
+                for (let i = startIndex; i < endIndex; i++) {
+                    if (data[i] && BatchManager.utils.isValidElement(data[i])) {
+                        data[i].style.display = '';
+                    }
+                }
+                
+                this.updatePaginationInfo(tableType, startIndex + 1, endIndex, data.length);
+                this.updatePaginationButtons(tableType);
+            },
+
+            updatePaginationInfo: function(tableType, start, end, total) {
+                const elements = {
+                    start: document.getElementById(`${tableType}-start`),
+                    end: document.getElementById(`${tableType}-end`),
+                    total: document.getElementById(`${tableType}-total`),
+                    pageInfo: document.getElementById(`${tableType}-page-info`)
+                };
+                
+                if (elements.start) elements.start.textContent = start;
+                if (elements.end) elements.end.textContent = end;
+                if (elements.total) elements.total.textContent = total;
+                
+                const totalPages = Math.ceil(total / BatchManager.config.rowsPerPage) || 0;
+                const currentPage = BatchManager.config.currentPage[tableType] || 1;
+                
+                if (elements.pageInfo) {
+                    elements.pageInfo.textContent = totalPages > 0 ? 
+                        `Page ${currentPage} of ${totalPages}` : 'Page 0 of 0';
+                }
+            },
+
+            updatePaginationButtons: function(tableType) {
+                const data = BatchManager.config.filteredData[tableType] || [];
+                const totalPages = Math.ceil(data.length / BatchManager.config.rowsPerPage) || 0;
+                const currentPage = BatchManager.config.currentPage[tableType] || 1;
+                
+                const prevBtn = document.getElementById(`${tableType}-prev`);
+                const nextBtn = document.getElementById(`${tableType}-next`);
+                
+                if (prevBtn) prevBtn.disabled = currentPage <= 1;
+                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+            },
+
+            changePage: function(tableType, direction) {
+                const data = BatchManager.config.filteredData[tableType] || [];
+                const totalPages = Math.ceil(data.length / BatchManager.config.rowsPerPage) || 0;
+                const currentPage = BatchManager.config.currentPage[tableType] || 1;
+                
+                const newPage = currentPage + direction;
+                if (newPage >= 1 && newPage <= totalPages) {
+                    BatchManager.config.currentPage[tableType] = newPage;
+                    this.displayPage(tableType);
+                }
+            },
+
+            initializeTable: function(tableType) {
+                const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
+                BatchManager.config.filteredData[tableType] = Array.from(rows);
+                this.displayPage(tableType);
+            }
+        },
+
+        // ✅ Table update functions
+        tableUpdates: {
+            updatePaymentInTable: function(enquiryId, data) {
+                const row = document.querySelector(`tr[data-id="${enquiryId}"]`);
+                if (!BatchManager.utils.isValidElement(row)) return;
+                
+                const balanceCell = row.querySelector('td:nth-child(6)');
+                const paidCell = row.querySelector('td:nth-child(5)');
+                
+                if (balanceCell && paidCell && data) {
+                    balanceCell.textContent = `₹${parseFloat(data.new_balance || 0).toFixed(0)}`;
+                    paidCell.textContent = `₹${parseFloat(data.new_paid || 0).toFixed(0)}`;
+                    
+                    // Highlight effect
+                    row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                    setTimeout(() => {
+                        if (BatchManager.utils.isValidElement(row)) {
+                            row.style.backgroundColor = '';
+                        }
+                    }, 2000);
+                }
+            },
+
+            updateDueDateInTable: function(studentId, newDueDate) {
+                const row = document.querySelector(`tr[data-id="${studentId}"]`);
+                if (!BatchManager.utils.isValidElement(row)) return;
+                
+                const dueDateCell = row.querySelector('.due-badge');
+                if (dueDateCell) {
+                    dueDateCell.innerHTML = BatchManager.utils.formatDateForDisplay(newDueDate);
+                    dueDateCell.className = 'due-badge';
+                    
+                    // Check if overdue
+                    try {
+                        const today = new Date();
+                        const dueDate = new Date(newDueDate);
+                        if (dueDate < today) {
+                            dueDateCell.classList.add('due-badge-danger');
+                        }
+                    } catch (e) {
+                        console.warn('Date comparison failed:', e);
+                    }
+                    
+                    // Update data attribute
+                    row.dataset.dueDate = newDueDate;
+                    
+                    // Highlight effect
+                    row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                    setTimeout(() => {
+                        if (BatchManager.utils.isValidElement(row)) {
+                            row.style.backgroundColor = '';
+                        }
+                    }, 2000);
+                }
+            }
+        },
+
+        // ✅ Form submission functions
+        forms: {
+            submitSingleAssign: function(batchId, studentId) {
+                if (!confirm('Are you sure you want to assign this student to the batch?')) {
+                    return;
+                }
+                
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `${window.location.origin}/batch/${batchId}/assign/${studentId}/`;
+                form.style.display = 'none';
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = BatchManager.utils.getCookie('csrftoken');
+                
+                const studentInput = document.createElement('input');
+                studentInput.type = 'hidden';
+                studentInput.name = 'enquiry_ids';
+                studentInput.value = studentId;
+                
+                form.appendChild(csrfInput);
+                form.appendChild(studentInput);
+                document.body.appendChild(form);
+                
+                BatchManager.utils.showToast('Processing', 'Assigning student to batch...', 'info');
+                form.submit();
+            },
+
+            submitSingleRemove: function(batchId, studentId) {
+                if (!confirm('Are you sure you want to remove this student from the batch?')) {
+                    return;
+                }
+                
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `${window.location.origin}/batch/${batchId}/remove/${studentId}/`;
+                form.style.display = 'none';
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = BatchManager.utils.getCookie('csrftoken');
+                
+                const studentInput = document.createElement('input');
+                studentInput.type = 'hidden';
+                studentInput.name = 'enquiry_ids';
+                studentInput.value = studentId;
+                
+                form.appendChild(csrfInput);
+                form.appendChild(studentInput);
+                document.body.appendChild(form);
+                
+                BatchManager.utils.showToast('Processing', 'Removing student from batch...', 'info');
+                form.submit();
+            }
+        },
+
+        // ✅ Event handlers setup
+        events: {
+            setupPaymentModal: function() {
+                const paymentModal = document.getElementById('updatePaymentModal');
+                if (!paymentModal) return;
+                
+                let modal;
+                try {
+                    modal = new bootstrap.Modal(paymentModal);
+                } catch (e) {
+                    console.warn('Bootstrap Modal initialization failed:', e);
+                    return;
+                }
+                
+                // Payment button handler - use event delegation with namespace
+                const paymentHandler = function(e) {
+                    const btn = e.target.closest('.update-payment-btn');
+                    if (!btn) return;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const row = btn.closest('tr');
+                    if (!row) return;
+                    
+                    const studentId = row.dataset.id;
+                    const balance = row.dataset.balance;
+                    
+                    const elements = {
+                        enquiryId: document.getElementById('payment_enquiry_id'),
+                        balanceFees: document.getElementById('balanceFees'),
+                        paymentAmount: document.getElementById('paymentAmount')
+                    };
+                    
+                    if (elements.enquiryId) elements.enquiryId.value = studentId || '';
+                    if (elements.balanceFees) elements.balanceFees.value = parseFloat(balance || 0).toFixed(0);
+                    if (elements.paymentAmount) elements.paymentAmount.value = '';
+                    
+                    modal.show();
+                    setTimeout(() => {
+                        if (elements.paymentAmount) elements.paymentAmount.focus();
+                    }, 300);
+                };
+                
+                // Remove existing listeners and add new one
+                document.removeEventListener('click', paymentHandler);
+                document.addEventListener('click', paymentHandler);
+                
+                // Submit payment handler
+                const submitPaymentBtn = document.getElementById('submitPayment');
+                if (submitPaymentBtn) {
+                    const submitHandler = function(e) {
+                        e.preventDefault();
+                        
+                        const elements = {
+                            enquiryId: document.getElementById('payment_enquiry_id'),
+                            paymentAmount: document.getElementById('paymentAmount'),
+                            balanceFees: document.getElementById('balanceFees')
+                        };
+                        
+                        const enquiryId = elements.enquiryId?.value;
+                        const paymentAmount = elements.paymentAmount?.value;
+                        const balanceFees = parseFloat(elements.balanceFees?.value || 0);
+                        
+                        if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
+                            BatchManager.utils.showToast('Validation Error', 'Please enter a valid payment amount', 'error');
+                            return;
+                        }
+                        
+                        if (parseFloat(paymentAmount) > balanceFees) {
+                            BatchManager.utils.showToast('Validation Error', 'Payment amount cannot exceed balance fees', 'error');
+                            return;
+                        }
+                        
+                        const submitBtn = this;
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                        submitBtn.disabled = true;
+                        
+                        fetch(`${window.location.origin}/enquiry/update-payment/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': BatchManager.utils.getCookie('csrftoken')
+                            },
+                            body: `enquiry_id=${encodeURIComponent(enquiryId)}&payment_amount=${encodeURIComponent(paymentAmount)}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.success) {
+                                BatchManager.tableUpdates.updatePaymentInTable(enquiryId, data);
+                                BatchManager.utils.showToast('Success', 'Payment updated successfully!', 'success');
+                                modal.hide();
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                BatchManager.utils.showToast('Error', data?.message || 'Failed to update payment', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Payment update error:', error);
+                            BatchManager.utils.showToast('Network Error', 'Please check your connection and try again', 'error');
+                        })
+                        .finally(() => {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        });
+                    };
+                    
+                    // Remove existing listener and add new one
+                    submitPaymentBtn.removeEventListener('click', submitHandler);
+                    submitPaymentBtn.addEventListener('click', submitHandler);
+                }
+            },
+
+            setupDueDateModal: function() {
+                const dateModal = document.getElementById('updateDueDateModal');
+                if (!dateModal) return;
+                
+                let modal;
+                try {
+                    modal = new bootstrap.Modal(dateModal);
+                } catch (e) {
+                    console.warn('Bootstrap Modal initialization failed:', e);
+                    return;
+                }
+                
+                // Due date button handler
+                const dueDateHandler = function(e) {
+                    const btn = e.target.closest('.update-date-btn');
+                    if (!btn) return;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const row = btn.closest('tr');
+                    if (!row) return;
+                    
+                    const studentId = row.dataset.id;
+                    const studentName = row.dataset.name;
+                    const dueDate = row.dataset.dueDate;
+                    
+                    const elements = {
+                        studentId: document.getElementById('duedate_student_id'),
+                        studentName: document.getElementById('dueDateStudentName'),
+                        currentDueDate: document.getElementById('currentDueDate'),
+                        newDueDate: document.getElementById('newDueDate')
+                    };
+                    
+                    if (elements.studentId) elements.studentId.value = studentId || '';
+                    if (elements.studentName) elements.studentName.value = studentName || '';
+                    if (elements.currentDueDate) elements.currentDueDate.value = BatchManager.utils.formatDateForDisplay(dueDate);
+                    if (elements.newDueDate) elements.newDueDate.value = '';
+                    
+                    modal.show();
+                };
+                
+                document.removeEventListener('click', dueDateHandler);
+                document.addEventListener('click', dueDateHandler);
+                
+                // Submit due date handler
+                const submitDueDateBtn = document.getElementById('submitDueDate');
+                if (submitDueDateBtn) {
+                    const submitHandler = function(e) {
+                        e.preventDefault();
+                        
+                        const studentId = document.getElementById('duedate_student_id')?.value;
+                        const newDueDate = document.getElementById('newDueDate')?.value;
+                        
+                        if (!newDueDate) {
+                            BatchManager.utils.showToast('Validation Error', 'Please select a new due date', 'error');
+                            return;
+                        }
+                        
+                        const submitBtn = this;
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+                        submitBtn.disabled = true;
+                        
+                        fetch(`${window.location.origin}/enquiry/update-due-date/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': BatchManager.utils.getCookie('csrftoken')
+                            },
+                            body: `student_id=${studentId}&new_due_date=${newDueDate}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.success) {
+                                BatchManager.tableUpdates.updateDueDateInTable(studentId, newDueDate);
+                                BatchManager.utils.showToast('Success', 'Due date updated successfully!', 'success');
+                                modal.hide();
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                BatchManager.utils.showToast('Error', data?.message || 'Failed to update due date', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Due date update error:', error);
+                            BatchManager.utils.showToast('Network Error', 'Please check your connection and try again', 'error');
+                        })
+                        .finally(() => {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        });
+                    };
+                    
+                    submitDueDateBtn.removeEventListener('click', submitHandler);
+                    submitDueDateBtn.addEventListener('click', submitHandler);
+                }
+            },
+
+            setupAssignRemoveButtons: function() {
+                // Single handler for both assign and remove buttons
+                const buttonHandler = function(e) {
+                    // Handle assign buttons
+                    if (e.target.matches('button[onclick*="submitSingleAssign"]') || 
+                        e.target.closest('button[onclick*="submitSingleAssign"]')) {
+                        
+                        const button = e.target.matches('button') ? e.target : e.target.closest('button');
+                        const onclickAttr = button?.getAttribute('onclick');
+                        
+                        if (onclickAttr) {
+                            const matches = onclickAttr.match(/submitSingleAssign\((\d+),\s*(\d+)\)/);
+                            if (matches) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                BatchManager.forms.submitSingleAssign(matches[1], matches[2]);
+                            }
+                        }
+                    }
+                    
+                    // Handle remove buttons
+                    if (e.target.matches('button[onclick*="submitSingleRemove"]') || 
+                        e.target.closest('button[onclick*="submitSingleRemove"]')) {
+                        
+                        const button = e.target.matches('button') ? e.target : e.target.closest('button');
+                        const onclickAttr = button?.getAttribute('onclick');
+                        
+                        if (onclickAttr) {
+                            const matches = onclickAttr.match(/submitSingleRemove\((\d+),\s*(\d+)\)/);
+                            if (matches) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                BatchManager.forms.submitSingleRemove(matches[1], matches[2]);
+                            }
+                        }
+                    }
+                };
+                
+                // Remove and add event listener to prevent duplicates
+                document.removeEventListener('click', buttonHandler);
+                document.addEventListener('click', buttonHandler);
+            },
+
+            setupSelectAll: function() {
+                // Select All Assigned
+                const selectAllAssigned = document.getElementById('select_all_assigned');
+                if (selectAllAssigned) {
+                    const handler = function() {
+                        const checkboxes = document.querySelectorAll('#assigned input[name="enquiry_ids"]');
+                        checkboxes.forEach(checkbox => {
+                            const row = checkbox.closest('tr');
+                            if (row && row.style.display !== 'none') {
+                                checkbox.checked = this.checked;
+                            }
+                        });
+                    };
+                    
+                    selectAllAssigned.removeEventListener('change', handler);
+                    selectAllAssigned.addEventListener('change', handler);
+                }
+
+                // Select All Unassigned
+                const selectAllUnassigned = document.getElementById('select_all_unassigned');
+                if (selectAllUnassigned) {
+                    const handler = function() {
+                        const checkboxes = document.querySelectorAll('#unassigned input[name="enquiry_ids"]');
+                        checkboxes.forEach(checkbox => {
+                            const row = checkbox.closest('tr');
+                            if (row && row.style.display !== 'none') {
+                                checkbox.checked = this.checked;
+                            }
+                        });
+                    };
+                    
+                    selectAllUnassigned.removeEventListener('change', handler);
+                    selectAllUnassigned.addEventListener('change', handler);
+                }
+            },
+
+            setupForms: function() {
+                // Bulk Assign Form
+                const bulkAssignForm = document.getElementById('bulk-assign-form');
+                if (bulkAssignForm) {
+                    const handler = function(e) {
+                        const checkedBoxes = document.querySelectorAll('#unassigned input[name="enquiry_ids"]:checked');
+                        if (checkedBoxes.length === 0) {
+                            e.preventDefault();
+                            BatchManager.utils.showToast('Selection Required', 'Please select at least one student to assign', 'warning');
+                            return false;
+                        }
+                        
+                        if (!confirm(`Are you sure you want to assign ${checkedBoxes.length} student(s) to this batch?`)) {
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        BatchManager.utils.showToast('Processing', `Assigning ${checkedBoxes.length} student(s) to batch...`, 'info');
+                    };
+                    
+                    bulkAssignForm.removeEventListener('submit', handler);
+                    bulkAssignForm.addEventListener('submit', handler);
+                }
+
+                // Bulk Remove Form
+                const bulkRemoveForm = document.getElementById('bulk-remove-form');
+                if (bulkRemoveForm) {
+                    const handler = function(e) {
+                        const checkedBoxes = document.querySelectorAll('#assigned input[name="enquiry_ids"]:checked');
+                        if (checkedBoxes.length === 0) {
+                            e.preventDefault();
+                            BatchManager.utils.showToast('Selection Required', 'Please select at least one student to remove', 'warning');
+                            return false;
+                        }
+                        
+                        if (!confirm(`Are you sure you want to remove ${checkedBoxes.length} student(s) from this batch?`)) {
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        BatchManager.utils.showToast('Processing', `Removing ${checkedBoxes.length} student(s) from batch...`, 'info');
+                    };
+                    
+                    bulkRemoveForm.removeEventListener('submit', handler);
+                    bulkRemoveForm.addEventListener('submit', handler);
+                }
+            },
+
+            setupSearch: function() {
+                // Search handlers with proper debouncing
+                const searchAssigned = document.getElementById('searchAssigned');
+                const searchUnassigned = document.getElementById('searchUnassigned');
+                
+                if (searchAssigned) {
+                    const handler = BatchManager.utils.debounce(() => {
+                        BatchManager.search.performSearch('assigned');
+                    }, 300, 'search-assigned');
+                    
+                    searchAssigned.removeEventListener('input', handler);
+                    searchAssigned.addEventListener('input', handler);
+                }
+                
+                searchUnassigned.removeEventListener('input', handler);
+                    searchUnassigned.addEventListener('input', handler);
+                }
+            },
+
+            setupPagination: function() {
+                // Assigned pagination buttons
+                const assignedPrev = document.getElementById('assigned-prev');
+                const assignedNext = document.getElementById('assigned-next');
+                
+                if (assignedPrev) {
+                    const handler = () => BatchManager.pagination.changePage('assigned', -1);
+                    assignedPrev.removeEventListener('click', handler);
+                    assignedPrev.addEventListener('click', handler);
+                }
+                
+                if (assignedNext) {
+                    const handler = () => BatchManager.pagination.changePage('assigned', 1);
+                    assignedNext.removeEventListener('click', handler);
+                    assignedNext.addEventListener('click', handler);
+                }
+                
+                // Unassigned pagination buttons
+                const unassignedPrev = document.getElementById('unassigned-prev');
+                const unassignedNext = document.getElementById('unassigned-next');
+                
+                if (unassignedPrev) {
+                    const handler = () => BatchManager.pagination.changePage('unassigned', -1);
+                    unassignedPrev.removeEventListener('click', handler);
+                    unassignedPrev.addEventListener('click', handler);
+                }
+                
+                if (unassignedNext) {
+                    const handler = () => BatchManager.pagination.changePage('unassigned', 1);
+                    unassignedNext.removeEventListener('click', handler);
+                    unassignedNext.addEventListener('click', handler);
+                }
+            },
+
+            setupDatePicker: function() {
+                // Initialize Flatpickr for due date modal
+                const newDueDateInput = document.getElementById('newDueDate');
+                if (newDueDateInput && typeof flatpickr !== 'undefined') {
+                    try {
+                        flatpickr(newDueDateInput, {
+                            dateFormat: "Y-m-d",
+                            minDate: "today",
+                            allowInput: true,
+                            clickOpens: true
+                        });
+                    } catch (e) {
+                        console.warn('Flatpickr initialization failed:', e);
+                    }
+                }
+            }
+        },
+
+        // ✅ Main initialization
+        init: function() {
+            if (this.config.initialized) {
+                console.warn('BatchManager already initialized');
+                return;
+            }
             
-            if (new Date(newDueDate) < new Date()) {
-                dueDateCell.classList.add('due-badge-danger');
+            try {
+                // Initialize pagination tables
+                this.pagination.initializeTable('assigned');
+                this.pagination.initializeTable('unassigned');
+                
+                // Setup all event handlers
+                this.events.setupPaymentModal();
+                this.events.setupDueDateModal();
+                this.events.setupAssignRemoveButtons();
+                this.events.setupSelectAll();
+                this.events.setupForms();
+                this.events.setupSearch();
+                this.events.setupPagination();
+                this.events.setupDatePicker();
+                
+                this.config.initialized = true;
+                console.log('BatchManager initialized successfully');
+                
+                // Show success message
+                this.utils.showToast('System Ready', 'Batch management system loaded successfully', 'success');
+                
+            } catch (error) {
+                console.error('BatchManager initialization failed:', error);
+                this.utils.showToast('Initialization Error', 'Some features may not work properly', 'error');
             }
+        },
+
+        // ✅ Cleanup function
+        destroy: function() {
+            // Clear all debounce timers
+            Object.keys(this.config.debounceTimers).forEach(key => {
+                clearTimeout(this.config.debounceTimers[key]);
+            });
+            this.config.debounceTimers = {};
+            
+            // Remove all toasts
+            document.querySelectorAll(`.${BATCH_NAMESPACE}toast`).forEach(toast => {
+                toast.remove();
+            });
+            
+            this.config.initialized = false;
+            console.log('BatchManager destroyed');
         }
-        row.dataset.dueDate = newDueDate;
-        row.style.backgroundColor = 'rgba(255, 127, 0, 0.1)';
-        setTimeout(() => row.style.backgroundColor = '', 2000);
+    };
+
+    // ✅ Expose BatchManager to global namespace
+    window.BatchDetailManager = BatchManager;
+
+    // ✅ Auto-initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => BatchManager.init(), 100);
+        });
+    } else {
+        setTimeout(() => BatchManager.init(), 100);
+    }
+
+    // ✅ Global functions for backwards compatibility
+    window.submitSingleAssign = function(batchId, studentId) {
+        BatchManager.forms.submitSingleAssign(batchId, studentId);
+    };
+
+    window.submitSingleRemove = function(batchId, studentId) {
+        BatchManager.forms.submitSingleRemove(batchId, studentId);
+    };
+
+    // ✅ Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (BatchManager.config.initialized) {
+            BatchManager.destroy();
+        }
+    });
+
+})();
+
+// ✅ Additional utility functions outside the main scope
+document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced table row highlighting
+    const addRowHoverEffects = function() {
+        const tables = document.querySelectorAll('#assigned-tbody, #unassigned-tbody');
+        tables.forEach(tbody => {
+            tbody.addEventListener('mouseenter', function(e) {
+                if (e.target.closest('tr.student-row')) {
+                    e.target.closest('tr.student-row').classList.add('table-hover-highlight');
+                }
+            }, true);
+            
+            tbody.addEventListener('mouseleave', function(e) {
+                if (e.target.closest('tr.student-row')) {
+                    e.target.closest('tr.student-row').classList.remove('table-hover-highlight');
+                }
+            }, true);
+        });
+    };
+
+    // Enhanced checkbox interactions
+    const addCheckboxEnhancements = function() {
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('input[name="enquiry_ids"]')) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    if (e.target.checked) {
+                        row.classList.add('table-row-selected');
+                    } else {
+                        row.classList.remove('table-row-selected');
+                    }
+                }
+            }
+        });
+    };
+
+    // Enhanced form validation
+    const addFormValidation = function() {
+        const forms = document.querySelectorAll('form[id*="bulk-"]');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+                    
+                    // Re-enable after 5 seconds as fallback
+                    setTimeout(() => {
+                        if (submitBtn.disabled) {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }, 5000);
+                }
+            });
+        });
+    };
+
+    // Enhanced keyboard shortcuts
+    const addKeyboardShortcuts = function() {
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + F to focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                const activeTab = document.querySelector('.tab-pane.active');
+                if (activeTab) {
+                    const searchInput = activeTab.querySelector('input[type="search"]');
+                    if (searchInput) {
+                        e.preventDefault();
+                        searchInput.focus();
+                    }
+                }
+            }
+            
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                const focusedElement = document.activeElement;
+                if (focusedElement && focusedElement.type === 'search') {
+                    focusedElement.value = '';
+                    focusedElement.dispatchEvent(new Event('input'));
+                }
+            }
+        });
+    };
+
+    // Enhanced error handling
+    const addGlobalErrorHandling = function() {
+        window.addEventListener('error', function(e) {
+            console.error('Global error caught:', e.error);
+            if (window.BatchDetailManager && window.BatchDetailManager.utils) {
+                window.BatchDetailManager.utils.showToast(
+                    'System Error', 
+                    'An unexpected error occurred. Please refresh the page.', 
+                    'error'
+                );
+            }
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            if (window.BatchDetailManager && window.BatchDetailManager.utils) {
+                window.BatchDetailManager.utils.showToast(
+                    'Network Error', 
+                    'A network request failed. Please check your connection.', 
+                    'error'
+                );
+            }
+        });
+    };
+
+    // Initialize all enhancements
+    setTimeout(() => {
+        addRowHoverEffects();
+        addCheckboxEnhancements();
+        addFormValidation();
+        addKeyboardShortcuts();
+        addGlobalErrorHandling();
+    }, 200);
+});
+
+// ✅ CSS styles to add to the page (add this to your CSS file)
+const additionalStyles = `
+<style>
+.table-hover-highlight {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.table-row-selected {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+    border-left: 3px solid #28a745;
+}
+
+.batch-detail-toast {
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.due-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.due-badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-sm {
+        padding: 0.125rem 0.25rem;
+        font-size: 0.75rem;
     }
 }
+</style>
+`;
 
-// ✅ Flatpickr Initialization
-flatpickr('.datepicker', {
-    dateFormat: "Y-m-d",
-    minDate: "today",
-    allowInput: true,
-    theme: "material_orange"
-});
-
-// ✅ Checkbox Selectors
-document.getElementById('select_all_assigned')?.addEventListener('change', function () {
-    document.querySelectorAll('#assigned-table input[name="enquiry_ids"]').forEach(cb => cb.checked = this.checked);
-});
-
-document.getElementById('select_all_unassigned')?.addEventListener('change', function () {
-    document.querySelectorAll('#unassigned-table input[name="enquiry_ids"]').forEach(cb => cb.checked = this.checked);
-});
-
-function submitDynamicPost(url) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = url;
-
-    const csrfToken = document.querySelector('#csrf_token').value;
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrfmiddlewaretoken';
-    csrfInput.value = csrfToken;
-
-    form.appendChild(csrfInput);
-    document.body.appendChild(form);
-    form.submit();
+// Add styles to document head if not already present
+if (!document.querySelector('#batch-detail-styles')) {
+    const styleSheet = document.createElement('div');
+    styleSheet.id = 'batch-detail-styles';
+    styleSheet.innerHTML = additionalStyles;
+    document.head.appendChild(styleSheet);
 }
 
-function submitSingleRemove(batchId, studentId) {
-    const url = `/batch/${batchId}/remove/${studentId}/`;
-    submitDynamicPost(url);
-}
-
-function submitSingleAssign(batchId, studentId) {
-    const url = `/batch/${batchId}/assign/${studentId}/`;
-    submitDynamicPost(url);
-}
-
-// ✅ DataTables Initialization
-$(document).ready(function () {
-    $('#assigned-table').DataTable({
-        paging: true,
-        searching: true,
-        responsive: true,
-        columnDefs: [{ orderable: false, targets: [0, -1] }]
-    });
-
-    const unassignedTable = $('#unassigned-table').DataTable({
-        paging: true,
-        searching: true,
-        responsive: true,
-        columnDefs: [{ orderable: false, targets: [0, -1] }]
-    });
-
-    $('#searchUnassigned').on('keyup', function () {
-        unassignedTable.search(this.value).draw();
-    });
-});
 </script>
+
 {% endblock %}

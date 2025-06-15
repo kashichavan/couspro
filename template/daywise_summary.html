@@ -392,180 +392,377 @@
 <script src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.13.6/b-2.4.2/b-html5-2.4.2/datatables.min.js"></script>
 
 <div class="dashboard-container">
-  <!-- Modern Header -->
+  <!-- Modern Header with Stats -->
   <div class="dashboard-header">
-    <h2><i class="fas fa-chart-line me-3"></i>Counsellor Analytics Dashboard</h2>
-    <div class="subtitle">
-      <i class="fas fa-calendar-alt me-2"></i>Day-wise Performance Summary & Insights
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2><i class="fas fa-chart-line me-3"></i>Counsellor Analytics Dashboard</h2>
+        <div class="subtitle">
+          <i class="fas fa-calendar-alt me-2"></i>Day-wise Performance Summary & Insights
+        </div>
+      </div>
+      <div class="header-stats d-none d-md-flex">
+        <div class="stat-item me-3">
+          <div class="stat-value" id="totalCounsellors">0</div>
+          <div class="stat-label">Total Counsellors</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalEnquiries">0</div>
+          <div class="stat-label">Total Enquiries</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Enhanced Filter Card -->
+  <!-- Enhanced Filter Card with Quick Actions -->
   <div class="filter-card">
-    <h5 class="mb-3"><i class="fas fa-filter me-2 text-orange"></i>Smart Filters</h5>
-    <form method="get" class="row g-3">
-      <div class="col-md-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0"><i class="fas fa-filter me-2 text-orange"></i>Smart Filters</h5>
+      <div class="quick-actions">
+        <button type="button" class="btn btn-outline-primary btn-sm me-2" id="todayBtn">
+          <i class="fas fa-calendar-day me-1"></i>Today
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm me-2" id="weekBtn">
+          <i class="fas fa-calendar-week me-1"></i>This Week
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="monthBtn">
+          <i class="fas fa-calendar-alt me-1"></i>This Month
+        </button>
+      </div>
+    </div>
+    <form method="get" class="row g-3" id="filterForm">
+      <div class="col-md-3">
         <label for="start_date" class="form-label fw-semibold">
           <i class="fas fa-calendar-day me-1 text-orange"></i>Start Date
         </label>
         <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}">
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <label for="end_date" class="form-label fw-semibold">
           <i class="fas fa-calendar-check me-1 text-orange"></i>End Date
         </label>
         <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}">
       </div>
-      <div class="col-md-4 align-self-end">
+      <div class="col-md-3">
+        <label for="counsellor_filter" class="form-label fw-semibold">
+          <i class="fas fa-user me-1 text-orange"></i>Counsellor
+        </label>
+        <select name="counsellor_filter" id="counsellor_filter" class="form-select">
+          <option value="">All Counsellors</option>
+          {% for item in summary %}
+          <option value="{{ item.counsellor_name }}">{{ item.counsellor_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 align-self-end">
         <button type="submit" class="btn btn-primary btn-modern me-2" id="filterBtn">
           <i class="fas fa-search me-2"></i>Apply Filter
         </button>
-        <a href="?start_date={{ start_date }}&end_date={{ end_date }}&export=1" class="btn btn-success btn-modern" id="exportBtn">
-          <i class="fas fa-file-excel me-2"></i>Export Excel
-        </a>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-success btn-modern dropdown-toggle" data-bs-toggle="dropdown" id="exportBtn">
+            <i class="fas fa-download me-2"></i>Export
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="?start_date={{ start_date }}&end_date={{ end_date }}&export=excel">
+              <i class="fas fa-file-excel me-2"></i>Excel
+            </a></li>
+            <li><a class="dropdown-item" href="?start_date={{ start_date }}&end_date={{ end_date }}&export=pdf">
+              <i class="fas fa-file-pdf me-2"></i>PDF
+            </a></li>
+            <li><a class="dropdown-item" href="#" id="printBtn">
+              <i class="fas fa-print me-2"></i>Print
+            </a></li>
+          </ul>
+        </div>
       </div>
     </form>
   </div>
 
   {% if summary %}
   
-  <!-- Enhanced Counsellor Summary Table -->
-<div class="table-container">
-  <div class="p-3 border-bottom">
-    <h5 class="mb-0">
-      <i class="fas fa-table me-2 text-orange"></i>Counsellor Performance Matrix
-    </h5>
-  </div>
-
-  <div class="table-responsive">
-    <table id="dataTable" class="table table-hover">
-      <thead>
-        <tr>
-          <th><i class="fas fa-user me-1"></i>Counsellor</th>
-          <th><i class="fas fa-phone me-1"></i>Mobile</th>
-          <th><i class="fas fa-chart-bar me-1"></i>Total</th>
-          <th><i class="fas fa-phone-alt me-1"></i>Tel</th>
-          <th><i class="fas fa-user-plus me-1"></i>T J</th>
-          <th><i class="fas fa-walking me-1"></i>Walk-in</th>
-          <th><i class="fas fa-door-open me-1"></i>W Joined</th>
-          <th><i class="fas fa-check-circle me-1"></i>Joined</th>
-          <th><i class="fas fa-history me-1"></i>Prev Conv</th>
-          <th><i class="fas fa-hourglass-half me-1"></i>Pending</th>
-          <th><i class="fas fa-user-times me-1"></i>Dropout</th>
-          <th><i class="fas fa-rupee-sign me-1"></i>Fees Paid</th>
-          <th><i class="fas fa-bullseye me-1"></i>Target</th>
-          <th><i class="fas fa-balance-scale me-1"></i>Balance</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in summary %}
-        <tr>
-          <td class="fw-semibold">{{ item.counsellor_name }}</td>
-          <td>{{ item.counsellor_mobile }}</td>
-          <td><span class="badge bg-primary rounded-pill">{{ item.total_enquiries }}</span></td>
-          <td><span class="badge bg-info rounded-pill">{{ item.telephonic_count }}</span></td>
-          <td><span class="badge bg-success rounded-pill">{{ item.telephonic_joined }}</span></td>
-          <td><span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span></td>
-          <td><span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span></td>
-          <td><span class="badge bg-success rounded-pill">{{ item.joined_count }}</span></td>
-       <td>
-    {% if item.counsellor_id and item.previous_converted_count %}
-        <a href="{% url 'enquiry:previous_converted_list' counsellor_id=item.counsellor_id %}?start_date={{ start_date }}&end_date={{ end_date }}">
-            {{ item.previous_converted_count }}
-        </a>
-    {% else %}
-        {{ item.previous_converted_count }}
-    {% endif %}
-</td>
-          <td><span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span></td>
-          <td><span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span></td>
-          <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>
-          <td class="fw-bold text-orange">₹{{ item.fees_target|floatformat:2 }}</td>
-          <td class="fw-bold {% if item.fees_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-            ₹{{ item.fees_balance|floatformat:2 }}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Enhanced Day-wise Fees Section -->
-<div class="table-container my-5">
-  <div class="p-3 border-bottom bg-light">
-    <h5 class="mb-0">
-      <i class="fas fa-calendar-money me-2 text-success"></i>
-      Day-wise Revenue Tracking
-    </h5>
-  </div>
-
-  <div class="table-responsive">
-    <table class="table table-hover table-striped" id="feesTable">
-      <thead class="table-dark">
-        <tr>
-          <th><i class="fas fa-calendar me-1"></i>Date</th>
-          <th><i class="fas fa-coins me-1"></i>Fees Collected</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for day in day_wise_fees %}
-        <tr>
-          <td class="fw-semibold">{{ day.day|date:"d M Y" }}</td>
-          <td class="fw-bold text-success">₹{{ day.total_paid|floatformat:2 }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="2" class="text-center text-muted py-4">
-            <i class="fas fa-info-circle me-2"></i>No fees collected in this period.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot class="table-light">
-        <tr>
-          <th class="text-center">
-            <i class="fas fa-calculator me-2"></i>Total Collection
-          </th>
-          <th class="text-center text-primary fw-bold">
-            ₹{{ total_fees_collected|floatformat:2|default:"0.00" }}
-          </th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-</div>
-
- <!-- Updated Total Summary Card -->
-{% if total_fees_collected %}
-  <div class="total-summary-card mb-4">
-    <div class="summary-box">
-      <div class="summary-icon">
-        <i class="fas fa-trophy"></i>
+  <!-- Performance Overview Cards -->
+  <div class="row mb-4" id="performanceCards">
+    <div class="col-md-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="stat-icon bg-primary"><i class="fas fa-users"></i></div>
+          <h4 class="stat-number" id="totalEnquiriesCard">{{ summary|length }}</h4>
+          <p class="stat-label">Active Counsellors</p>
+        </div>
       </div>
-      <div>
-        <h6>
-          <i class="fas fa-chart-line me-1"></i> Total Revenue
-        </h6>
-        <h4>₹{{ total_fees_collected|floatformat:2 }}</h4>
-        <small>
-          <i class="fas fa-calendar-range me-1"></i>
-          {{ start_date|date:"d M" }} - {{ end_date|date:"d M Y" }}
-        </small>
-        <div class="summary-metrics mt-2">
-          <span class="text-muted d-block">
-            <i class="fas fa-coins me-1 text-warning"></i>
-            Target Fees: <strong>₹{{ total_target_fees|floatformat:2 }}</strong>
-          </span>
-          <span class="text-muted d-block mt-1">
-            <i class="fas fa-money-bill-wave me-1 text-danger"></i>
-            Yet to Collect: <strong>₹{{ yet_to_collect|floatformat:2 }}</strong>
-          </span>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="stat-icon bg-success"><i class="fas fa-user-check"></i></div>
+          <h4 class="stat-number" id="totalJoinedCard">0</h4>
+          <p class="stat-label">Total Joined</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="stat-icon bg-warning"><i class="fas fa-hourglass-half"></i></div>
+          <h4 class="stat-number" id="totalPendingCard">0</h4>
+          <p class="stat-label">Total Pending</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="stat-icon bg-info"><i class="fas fa-rupee-sign"></i></div>
+          <h4 class="stat-number" id="totalRevenueCard">₹0</h4>
+          <p class="stat-label">Total Revenue</p>
         </div>
       </div>
     </div>
   </div>
-{% endif %}
+
+  <!-- Enhanced Counsellor Summary Table -->
+  <div class="table-container">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+      <h5 class="mb-0">
+        <i class="fas fa-table me-2 text-orange"></i>Counsellor Performance Matrix
+      </h5>
+      <div class="table-actions">
+        <button class="btn btn-outline-secondary btn-sm me-2" id="toggleColumns">
+          <i class="fas fa-columns me-1"></i>Columns
+        </button>
+        <button class="btn btn-outline-primary btn-sm" id="refreshTable">
+          <i class="fas fa-sync-alt me-1"></i>Refresh
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table id="dataTable" class="table table-hover table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th><i class="fas fa-user me-1"></i>Counsellor</th>
+            <th><i class="fas fa-phone me-1"></i>Mobile</th>
+            <th><i class="fas fa-chart-bar me-1"></i>Total</th>
+            <th><i class="fas fa-phone-alt me-1"></i>Tel</th>
+            <th><i class="fas fa-user-plus me-1"></i>T J</th>
+            <th><i class="fas fa-walking me-1"></i>Walk-in</th>
+            <th><i class="fas fa-door-open me-1"></i>W Joined</th>
+            <th><i class="fas fa-check-circle me-1"></i>Joined</th>
+            <th><i class="fas fa-history me-1"></i>Prev Conv</th>
+            <th><i class="fas fa-hourglass-half me-1"></i>Pending</th>
+            <th><i class="fas fa-user-times me-1"></i>Dropout</th>
+            <th><i class="fas fa-rupee-sign me-1"></i>Fees Paid</th>
+            <th><i class="fas fa-bullseye me-1"></i>Target</th>
+            <th><i class="fas fa-balance-scale me-1"></i>Balance</th>
+            <th><i class="fas fa-percentage me-1"></i>Conversion</th>
+            <th><i class="fas fa-cogs me-1"></i>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in summary %}
+          <tr data-counsellor="{{ item.counsellor_name }}">
+            <td class="fw-semibold">
+              <div class="d-flex align-items-center">
+                <div class="avatar me-2">{{ item.counsellor_name|first }}</div>
+                {{ item.counsellor_name }}
+              </div>
+            </td>
+            <td>{{ item.counsellor_mobile }}</td>
+            <td><span class="badge bg-primary rounded-pill">{{ item.total_enquiries }}</span></td>
+            <td><span class="badge bg-info rounded-pill">{{ item.telephonic_count }}</span></td>
+            <td><span class="badge bg-success rounded-pill">{{ item.telephonic_joined }}</span></td>
+            <td><span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span></td>
+            <td><span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span></td>
+            <td><span class="badge bg-success rounded-pill">{{ item.joined_count }}</span></td>
+            <td>
+              {% if item.counsellor_id and item.previous_converted_count %}
+                <a href="{% url 'enquiry:previous_converted_list' counsellor_id=item.counsellor_id %}?start_date={{ start_date }}&end_date={{ end_date }}" 
+                   class="text-decoration-none">
+                  <span class="badge bg-primary">{{ item.previous_converted_count }}</span>
+                </a>
+              {% else %}
+                <span class="badge bg-secondary">{{ item.previous_converted_count }}</span>
+              {% endif %}
+            </td>
+            <td><span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span></td>
+            <td><span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span></td>
+            <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>
+            <td class="fw-bold text-orange">₹{{ item.fees_target|floatformat:2 }}</td>
+            <td class="fw-bold {% if item.fees_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+              ₹{{ item.fees_balance|floatformat:2 }}
+            </td>
+            <td>
+              {% if item.total_enquiries > 0 %}
+                {% widthratio item.joined_count item.total_enquiries 100 as conversion_rate %}
+                <span class="badge {% if conversion_rate >= 50 %}bg-success{% elif conversion_rate >= 25 %}bg-warning{% else %}bg-danger{% endif %}">
+                  {{ conversion_rate }}%
+                </span>
+              {% else %}
+                <span class="badge bg-secondary">0%</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary" title="View Details" 
+                        onclick="viewCounsellorDetails('{{ item.counsellor_name }}')">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-success" title="Send Report" 
+                        onclick="sendReport('{{ item.counsellor_name }}')">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="table-light">
+          <tr>
+            <th colspan="2" class="text-center">TOTALS</th>
+            <th class="text-center" id="totalEnquiriesFooter">0</th>
+            <th class="text-center" id="totalTelFooter">0</th>
+            <th class="text-center" id="totalTJFooter">0</th>
+            <th class="text-center" id="totalWalkinFooter">0</th>
+            <th class="text-center" id="totalWJFooter">0</th>
+            <th class="text-center" id="totalJoinedFooter">0</th>
+            <th class="text-center" id="totalPrevFooter">0</th>
+            <th class="text-center" id="totalPendingFooter">0</th>
+            <th class="text-center" id="totalDropoutFooter">0</th>
+            <th class="text-center" id="totalFeesFooter">₹0</th>
+            <th class="text-center" id="totalTargetFooter">₹0</th>
+            <th class="text-center" id="totalBalanceFooter">₹0</th>
+            <th class="text-center" id="totalConversionFooter">0%</th>
+            <th></th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Enhanced Day-wise Fees Section with Chart -->
+  <div class="row my-5">
+    <div class="col-md-8">
+      <div class="table-container">
+        <div class="p-3 border-bottom bg-light">
+          <h5 class="mb-0">
+            <i class="fas fa-calendar-money me-2 text-success"></i>
+            Day-wise Revenue Tracking
+          </h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover table-striped" id="feesTable">
+            <thead class="table-dark">
+              <tr>
+                <th><i class="fas fa-calendar me-1"></i>Date</th>
+                <th><i class="fas fa-coins me-1"></i>Fees Collected</th>
+                <th><i class="fas fa-chart-line me-1"></i>Daily Target</th>
+                <th><i class="fas fa-percentage me-1"></i>Achievement</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for day in day_wise_fees %}
+              <tr>
+                <td class="fw-semibold">{{ day.day|date:"d M Y" }}</td>
+                <td class="fw-bold text-success">₹{{ day.total_paid|floatformat:2 }}</td>
+                <td class="fw-bold text-orange">₹{{ day.daily_target|default:"0"|floatformat:2 }}</td>
+                <td>
+                  {% if day.daily_target %}
+                    {% widthratio day.total_paid day.daily_target 100 as achievement %}
+                    <span class="badge {% if achievement >= 100 %}bg-success{% elif achievement >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                      {{ achievement }}%
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary">N/A</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  <i class="fas fa-info-circle me-2"></i>No fees collected in this period.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0"><i class="fas fa-chart-area me-2"></i>Revenue Trend</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="revenueChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Total Summary Card -->
+  {% if total_fees_collected %}
+    <div class="total-summary-card mb-4">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="summary-box">
+            <div class="summary-icon bg-success">
+              <i class="fas fa-trophy"></i>
+            </div>
+            <div>
+              <h6><i class="fas fa-chart-line me-1"></i> Total Revenue</h6>
+              <h4 class="text-success">₹{{ total_fees_collected|floatformat:2 }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="summary-box">
+            <div class="summary-icon bg-warning">
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <div>
+              <h6><i class="fas fa-coins me-1"></i> Target Fees</h6>
+              <h4 class="text-warning">₹{{ total_target_fees|floatformat:2 }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="summary-box">
+            <div class="summary-icon bg-danger">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div>
+              <h6><i class="fas fa-exclamation-circle me-1"></i> Yet to Collect</h6>
+              <h4 class="text-danger">₹{{ yet_to_collect|floatformat:2 }}</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="summary-box">
+            <div class="summary-icon bg-info">
+              <i class="fas fa-percentage"></i>
+            </div>
+            <div>
+              <h6><i class="fas fa-chart-pie me-1"></i> Achievement</h6>
+              <h4 class="text-info">
+                {% if total_target_fees > 0 %}
+                  {% widthratio total_fees_collected total_target_fees 100 %}%
+                {% else %}
+                  0%
+                {% endif %}
+              </h4>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 text-center">
+        <small class="text-muted">
+          <i class="fas fa-calendar-range me-1"></i>
+          {{ start_date|date:"d M" }} - {{ end_date|date:"d M Y" }}
+        </small>
+      </div>
+    </div>
+  {% endif %}
 
   {% else %}
   <!-- Enhanced No Data State -->
@@ -582,96 +779,621 @@
   {% endif %}
 </div>
 
+<!-- Modals -->
+<div class="modal fade" id="counsellorModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Counsellor Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="counsellorModalBody">
+        <!-- Dynamic content will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast Container -->
-<div class="toast-container"></div>
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+<!-- Custom Styles -->
+<style>
+.dashboard-container {
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);
+
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.header-stats .stat-item {
+    text-align: center;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.header-stats .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.header-stats .stat-label {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.filter-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.quick-actions .btn {
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.quick-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.stat-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.stat-card .card-body {
+    padding: 25px;
+    position: relative;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+.table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.table-actions .btn {
+    border-radius: 20px;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.table thead th {
+    background: #343a40 !important;
+    color: white;
+    border: none;
+    padding: 15px 10px;
+    font-weight: 600;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 11px;
+    padding: 6px 12px;
+}
+
+.summary-box {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.summary-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.summary-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+}
+
+.btn-modern {
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.text-orange {
+    color: #f97316 !important;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 10px;
+    }
+    
+    .dashboard-header {
+        padding: 20px;
+    }
+    
+    .filter-card {
+        padding: 15px;
+    }
+    
+    .summary-box {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .summary-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+</style>
 
 <!-- Enhanced JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables-buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables-buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
 $(document).ready(function () {
-    // Calculate total fees for footer if not provided by backend
-    let totalFees = 0;
-    $('#feesTable tbody tr').each(function() {
-        const feeText = $(this).find('td:last').text().replace(/[₹,]/g, '');
-        const feeValue = parseFloat(feeText) || 0;
-        totalFees += feeValue;
-    });
-
+    // Initialize variables
+    let dataTable;
+    let revenueChart;
+    
+    // Calculate and display totals
+    calculateTotals();
+    
     // Initialize DataTable with enhanced features
-    const dataTable = $('#dataTable').DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'excelHtml5',
-                text: '<i class="fas fa-file-excel me-1"></i>Export Excel',
-                className: 'btn btn-success btn-sm',
-                title: 'Counsellor Summary Report'
-            }
-        ],
-        responsive: true,
-        pageLength: 25,
-        ordering: true,
-        searching: true,
-        lengthChange: true,
-        info: true,
-        paging: true,
-        language: {
-            search: "🔍 Search counsellors:",
-            lengthMenu: "Show _MENU_ counsellors per page",
-            info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
-            infoEmpty: "No counsellors found",
-            infoFiltered: "(filtered from _MAX_ total counsellors)",
-            paginate: {
-                first: "⏮️ First",
-                last: "⏭️ Last",
-                next: "▶️ Next",
-                previous: "◀️ Previous"
-            }
-        },
-        columnDefs: [
-            { targets: [2,3,4,5,6,7,8,9], className: 'text-center' },
-            { targets: [10,11,12], className: 'text-end' }
-        ]
-    });
+    initializeDataTable();
+    
+    // Initialize Charts
+    initializeCharts();
+    
+    // Setup event handlers
+    setupEventHandlers();
+    
+    // Animate counters
+    animateCounters();
+    
+    // Auto-refresh setup
+    setupAutoRefresh();
 
-    // Initialize Fees Table
-    $('#feesTable').DataTable({
-        responsive: true,
-        pageLength: 10,
-        ordering: true,
-        searching: false,
-        paging: false,
-        info: false,
-        language: {
-            search: "🔍 Search dates:",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries"
-        }
-    });
-
-    // Enhanced button interactions
-    $('#filterBtn').click(function() {
-        const btn = $(this);
-        const originalText = btn.html();
-        btn.html('<span class="loading-spinner me-2"></span>Filtering...');
-        btn.prop('disabled', true);
+    function calculateTotals() {
+        let totalEnquiries = 0, totalJoined = 0, totalPending = 0, totalRevenue = 0;
+        let totalTel = 0, totalTJ = 0, totalWalkin = 0, totalWJ = 0;
+        let totalPrev = 0, totalDropout = 0, totalTarget = 0, totalBalance = 0;
         
-        setTimeout(() => {
-            btn.html(originalText);
-            btn.prop('disabled', false);
-        }, 1500);
-    });
+        $('#dataTable tbody tr').each(function() {
+            const row = $(this);
+            totalEnquiries += parseInt(row.find('.badge:eq(0)').text()) || 0;
+            totalTel += parseInt(row.find('.badge:eq(1)').text()) || 0;
+            totalTJ += parseInt(row.find('.badge:eq(2)').text()) || 0;
+            totalWalkin += parseInt(row.find('.badge:eq(3)').text()) || 0;
+            totalWJ += parseInt(row.find('.badge:eq(4)').text()) || 0;
+            totalJoined += parseInt(row.find('.badge:eq(5)').text()) || 0;
+            totalPrev += parseInt(row.find('.badge:eq(6)').text()) || 0;
+            totalPending += parseInt(row.find('.badge:eq(7)').text()) || 0;
+            totalDropout += parseInt(row.find('.badge:eq(8)').text()) || 0;
+            
+            // Extract currency values
+            const feesPaid = parseFloat(row.find('td:eq(11)').text().replace(/[₹,]/g, '')) || 0;
+            const feesTarget = parseFloat(row.find('td:eq(12)').text().replace(/[₹,]/g, '')) || 0;
+            const feesBalance = parseFloat(row.find('td:eq(13)').text().replace(/[₹,]/g, '')) || 0;
+            
+            totalRevenue += feesPaid;
+            totalTarget += feesTarget;
+            totalBalance += feesBalance;
+        });
+        
+        // Update footer totals
+        $('#totalEnquiriesFooter').text(totalEnquiries);
+        $('#totalTelFooter').text(totalTel);
+        $('#totalTJFooter').text(totalTJ);
+        $('#totalWalkinFooter').text(totalWalkin);
+        $('#totalWJFooter').text(totalWJ);
+        $('#totalJoinedFooter').text(totalJoined);
+        $('#totalPrevFooter').text(totalPrev);
+        $('#totalPendingFooter').text(totalPending);
+        $('#totalDropoutFooter').text(totalDropout);
+        $('#totalFeesFooter').text('₹' + totalRevenue.toLocaleString());
+        $('#totalTargetFooter').text('₹' + totalTarget.toLocaleString());
+        $('#totalBalanceFooter').text('₹' + totalBalance.toLocaleString());
+        
+        // Calculate conversion rate
+        const conversionRate = totalEnquiries > 0 ? ((totalJoined / totalEnquiries) * 100).toFixed(1) : 0;
+        $('#totalConversionFooter').text(conversionRate + '%');
+        
+        // Update header stats
+        $('#totalCounsellors').text($('#dataTable tbody tr').length);
+        $('#totalEnquiries').text(totalEnquiries);
+        
+        // Update performance cards
+        $('#totalEnquiriesCard').text($('#dataTable tbody tr').length);
+        $('#totalJoinedCard').text(totalJoined);
+        $('#totalPendingCard').text(totalPending);
+        $('#totalRevenueCard').text('₹' + totalRevenue.toLocaleString());
+    }
 
-    $('#exportBtn').click(function() {
-        showToast('Excel export started!', 'success');
-    });
+    function initializeDataTable() {
+        dataTable = $('#dataTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel me-1"></i>Export Excel',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Counsellor Summary Report',
+                    exportOptions: {
+                        columns: ':not(:last-child)' // Exclude actions column
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf me-1"></i>Export PDF',
+                    className: 'btn btn-danger btn-sm',
+                    title: 'Counsellor Summary Report',
+                    orientation: 'landscape',
+                    exportOptions: {
+                        columns: ':not(:last-child)'
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print me-1"></i>Print',
+                    className: 'btn btn-info btn-sm',
+                    title: 'Counsellor Summary Report',
+                    exportOptions: {
+                        columns: ':not(:last-child)'
+                    }
+                }
+            ],
+            responsive: true,
+            pageLength: 25,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+            ordering: true,
+            searching: true,
+            lengthChange: true,
+            info: true,
+            paging: true,
+            stateSave: true,
+            language: {
+                search: "🔍 Search counsellors:",
+                lengthMenu: "Show _MENU_ counsellors per page",
+                info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
+                infoEmpty: "No counsellors found",
+                infoFiltered: "(filtered from _MAX_ total counsellors)",
+                paginate: {
+                    first: "⏮️ First",
+                    last: "⏭️ Last",
+                    next: "▶️ Next",
+                    previous: "◀️ Previous"
+                }
+            },
+            columnDefs: [
+                { targets: [2,3,4,5,6,7,8,9,10,14], className: 'text-center' },
+                { targets: [11,12,13], className: 'text-end' },
+                { targets: [15], orderable: false }
+            ],
+            footerCallback: function (row, data, start, end, display) {
+                // Update footer calculations on filter/sort
+                calculateTotals();
+            }
+        });
+        
+        // Move buttons to custom location
+        dataTable.buttons().container().appendTo('#dataTable_wrapper .col-md-6:eq(0)');
+    }
 
-    // Animate counter numbers
+    function initializeCharts() {
+        // Revenue Trend Chart
+        const ctx = document.getElementById('revenueChart');
+        if (ctx) {
+            const chartData = [];
+            const chartLabels = [];
+            
+            $('#feesTable tbody tr').each(function() {
+                const date = $(this).find('td:eq(0)').text().trim();
+                const amount = parseFloat($(this).find('td:eq(1)').text().replace(/[₹,]/g, '')) || 0;
+                
+                if (date && date !== 'No fees collected in this period.') {
+                    chartLabels.push(date);
+                    chartData.push(amount);
+                }
+            });
+            
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Daily Revenue',
+                        data: chartData,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 7
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverBackgroundColor: '#10b981'
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function setupEventHandlers() {
+        // Quick date filters
+        $('#todayBtn').click(function() {
+            const today = new Date().toISOString().split('T')[0];
+            $('#start_date').val(today);
+            $('#end_date').val(today);
+            showToast('Date filter set to today', 'info');
+        });
+
+        $('#weekBtn').click(function() {
+            const today = new Date();
+            const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+            const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+            
+            $('#start_date').val(weekStart.toISOString().split('T')[0]);
+            $('#end_date').val(weekEnd.toISOString().split('T')[0]);
+            showToast('Date filter set to this week', 'info');
+        });
+
+        $('#monthBtn').click(function() {
+            const today = new Date();
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            $('#start_date').val(monthStart.toISOString().split('T')[0]);
+            $('#end_date').val(monthEnd.toISOString().split('T')[0]);
+            showToast('Date filter set to this month', 'info');
+        });
+
+        // Enhanced filter functionality
+        $('#filterBtn').click(function(e) {
+            e.preventDefault();
+            const btn = $(this);
+            const originalText = btn.html();
+            
+            btn.html('<span class="loading-spinner me-2"></span>Filtering...');
+            btn.prop('disabled', true);
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                $('#filterForm').submit();
+            }, 1000);
+        });
+
+        // Column visibility toggle
+        $('#toggleColumns').click(function() {
+            const columns = dataTable.columns();
+            let visibilityHtml = '<div class="row">';
+            
+            columns.every(function(index) {
+                if (index < columns.count() - 1) { // Exclude actions column
+                    const column = this;
+                    const header = $(column.header()).text().trim();
+                    const visible = column.visible();
+                    
+                    visibilityHtml += `
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="col${index}" ${visible ? 'checked' : ''} 
+                                       onchange="toggleColumn(${index})">
+                                <label class="form-check-label" for="col${index}">
+                                    ${header}
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            visibilityHtml += '</div>';
+            
+            showModal('Column Visibility', visibilityHtml);
+        });
+
+        // Refresh table
+        $('#refreshTable').click(function() {
+            dataTable.ajax.reload(null, false);
+            showToast('Table refreshed successfully', 'success');
+        });
+
+        // Counsellor filter
+        $('#counsellor_filter').change(function() {
+            const selectedCounsellor = $(this).val();
+            if (selectedCounsellor) {
+                dataTable.column(0).search(selectedCounsellor).draw();
+                showToast(`Filtered by: ${selectedCounsellor}`, 'info');
+            } else {
+                dataTable.column(0).search('').draw();
+                showToast('Filter cleared', 'info');
+            }
+        });
+
+        // Print functionality
+        $('#printBtn').click(function(e) {
+            e.preventDefault();
+            window.print();
+        });
+
+        // Enhanced export functionality
+        $('.dropdown-item[href*="export="]').click(function() {
+            const exportType = $(this).text().trim();
+            showToast(`${exportType} export started!`, 'success');
+        });
+    }
+
+    function animateCounters() {
+        $('.stat-number').each(function() {
+            const $this = $(this);
+            const text = $this.text().replace(/[₹,]/g, '');
+            const value = parseInt(text) || 0;
+            
+            if (value > 0) {
+                $this.text('0');
+                animateValue(this, 0, value, 2000);
+            }
+        });
+    }
+
     function animateValue(element, start, end, duration) {
         let startTimestamp = null;
+        const isRupee = $(element).text().includes('₹');
+        
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             const current = Math.floor(progress * (end - start) + start);
-            element.innerHTML = '₹' + current.toLocaleString() + '.00';
+            
+            if (isRupee) {
+                element.innerHTML = '₹' + current.toLocaleString();
+            } else {
+                element.innerHTML = current.toLocaleString();
+            }
+            
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             }
@@ -679,76 +1401,262 @@ $(document).ready(function () {
         window.requestAnimationFrame(step);
     }
 
-    // Animate total summary card
-    $('.total-summary-card .display-3').each(function() {
-        const $this = $(this);
-        const text = $this.text().replace(/[₹,]/g, '');
-        const value = parseInt(text) || 0;
-        if (value > 0) {
-            $this.text('₹0.00');
-            animateValue(this, 0, value, 3000);
-        }
-    });
-
-    // Show toast notification
-    function showToast(message, type = 'info') {
-        const toast = $(`
-            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header bg-${type} text-white">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong class="me-auto">Notification</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                </div>
-                <div class="toast-body">${message}</div>
-            </div>
-        `);
+    function setupAutoRefresh() {
+        let autoRefreshInterval;
         
-        $('.toast-container').append(toast);
-        const bsToast = new bootstrap.Toast(toast[0]);
-        bsToast.show();
-        
-        setTimeout(() => toast.remove(), 5000);
+        $(document).keydown(function(e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 82) { // Ctrl+Shift+R
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                    showToast('Auto-refresh disabled', 'warning');
+                } else {
+                    autoRefreshInterval = setInterval(() => {
+                        location.reload();
+                    }, 300000); // 5 minutes
+                    showToast('Auto-refresh enabled (every 5 minutes)', 'info');
+                }
+            }
+        });
     }
 
-    // Enhanced table row hover effects
-    $('.table tbody tr').hover(
-        function() {
-            $(this).addClass('table-active');
-        },
-        function() {
-            $(this).removeClass('table-active');
-        }
-    );
-
-    // Auto-refresh functionality (optional)
-    let autoRefresh = false;
-    $(document).keydown(function(e) {
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 82) { // Ctrl+Shift+R
-            autoRefresh = !autoRefresh;
-            if (autoRefresh) {
-                showToast('Auto-refresh enabled (every 5 minutes)', 'info');
-                setInterval(() => {
-                    if (autoRefresh) location.reload();
-                }, 300000);
-            } else {
-                showToast('Auto-refresh disabled', 'warning');
-            }
+    // Initialize tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // Initialize fees table
+    $('#feesTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        ordering: true,
+        searching: false,
+        paging: true,
+        info: true,
+        language: {
+            info: "Showing _START_ to _END_ of _TOTAL_ entries"
         }
     });
-
-    // Initialize tooltips for better UX
-    $('[data-bs-toggle="tooltip"]').tooltip();
 });
 
-// Add smooth scrolling
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-        });
-    });
+// Global functions
+function toggleColumn(columnIndex) {
+    const column = $('#dataTable').DataTable().column(columnIndex);
+    column.visible(!column.visible());
+}
+
+function viewCounsellorDetails(counsellorName) {
+    const modalBody = `
+        <div class="row">
+            <div class="col-md-12">
+                <h6>Counsellor: ${counsellorName}</h6>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Detailed performance metrics and history for ${counsellorName} would be displayed here.
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Performance Metrics</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Total Enquiries</span>
+                                <strong id="modalTotalEnquiries">Loading...</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Conversion Rate</span>
+                                <strong id="modalConversionRate">Loading...</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Revenue Generated</span>
+                                <strong id="modalRevenue">Loading...</strong>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Recent Activity</h6>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6>New Enquiry</h6>
+                                    <p class="text-muted">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6>Student Joined</h6>
+                                    <p class="text-muted">5 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    showModal(`${counsellorName} - Details`, modalBody);
+    
+    // Populate modal with actual data
+    const row = $(`tr[data-counsellor="${counsellorName}"]`);
+    if (row.length) {
+        const totalEnquiries = row.find('.badge:eq(0)').text();
+        const joined = row.find('.badge:eq(5)').text();
+        const revenue = row.find('td:eq(11)').text();
+        const conversionRate = totalEnquiries > 0 ? ((joined / totalEnquiries) * 100).toFixed(1) : 0;
+        
+        setTimeout(() => {
+            $('#modalTotalEnquiries').text(totalEnquiries);
+            $('#modalConversionRate').text(conversionRate + '%');
+            $('#modalRevenue').text(revenue);
+        }, 500);
+    }
+}
+
+function sendReport(counsellorName) {
+    showToast(`Sending report to ${counsellorName}...`, 'info');
+    
+    // Simulate API call
+    setTimeout(() => {
+        showToast(`Report sent successfully to ${counsellorName}!`, 'success');
+    }, 2000);
+}
+
+function showToast(message, type = 'info') {
+    const iconMap = {
+        'info': 'fas fa-info-circle',
+        'success': 'fas fa-check-circle',
+        'warning': 'fas fa-exclamation-triangle',
+        'danger': 'fas fa-times-circle'
+    };
+    
+    const toast = $(`
+        <div class="toast fade-in" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+            <div class="toast-header bg-${type} text-white">
+                <i class="${iconMap[type]} me-2"></i>
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">${message}</div>
+        </div>
+    `);
+    
+    $('.toast-container').append(toast);
+    const bsToast = new bootstrap.Toast(toast[0]);
+    bsToast.show();
+    
+    setTimeout(() => toast.remove(), 6000);
+}
+
+function showModal(title, body) {
+    $('#counsellorModal .modal-title').text(title);
+    $('#counsellorModalBody').html(body);
+    const modal = new bootstrap.Modal(document.getElementById('counsellorModal'));
+    modal.show();
+}
+
+// Enhanced table interactions
+$(document).on('mouseenter', '.table tbody tr', function() {
+    $(this).addClass('table-active');
+}).on('mouseleave', '.table tbody tr', function() {
+    $(this).removeClass('table-active');
+});
+
+// Smooth scrolling for anchor links
+$(document).on('click', 'a[href^="#"]', function(e) {
+    e.preventDefault();
+    const target = $(this.getAttribute('href'));
+    if (target.length) {
+        $('html, body').animate({
+            scrollTop: target.offset().top - 100
+        }, 800);
+    }
+});
+
+// Print styles
+window.addEventListener('beforeprint', function() {
+    $('body').addClass('printing');
+});
+
+window.addEventListener('afterprint', function() {
+    $('body').removeClass('printing');
 });
 </script>
+
+<style>
+/* Timeline styles for modal */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.timeline-content p {
+    font-size: 12px;
+    margin-bottom: 0;
+}
+
+/* Print styles */
+@media print {
+    .printing .btn,
+    .printing .dropdown,
+    .printing .toast-container,
+    .printing .modal {
+        display: none !important;
+    }
+    
+    .printing .table {
+        font-size: 10px;
+    }
+    
+    .printing .dashboard-header {
+        background: #333 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact;
+    }
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .header-stats {
+        display: none !important;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .quick-actions .btn {
+        width: 100%;
+    }
+    
+    .table-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .summary-box {
+        margin-bottom: 15px;
+    }
+}
+</style>
 
 {% endblock %}

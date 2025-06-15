@@ -747,6 +747,12 @@ def download_monthly_excel(request):
     return response
 
 # ========== Monthly Summary Dashboard ==========
+from datetime import datetime
+from decimal import Decimal
+from django.db.models import Sum
+import calendar
+from .models import Enquiry
+
 @manager_required
 def get_monthly_stats(request, month_filter=None, status_filter=None):
     stats = []
@@ -760,17 +766,20 @@ def get_monthly_stats(request, month_filter=None, status_filter=None):
             start_date = datetime(year, month, 1)
             end_date = datetime(year, month, calendar.monthrange(year, month)[1])
             queryset = Enquiry.objects.filter(created_at__range=(start_date, end_date))
-            
+
             if status_filter:
                 queryset = queryset.filter(status=status_filter)
-            
+
+            joined_qs = queryset.filter(status='joined')
+
             total_students = queryset.count()
-            joined_count = queryset.filter(status='joined').count()
+            joined_count = joined_qs.count()
             pending_count = queryset.filter(status='pending').count()
             dropout_count = queryset.filter(status='dropout').count()
-            total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or Decimal('0.00')
-            total_balance = queryset.aggregate(Sum('fees_balance'))['fees_balance__sum'] or Decimal('0.00')
             
+            total_fees_paid = queryset.aggregate(Sum('fees_paid'))['fees_paid__sum'] or Decimal('0.00')
+            total_balance = joined_qs.filter(fees_balance__gt=0).aggregate(Sum('fees_balance'))['fees_balance__sum'] or Decimal('0.00')
+
             stats.append({
                 'month': f"{year}-{month:02d}",
                 'label': f"{calendar.month_abbr[month]} {year}",
@@ -784,9 +793,11 @@ def get_monthly_stats(request, month_filter=None, status_filter=None):
     
     return stats
 
+
 @manager_required
 def monthly_summary_dashboard(request):
     selected_month = request.GET.get('month', None)
+    
     status_filter = request.GET.get('status', '')
     stats = get_monthly_stats(request, selected_month, status_filter)
     
@@ -1169,6 +1180,8 @@ def update_due_date(request):
             'success': False,
             'message': 'An error occurred while processing your request'
         }, status=500)
+        
+        
 from datetime import datetime
 import decimal
 

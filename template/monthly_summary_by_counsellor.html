@@ -2,34 +2,27 @@
 {% load humanize %}
 {% load custom_filters %}
 
-
-
 {% block content %}
 <div class="container-fluid py-4">
   <!-- Month Filter Header -->
+  <!-- Flatpickr Month Selector -->
   <div class="filter-section fade-in">
     <h2 class="filter-title">
       <i class="fas fa-chart-line me-2"></i>
       Counsellor Performance Dashboard
     </h2>
+
     <form id="month-filter-form" class="row g-3 align-items-end">
       <div class="col-md-6 col-lg-4">
-        <label for="month-select" class="form-label fw-bold text-dark">Select Month</label>
-        <select id="month-select" name="month" class="form-select form-select-modern">
-          <option value="">All Time</option>
-          {% for value, label in month_choices %}
-            <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>
-              {{ label }}
-            </option>
-          {% endfor %}
-        </select>
+        <label for="month-picker" class="form-label fw-bold text-dark">Select Month</label>
+        <input type="text" id="month-picker" name="month" class="form-control form-control-lg shadow-sm" placeholder="Select Month" value="{{ selected_month }}">
       </div>
-      
-      <div class="col-md-6 col-lg-4">
-        <button type="submit" class="btn btn-modern-primary me-2">
-          <i class="fas fa-filter me-2"></i>Filter Data
+
+      <div class="col-md-6 col-lg-4 d-flex gap-2">
+        <button type="submit" class="btn btn-modern-primary w-50">
+          <i class="fas fa-filter me-2"></i>Filter
         </button>
-        <button type="button" id="reset-btn" class="btn btn-modern-secondary">
+        <button type="button" id="reset-btn" class="btn btn-modern-secondary w-50">
           <i class="fas fa-undo me-2"></i>Reset
         </button>
       </div>
@@ -187,6 +180,11 @@
 </div>
 
 
+
+<!-- Flatpickr Core CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Optional Theme (e.g., Material Blue) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 
 <!-- Google Fonts - Trending Typography -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -588,6 +586,13 @@ body {
     }
 }
 </style>
+
+<!-- Flatpickr Core JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- Month Select Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+
 {% endblock %}
 
 {% block extra_js %}
@@ -596,8 +601,29 @@ body {
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> 
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> 
 
+<!-- Flatpickr Core JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<!-- Month Select Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+
 <script>
 $(document).ready(function() {
+    // Initialize Flatpickr Month Picker
+    const monthPicker = flatpickr("#month-picker", {
+        dateFormat: "Y-m",                 // Format for backend (e.g., 2025-06)
+        altInput: true,
+        altFormat: "F Y",                  // Display format (e.g., June 2025)
+        plugins: [
+            new monthSelectPlugin({
+                shorthand: false,
+                dateFormat: "Y-m",
+                altFormat: "F Y",
+                theme: "light"
+            })
+        ]
+    });
+
     // Initialize DataTable with modern styling
     let table = $('#counsellor-table').DataTable({
         responsive: true,
@@ -627,83 +653,39 @@ $(document).ready(function() {
         ]
     });
 
-    // Handle month filter submission
+    // Handle month filter form submission
     $('#month-filter-form').on('submit', function(e) {
         e.preventDefault();
-        const selectedMonth = $('#month-select').val();
         
-        // Add loading state
+        const selectedMonth = $('#month-picker').val();
         const filterBtn = $(this).find('button[type="submit"]');
         const originalText = filterBtn.html();
+        
+        // Add loading state
         filterBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading...').prop('disabled', true);
-
-        // Fetch filtered data
-        $.ajax({
-            url: "{% url 'enquiry:monthly_summary_by_counsellor' %}",
-            type: 'GET',
-            data: { month: selectedMonth },
-            success: function(response) {
-                // Extract table HTML from response
-                const parser = new DOMParser();
-                const htmlDoc = parser.parseFromString(response, 'text/html');
-                const newTableHtml = $(htmlDoc).find('#counsellor-table').html();
-
-                // Update table content
-                $('#counsellor-table').html(newTableHtml);
-                
-                // Reinitialize DataTable
-                table.destroy();
-                table = $('#counsellor-table').DataTable({
-                    responsive: true,
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    pageLength: 15,
-                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-                    language: {
-                        search: "Search counsellors:",
-                        lengthMenu: "Show _MENU_ entries per page",
-                        info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
-                        infoEmpty: "No counsellors found",
-                        infoFiltered: "(filtered from _MAX_ total entries)",
-                        paginate: {
-                            first: "First",
-                            last: "Last",
-                            next: "Next",
-                            previous: "Prev"
-                        },
-                        emptyTable: "No counsellor data available"
-                    },
-                    columnDefs: [
-                        { targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], className: "text-center" },
-                        { targets: [12, 13], className: "text-end" }
-                    ]
-                });
-
-                // Update summary stats
-                updateSummaryStats();
-                
-                // Show success feedback
-                showNotification('Data filtered successfully!', 'success');
-            },
-            error: function() {
-                showNotification('Error loading data. Please try again.', 'error');
-            },
-            complete: function() {
-                filterBtn.html(originalText).prop('disabled', false);
-            }
-        });
+        
+        // Submit form to reload page with month parameter
+        if (selectedMonth) {
+            window.location.href = window.location.pathname + '?month=' + encodeURIComponent(selectedMonth);
+        } else {
+            window.location.href = window.location.pathname;
+        }
     });
 
     // Reset button handler
     $('#reset-btn').on('click', function() {
-        $('#month-select').val('');
-        $('#month-filter-form').submit();
+        monthPicker.clear();
+        // Submit form without month parameter
+        window.location.href = window.location.pathname;
     });
 
-    // Initial stats update
+    // Initial stats update on page load
     updateSummaryStats();
+
+    // Update stats when DataTable is redrawn (search, pagination, etc.)
+    table.on('draw', function() {
+        updateSummaryStats();
+    });
 
     function updateSummaryStats() {
         let totalTelephonic = 0;
@@ -713,21 +695,28 @@ $(document).ready(function() {
         let totalDropout = 0;
         let totalFees = 0;
 
-        $('#counsellor-table tbody tr:not(.dataTables_empty)').each(function() {
-            // Extract numbers from badges and text
-            const walkinText = $(this).find('td:eq(1) .badge-walkin').text() || '0';
-            const telephonicText = $(this).find('td:eq(5) .badge-telephonic').text() || '0';
-            const joinedText = $(this).find('td:eq(9) .status-joined').text() || '0';
-            const pendingText = $(this).find('td:eq(10) .status-pending').text() || '0';
-            const dropoutText = $(this).find('td:eq(11) .status-dropout').text() || '0';
-            const feesText = $(this).find('td:eq(12) .money-positive').text().replace('₹', '').replace(/,/g, '') || '0';
+        // Only count visible rows (after DataTable filtering)
+        table.rows({ search: 'applied' }).every(function() {
+            const data = this.data();
+            const node = this.node();
+            
+            if ($(node).find('td').length > 1) { // Skip empty state row
+                // Extract values from table cells
+                const walkinBadge = $(node).find('td:eq(1) .badge-walkin').text().trim();
+                const telephonicBadge = $(node).find('td:eq(5) .badge-telephonic').text().trim();
+                const joinedBadge = $(node).find('td:eq(9) .status-joined').text().trim();
+                const pendingBadge = $(node).find('td:eq(10) .status-pending').text().trim();
+                const dropoutBadge = $(node).find('td:eq(11) .status-dropout').text().trim();
+                const feesText = $(node).find('td:eq(12) .money-positive').text().replace('₹', '').replace(/,/g, '').trim();
 
-            totalWalkin += parseInt(walkinText) || 0;
-            totalTelephonic += parseInt(telephonicText) || 0;
-            totalJoined += parseInt(joinedText) || 0;
-            totalPending += parseInt(pendingText) || 0;
-            totalDropout += parseInt(dropoutText) || 0;
-            totalFees += parseInt(feesText) || 0;
+                // Parse numbers safely
+                totalWalkin += parseInt(walkinBadge) || 0;
+                totalTelephonic += parseInt(telephonicBadge) || 0;
+                totalJoined += parseInt(joinedBadge) || 0;
+                totalPending += parseInt(pendingBadge) || 0;
+                totalDropout += parseInt(dropoutBadge) || 0;
+                totalFees += parseInt(feesText) || 0;
+            }
         });
 
         // Animate number updates
@@ -742,12 +731,21 @@ $(document).ready(function() {
     function animateNumber(selector, targetValue, isCurrency = false) {
         const element = $(selector);
         const currentValue = parseInt(element.text().replace(/[₹,]/g, '')) || 0;
+        
+        if (currentValue === targetValue) return; // No change needed
+        
         const increment = (targetValue - currentValue) / 20;
         let current = currentValue;
+        let steps = 0;
+        const maxSteps = 20;
 
         const timer = setInterval(function() {
+            steps++;
             current += increment;
-            if ((increment > 0 && current >= targetValue) || (increment < 0 && current <= targetValue)) {
+            
+            if (steps >= maxSteps || 
+                (increment > 0 && current >= targetValue) || 
+                (increment < 0 && current <= targetValue)) {
                 current = targetValue;
                 clearInterval(timer);
             }
@@ -760,10 +758,12 @@ $(document).ready(function() {
 
     function showNotification(message, type) {
         const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const iconClass = type === 'success' ? 'check-circle' : 'exclamation-circle';
+        
         const notification = $(`
             <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
                  style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                <i class="fas fa-${iconClass} me-2"></i>
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -772,6 +772,33 @@ $(document).ready(function() {
         $('body').append(notification);
         setTimeout(() => notification.fadeOut(), 3000);
     }
+
+    // Debug function to check data extraction
+    function debugDataExtraction() {
+        console.log('=== Debug Data Extraction ===');
+        table.rows({ search: 'applied' }).every(function() {
+            const node = this.node();
+            const counsellorName = $(node).find('td:eq(0)').text().trim();
+            
+            console.log('Counsellor:', counsellorName);
+            console.log('Walkin:', $(node).find('td:eq(1) .badge-walkin').text().trim());
+            console.log('Joined Walkin:', $(node).find('td:eq(2)').text().trim());
+            console.log('Pending Walkin:', $(node).find('td:eq(3)').text().trim());
+            console.log('Dropout Walkin:', $(node).find('td:eq(4)').text().trim());
+            console.log('Telephonic:', $(node).find('td:eq(5) .badge-telephonic').text().trim());
+            console.log('Joined Telephonic:', $(node).find('td:eq(6)').text().trim());
+            console.log('Pending Telephonic:', $(node).find('td:eq(7)').text().trim());
+            console.log('Dropout Telephonic:', $(node).find('td:eq(8)').text().trim());
+            console.log('Total Joined:', $(node).find('td:eq(9) .status-joined').text().trim());
+            console.log('Total Pending:', $(node).find('td:eq(10) .status-pending').text().trim());
+            console.log('Total Dropout:', $(node).find('td:eq(11) .status-dropout').text().trim());
+            console.log('Fees:', $(node).find('td:eq(12) .money-positive').text().trim());
+            console.log('---');
+        });
+    }
+
+    // Uncomment the line below for debugging
+    // debugDataExtraction();
 });
 </script>
 {% endblock %}

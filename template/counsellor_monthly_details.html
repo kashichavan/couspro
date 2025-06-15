@@ -297,7 +297,6 @@
     }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="container mt-4 mb-5 fade-in">
     <!-- Page Header -->
@@ -309,7 +308,6 @@
             </div>
         </div>
     </div>
-    
     
     <!-- Counsellor Information -->
     <div class="counsellor-info">
@@ -324,88 +322,212 @@
     </div>
     
     {% if enquiries %}
-    <!-- Data Summary Cards -->
+    <!-- Advanced Data Summary Cards -->
     <div class="data-summary">
-        <div class="summary-card">
+        <div class="summary-card total-card">
             <div class="number" id="totalEnquiries">{{ enquiries|length }}</div>
             <div class="label">Total Enquiries</div>
+            <div class="percentage">100%</div>
         </div>
-        <div class="summary-card">
-            <div class="number" id="joinedCount">{{ joined_count }}</div>
-            <div class="label">Joined</div>
+        <div class="summary-card joined-card">
+            <div class="number" id="joinedCount">0</div>
+            <div class="label">Joined Students</div>
+            <div class="percentage" id="joinedPercentage">0%</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card pending-card">
             <div class="number" id="pendingCount">0</div>
             <div class="label">Pending</div>
+            <div class="percentage" id="pendingPercentage">0%</div>
         </div>
-        <div class="summary-card">
+        <div class="summary-card dropout-card">
             <div class="number" id="dropoutCount">0</div>
             <div class="label">Dropouts</div>
-        </div>
-        <div class="summary-card">
-            <div class="number" id="balanceCount">0</div>
-            <div class="label">With Balance</div>
+            <div class="percentage" id="dropoutPercentage">0%</div>
         </div>
     </div>
-    
-    <!-- Filter Tabs -->
-    <div class="filter-tabs">
-        <div class="filter-tab active" data-filter="all">All Enquiries</div>
-        <div class="filter-tab" data-filter="joined">Joined</div>
-        <div class="filter-tab" data-filter="pending">Pending</div>
-        <div class="filter-tab" data-filter="dropped">Dropouts</div>
-        <div class="filter-tab" data-filter="balance">Has Balance</div>
-        <div class="filter-tab" data-filter="paid">Fully Paid</div>
+
+    <!-- Payment Status Summary (Only for Joined Students) -->
+    <div class="payment-summary mt-4">
+        <h5><i class="fas fa-rupee-sign me-2"></i>Payment Status (Joined Students Only)</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="payment-card fully-paid-card">
+                    <div class="number" id="fullyPaidCount">0</div>
+                    <div class="label">Fully Paid</div>
+                    <div class="amount" id="fullyPaidAmount">₹0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="payment-card partial-paid-card">
+                    <div class="number" id="partialPaidCount">0</div>
+                    <div class="label">Partial Payment</div>
+                    <div class="amount" id="partialPaidAmount">₹0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="payment-card balance-card">
+                    <div class="number" id="balanceCount">0</div>
+                    <div class="label">Has Balance</div>
+                    <div class="amount" id="totalBalance">₹0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="payment-card revenue-card">
+                    <div class="number" id="totalRevenue">₹0</div>
+                    <div class="label">Total Revenue</div>
+                    <div class="amount" id="expectedRevenue">₹0 Expected</div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <!-- Enquiries Table -->
-    <div class="table-container">
+
+    <!-- Advanced Filter Tabs -->
+    <div class="filter-tabs mt-4">
+        <div class="filter-tab active" data-filter="all">
+            All Enquiries <span class="filter-count" id="allCount">0</span>
+        </div>
+        <div class="filter-tab" data-filter="joined">
+            Joined <span class="filter-count" id="joinedFilterCount">0</span>
+        </div>
+        <div class="filter-tab" data-filter="pending">
+            Pending <span class="filter-count" id="pendingFilterCount">0</span>
+        </div>
+        <div class="filter-tab" data-filter="dropped">
+            Dropouts <span class="filter-count" id="droppedFilterCount">0</span>
+        </div>
+        <div class="filter-tab" data-filter="fully-paid">
+            Fully Paid <span class="filter-count" id="fullyPaidFilterCount">0</span>
+        </div>
+        <div class="filter-tab" data-filter="has-balance">
+            Has Balance <span class="filter-count" id="balanceFilterCount">0</span>
+        </div>
+        <div class="filter-tab" data-filter="no-payment">
+            No Payment <span class="filter-count" id="noPaymentCount">0</span>
+        </div>
+    </div>
+
+    <!-- Advanced Search and Actions -->
+    <div class="advanced-controls mt-3">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <div class="search-container">
+                    <input type="text" id="quickSearch" placeholder="Quick search..." class="form-control">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select id="courseFilter" class="form-select">
+                    <option value="">All Courses</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <div class="bulk-actions">
+                    <button class="btn btn-outline-primary btn-sm" id="selectAllBtn">
+                        <i class="fas fa-check-square me-1"></i>Select All
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" id="bulkActionBtn" disabled>
+                        <i class="fas fa-cogs me-1"></i>Bulk Action
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Enquiries Table -->
+    <div class="table-container mt-3">
         <div class="table-responsive">
             <table class="enquiry-table" id="enquiryTable">
                 <thead>
                     <tr>
-                        <th>Student Name</th>
-                        <th>Mobile</th>
-                        <th>Course</th>
-                        <th>Status</th>
-                        <th>Target Fees</th>
-                        <th>Fees Paid</th>
-                        <th>Balance</th>
-                        <th>Actions</th>
+                        <th width="3%">
+                            <input type="checkbox" id="masterCheckbox" class="form-check-input">
+                        </th>
+                        <th width="15%">Student Name</th>
+                        <th width="12%">Mobile</th>
+                        <th width="12%">Course</th>
+                        <th width="10%">Status</th>
+                        <th width="10%">Target Fees</th>
+                        <th width="10%">Fees Paid</th>
+                        <th width="10%">Balance</th>
+                        <th width="8%">Payment %</th>
+                        <th width="10%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for enquiry in enquiries %}
-                    <tr data-status="{{ enquiry.status|lower }}" data-balance="{% if enquiry.fees_balance > 0 %}balance{% else %}paid{% endif %}" {% if enquiry.fees_balance > 0 %}class="balance-warning"{% endif %}>
+                    <tr data-status="{{ enquiry.status|lower }}" 
+                        data-payment-status="{% if enquiry.status == 'joined' %}{% if enquiry.fees_balance == 0 %}fully-paid{% elif enquiry.fees_paid == 0 %}no-payment{% else %}partial-paid{% endif %}{% else %}na{% endif %}"
+                        data-course="{{ enquiry.get_subject_display }}"
+                        data-target-fees="{{ enquiry.target_fees }}"
+                        data-fees-paid="{{ enquiry.fees_paid }}"
+                        data-balance="{{ enquiry.fees_balance }}"
+                        {% if enquiry.status == 'joined' and enquiry.fees_balance > 0 %}class="balance-warning"{% endif %}>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <span class="ms-2">{{ enquiry.name }}</span>
+                            <input type="checkbox" class="row-checkbox form-check-input" value="{{ enquiry.id }}">
+                        </td>
+                        <td>
+                            <div class="student-info">
+                                <span class="student-name">{{ enquiry.name }}</span>
+                                {% if enquiry.status == 'joined' and enquiry.fees_balance > 0 %}
+                                <span class="badge bg-warning text-dark ms-1">Balance Due</span>
+                                {% endif %}
                             </div>
                         </td>
                         <td>
-                            <a href="tel:{{ enquiry.mobile }}" class="text-decoration-none">
-                                {{ enquiry.mobile }}
+                            <a href="tel:{{ enquiry.mobile }}" class="mobile-link">
+                                <i class="fas fa-phone-alt me-1"></i>{{ enquiry.mobile }}
                             </a>
                         </td>
-                        <td>{{ enquiry.get_subject_display }}</td>
+                        <td>
+                            <span class="course-badge">{{ enquiry.get_subject_display }}</span>
+                        </td>
                         <td>
                             <span class="status-badge status-{{ enquiry.status|lower }}">
+                                <i class="status-icon"></i>
                                 {{ enquiry.get_status_display }}
                             </span>
                         </td>
-                        <td>₹{{ enquiry.target_fees|floatformat:2 }}</td>
-                        <td>₹{{ enquiry.fees_paid|floatformat:2 }}</td>
-                        <td>₹{{ enquiry.fees_balance|floatformat:2 }}</td>
+                        <td class="amount">₹{{ enquiry.target_fees|floatformat:2 }}</td>
+                        <td class="amount fees-paid">₹{{ enquiry.fees_paid|floatformat:2 }}</td>
+                        <td class="amount {% if enquiry.fees_balance > 0 %}balance-due{% endif %}">
+                            ₹{{ enquiry.fees_balance|floatformat:2 }}
+                        </td>
                         <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'enquiry:enquiry_details' enquiry.id %}"><i class="fas fa-eye me-2"></i>View Details</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'enquiry:edit_enquiry' enquiry.id %}"><i class="fas fa-edit me-2"></i>Edit</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-money-bill me-2"></i>Record Payment</a></li>
-                                </ul>
+                            {% if enquiry.status == 'joined' and enquiry.target_fees > 0 %}
+                            <div class="payment-progress">
+                                {% widthratio enquiry.fees_paid enquiry.target_fees 100 as payment_percentage %}
+                                <div class="progress">
+                                    <div class="progress-bar {% if payment_percentage == 100 %}bg-success{% elif payment_percentage > 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                                         style="width: {{ payment_percentage }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ payment_percentage }}%</small>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{% url 'enquiry:enquiry_details' enquiry.id %}">
+                                            <i class="fas fa-eye me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'enquiry:edit_enquiry' enquiry.id %}">
+                                            <i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        {% if enquiry.status == 'joined' %}
+                                        <li><a class="dropdown-item payment-action" href="#" data-enquiry-id="{{ enquiry.id }}">
+                                            <i class="fas fa-money-bill me-2"></i>Record Payment</a></li>
+                                        {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item call-action" href="tel:{{ enquiry.mobile }}">
+                                            <i class="fas fa-phone me-2"></i>Call Now</a></li>
+                                        <li><a class="dropdown-item whatsapp-action" href="https://wa.me/91{{ enquiry.mobile }}" target="_blank">
+                                            <i class="fab fa-whatsapp me-2"></i>WhatsApp</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -414,19 +536,95 @@
             </table>
         </div>
     </div>
+
+    <!-- Summary Statistics -->
+    <div class="statistics-summary mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <h6>Conversion Rate</h6>
+                    <div class="stat-value" id="conversionRate">0%</div>
+                    <small class="text-muted">Joined / Total Enquiries</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <h6>Payment Collection Rate</h6>
+                    <div class="stat-value" id="collectionRate">0%</div>
+                    <small class="text-muted">Collected / Expected (Joined)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% else %}
-    <!-- Empty State -->
+    <!-- Enhanced Empty State -->
     <div class="empty-state">
-        <i class="far fa-clipboard"></i>
-        <p>No enquiries found for this counsellor in {{ month }} {{ year }}.</p>
+        <div class="empty-icon">
+            <i class="far fa-clipboard"></i>
+        </div>
+        <h4>No Enquiries Found</h4>
+        <p>No enquiries found for {{ counsellor.name }} in {{ month }} {{ year }}.</p>
+        <a href="{% url 'enquiry:add_enquiry' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add First Enquiry
+        </a>
     </div>
     {% endif %}
     
     <!-- Action Buttons -->
-    <div class="d-flex justify-content-between align-items-center mt-4">
-        <a href="{% url 'enquiry:monthly_summary_by_counsellor' %}" class="btn action-btn btn-back">
-            <i class="fas fa-arrow-left me-2"></i>Back to Monthly Summary
-        </a>
+    <div class="action-footer mt-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{% url 'enquiry:monthly_summary_by_counsellor' %}" class="btn action-btn btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Back to Monthly Summary
+            </a>
+            <div class="export-actions">
+                <button class="btn btn-outline-success" id="exportSelectedBtn" disabled>
+                    <i class="fas fa-download me-2"></i>Export Selected
+                </button>
+                <button class="btn btn-primary" id="addEnquiryBtn">
+                    <i class="fas fa-plus me-2"></i>Add New Enquiry
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Recording Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <input type="hidden" id="enquiryId">
+                    <div class="mb-3">
+                        <label class="form-label">Payment Amount</label>
+                        <input type="number" class="form-control" id="paymentAmount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select class="form-select" id="paymentMethod" required>
+                            <option value="">Select Method</option>
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="upi">UPI</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea class="form-control" id="paymentNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePaymentBtn">Record Payment</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -443,125 +641,756 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Calculate initial counts from HTML data attributes
-        calculateInitialCounts();
-
-        // Initialize DataTable only if table exists
-        const tableElement = document.getElementById('enquiryTable');
-        if (tableElement) {
-            const table = $('#enquiryTable').DataTable({
-                responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"p>>',
-                buttons: [
-                    {
-                        extend: 'csv',
-                        text: '<i class="fas fa-file-csv me-2"></i>Export CSV',
-                        className: 'btn btn-sm',
-                        filename: '{{ counsellor.name }}_enquiries_{{ month }}_{{ year }}',
-                        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] }
-                    },
-                    {
-                        extend: 'excel',
-                        text: '<i class="fas fa-file-excel me-2"></i>Export Excel',
-                        className: 'btn btn-sm',
-                        filename: '{{ counsellor.name }}_enquiries_{{ month }}_{{ year }}',
-                        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] }
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="fas fa-file-pdf me-2"></i>Export PDF',
-                        className: 'btn btn-sm',
-                        filename: '{{ counsellor.name }}_enquiries_{{ month }}_{{ year }}',
-                        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] },
-                        customize: function(doc) {
-                            doc.defaultStyle.fontSize = 10;
-                            doc.styles.tableHeader.fontSize = 11;
-                            doc.content[1].table.widths = ['15%', '15%', '15%', '15%', '15%', '15%', '10%'];
-                            doc.content.splice(0, 0, {
-                                margin: [0, 0, 0, 12],
-                                alignment: 'center',
-                                text: '{{ counsellor.name }}\'s Enquiries - {{ month }} {{ year }}',
-                                fontSize: 16,
-                                bold: true
-                            });
-                            doc.footer = function(currentPage, pageCount) {
-                                return {
-                                    columns: [
-                                        { text: 'Generated on: ' + new Date().toLocaleDateString(), alignment: 'left', margin: [20, 0] },
-                                        { text: 'Page ' + currentPage + ' of ' + pageCount, alignment: 'right', margin: [0, 0, 20, 0] }
-                                    ],
-                                    margin: [20, 0]
-                                };
-                            };
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="fas fa-print me-2"></i>Print',
-                        className: 'btn btn-sm',
-                        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] }
-                    }
-                ]
-            });
-
-            // Filter tab click handlers
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    applyDataTableFilter(this.dataset.filter, table);
-                });
-            });
-        }
-    });
-
-    // Calculate initial status counts from HTML table
-    function calculateInitialCounts() {
-        let pending = 0, dropout = 0, balanceCount = 0;
-        
-        document.querySelectorAll('#enquiryTable tbody tr').forEach(row => {
-            const status = row.dataset.status;
-            const balance = row.dataset.balance;
-            
-            if (status === 'pending') pending++;
-            if (status === 'dropped') dropout++;
-            if (balance === 'balance') balanceCount++;
+document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let dataTable;
+    let allEnquiries = [];
+    let selectedRows = new Set();
+    
+    // Initialize everything
+    initializeData();
+    initializeDataTable();
+    initializeEventListeners();
+    calculateAndDisplayStatistics();
+    
+    // Initialize data from DOM
+    function initializeData() {
+        const rows = document.querySelectorAll('#enquiryTable tbody tr');
+        rows.forEach(row => {
+            const enquiry = {
+                status: row.dataset.status,
+                paymentStatus: row.dataset.paymentStatus,
+                course: row.dataset.course,
+                targetFees: parseFloat(row.dataset.targetFees) || 0,
+                feesPaid: parseFloat(row.dataset.feesPaid) || 0,
+                balance: parseFloat(row.dataset.balance) || 0
+            };
+            allEnquiries.push(enquiry);
         });
-
-        // Update DOM elements once
-        document.getElementById('pendingCount').textContent = pending;
-        document.getElementById('dropoutCount').textContent = dropout;
-        document.getElementById('balanceCount').textContent = balanceCount;
-        
-        // Joined count comes from backend
-        document.getElementById('joinedCount').textContent = {{ joined_count }};
-        // Total count comes from backend
-        document.getElementById('totalEnquiries').textContent = {{ enquiries|length }};
     }
-
-    // DataTable filter implementation
-    function applyDataTableFilter(filter, table) {
+    
+    // Initialize DataTable with advanced features
+    function initializeDataTable() {
+        const tableElement = document.getElementById('enquiryTable');
+        if (!tableElement) return;
+        
+        dataTable = $('#enquiryTable').DataTable({
+            responsive: true,
+            pageLength: 25,
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+            order: [[1, 'asc']], // Sort by student name
+            dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'csv',
+                    text: '<i class="fas fa-file-csv me-2"></i>CSV',
+                    className: 'btn btn-sm btn-outline-success',
+                    filename: '{{ counsellor.name }}_enquiries_{{ month }}_{{ year }}',
+                    exportOptions: { 
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: { selected: null }
+                    }
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="fas fa-file-excel me-2"></i>Excel',
+                    className: 'btn btn-sm btn-outline-success',
+                    filename: '{{ counsellor.name }}_enquiries_{{ month }}_{{ year }}',
+                    exportOptions: { 
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: { selected: null }
+                    }
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fas fa-file-pdf me-2"></i>PDF',
+                    className: 'btn btn-sm btn-outline-danger',
+                    filename: '{{ counsellor.name }}_enquiries_{{ month }}_{{ year }}',
+                    exportOptions: { 
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                        modifier: { selected: null }
+                    },
+                    customize: function(doc) {
+                        doc.defaultStyle.fontSize = 8;
+                        doc.styles.tableHeader.fontSize = 9;
+                        doc.content[1].table.widths = ['18%', '15%', '12%', '10%', '12%', '12%', '11%', '10%'];
+                        doc.content.splice(0, 0, {
+                            margin: [0, 0, 0, 12],
+                            alignment: 'center',
+                            text: '{{ counsellor.name }}\'s Enquiries - {{ month }} {{ year }}',
+                            fontSize: 14,
+                            bold: true
+                        });
+                        doc.footer = function(currentPage, pageCount) {
+                            return {
+                                columns: [
+                                    { text: 'Generated: ' + new Date().toLocaleDateString(), alignment: 'left', margin: [20, 0] },
+                                    { text: 'Page ' + currentPage + ' of ' + pageCount, alignment: 'right', margin: [0, 0, 20, 0] }
+                                ],
+                                margin: [20, 0]
+                            };
+                        };
+                    }
+                }
+            ],
+            columnDefs: [
+                { targets: [0, 9], orderable: false }, // Checkbox and actions columns
+                { targets: [5, 6, 7], className: 'text-end' }, // Amount columns
+                { targets: 8, className: 'text-center' } // Progress column
+            ],
+            drawCallback: function() {
+                updateFilterCounts();
+                updateCheckboxState();
+            }
+        });
+        
+        // Custom search
+        $('#quickSearch').on('keyup', function() {
+            dataTable.search(this.value).draw();
+        });
+        
+        // Course filter
+        populateCourseFilter();
+        $('#courseFilter').on('change', function() {
+            const course = this.value;
+            if (course) {
+                dataTable.column(3).search('^' + course + '$', true, false).draw();
+            } else {
+                dataTable.column(3).search('').draw();
+            }
+        });
+    }
+    
+    // Initialize all event listeners
+    function initializeEventListeners() {
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                applyAdvancedFilter(this.dataset.filter);
+            });
+        });
+        
+        // Master checkbox
+        document.getElementById('masterCheckbox')?.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:not([style*="display: none"])');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+                updateSelectedRows(cb);
+            });
+            updateBulkActionButtons();
+        });
+        
+        // Row checkboxes
+        document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedRows(this);
+                updateBulkActionButtons();
+                updateMasterCheckbox();
+            });
+        });
+        
+        // Select all button
+        document.getElementById('selectAllBtn')?.addEventListener('click', function() {
+            const masterCheckbox = document.getElementById('masterCheckbox');
+            masterCheckbox.checked = !masterCheckbox.checked;
+            masterCheckbox.dispatchEvent(new Event('change'));
+        });
+        
+        // Payment actions
+        document.querySelectorAll('.payment-action').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openPaymentModal(this.dataset.enquiryId);
+            });
+        });
+        
+        // Save payment
+        document.getElementById('savePaymentBtn')?.addEventListener('click', savePayment);
+        
+        // Export selected
+        document.getElementById('exportSelectedBtn')?.addEventListener('click', exportSelected);
+    }
+    
+    // Calculate and display all statistics
+    function calculateAndDisplayStatistics() {
+        const total = allEnquiries.length;
+        const joined = allEnquiries.filter(e => e.status === 'joined').length;
+        const pending = allEnquiries.filter(e => e.status === 'pending').length;
+        const dropped = allEnquiries.filter(e => e.status === 'dropped').length;
+        
+        // Joined students payment analysis
+        const joinedStudents = allEnquiries.filter(e => e.status === 'joined');
+        const fullyPaid = joinedStudents.filter(e => e.balance === 0).length;
+        const partialPaid = joinedStudents.filter(e => e.balance > 0 && e.feesPaid > 0).length;
+        const noPaid = joinedStudents.filter(e => e.feesPaid === 0).length;
+        const hasBalance = joinedStudents.filter(e => e.balance > 0).length;
+        
+        // Financial calculations
+        const totalRevenue = joinedStudents.reduce((sum, e) => sum + e.feesPaid, 0);
+        const totalExpected = joinedStudents.reduce((sum, e) => sum + e.targetFees, 0);
+        const totalBalance = joinedStudents.reduce((sum, e) => sum + e.balance, 0);
+        
+        // Update main summary cards
+        updateElement('totalEnquiries', total);
+        updateElement('joinedCount', joined);
+        updateElement('pendingCount', pending);
+        updateElement('dropoutCount', dropped);
+        
+        // Update percentages
+        updateElement('joinedPercentage', calculatePercentage(joined, total));
+        updateElement('pendingPercentage', calculatePercentage(pending, total));
+        updateElement('dropoutPercentage', calculatePercentage(dropped, total));
+        
+        // Update payment summary
+        updateElement('fullyPaidCount', fullyPaid);
+        updateElement('partialPaidCount', partialPaid);
+        updateElement('balanceCount', hasBalance);
+        updateElement('totalRevenue', formatCurrency(totalRevenue));
+        updateElement('fullyPaidAmount', formatCurrency(fullyPaid * (totalExpected / joinedStudents.length || 0)));
+        updateElement('partialPaidAmount', formatCurrency(totalRevenue - (fullyPaid * (totalExpected / joinedStudents.length || 0))));
+        updateElement('totalBalance', formatCurrency(totalBalance));
+        updateElement('expectedRevenue', formatCurrency(totalExpected));
+        
+        // Update conversion and collection rates
+        const conversionRate = calculatePercentage(joined, total);
+        const collectionRate = totalExpected > 0 ? calculatePercentage(totalRevenue, totalExpected) : '0';
+        
+        updateElement('conversionRate', conversionRate);
+        updateElement('collectionRate', collectionRate);
+        
+        // Update filter counts
+        updateFilterCounts();
+    }
+    
+    // Apply advanced filtering
+    function applyAdvancedFilter(filter) {
         $.fn.dataTable.ext.search.pop(); // Clear previous filters
         
         if (filter === 'all') {
-            table.search('').columns().search('').draw();
+            dataTable.search('').columns().search('').draw();
             return;
         }
-
-        const filterType = filter === 'balance' || filter === 'paid' ? 'balance' : 'status';
         
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-            const row = table.row(dataIndex).node();
-            return filterType === 'balance' ? 
-                row.dataset.balance === filter : 
-                row.dataset.status === filter;
+            const row = dataTable.row(dataIndex).node();
+            const status = row.dataset.status;
+            const paymentStatus = row.dataset.paymentStatus;
+            
+            switch(filter) {
+                case 'joined':
+                    return status === 'joined';
+                case 'pending':
+                    return status === 'pending';
+                case 'dropped':
+                    return status === 'dropped';
+                case 'fully-paid':
+                    return status === 'joined' && paymentStatus === 'fully-paid';
+                case 'has-balance':
+                    return status === 'joined' && (paymentStatus === 'partial-paid' || paymentStatus === 'no-payment');
+                case 'no-payment':
+                    return status === 'joined' && paymentStatus === 'no-payment';
+                default:
+                    return true;
+            }
         });
-
-        table.draw();
+        
+        dataTable.draw();
     }
+    
+    // Update filter counts
+    function updateFilterCounts() {
+        if (!dataTable) return;
+        
+        const visibleRows = dataTable.rows({ search: 'applied' }).nodes();
+        let counts = {
+            all: visibleRows.length,
+            joined: 0,
+            pending: 0,
+            dropped: 0,
+            'fully-paid': 0,
+            'has-balance': 0,
+            'no-payment': 0
+        };
+        
+        Array.from(visibleRows).forEach(row => {
+            const status = row.dataset.status;
+            const paymentStatus = row.dataset.paymentStatus;
+            
+            if (status === 'joined') counts.joined++;
+            if (status === 'pending') counts.pending++;
+            if (status === 'dropped') counts.dropped++;
+            if (status === 'joined' && paymentStatus === 'fully-paid') counts['fully-paid']++;
+            if (status === 'joined' && (paymentStatus === 'partial-paid' || paymentStatus === 'no-payment')) counts['has-balance']++;
+            if (status === 'joined' && paymentStatus === 'no-payment') counts['no-payment']++;
+        });
+        
+        // Update filter tab counts
+        updateElement('allCount', counts.all);
+        updateElement('joinedFilterCount', counts.joined);
+        updateElement('pendingFilterCount', counts.pending);
+        updateElement('droppedFilterCount', counts.dropped);
+        updateElement('fullyPaidFilterCount', counts['fully-paid']);
+        updateElement('balanceFilterCount', counts['has-balance']);
+        updateElement('noPaymentCount', counts['no-payment']);
+    }
+    
+    // Populate course filter dropdown
+    function populateCourseFilter() {
+        const courses = [...new Set(allEnquiries.map(e => e.course))].sort();
+        const courseFilter = document.getElementById('courseFilter');
+        
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseFilter.appendChild(option);
+        });
+    }
+    
+    // Update selected rows tracking
+    function updateSelectedRows(checkbox) {
+        if (checkbox.checked) {
+            selectedRows.add(checkbox.value);
+        } else {
+            selectedRows.delete(checkbox.value);
+        }
+    }
+    
+    // Update bulk action buttons state
+    function updateBulkActionButtons() {
+        const bulkActionBtn = document.getElementById('bulkActionBtn');
+        const exportSelectedBtn = document.getElementById('exportSelectedBtn');
+        const hasSelected = selectedRows.size > 0;
+        
+        if (bulkActionBtn) {
+            bulkActionBtn.disabled = !hasSelected;
+            bulkActionBtn.innerHTML = hasSelected ? 
+                `<i class="fas fa-cogs me-1"></i>Actions (${selectedRows.size})` : 
+                '<i class="fas fa-cogs me-1"></i>Bulk Action';
+        }
+        
+        if (exportSelectedBtn) {
+            exportSelectedBtn.disabled = !hasSelected;
+            exportSelectedBtn.innerHTML = hasSelected ? 
+                `<i class="fas fa-download me-2"></i>Export Selected (${selectedRows.size})` : 
+                '<i class="fas fa-download me-2"></i>Export Selected';
+        }
+    }
+    
+    // Update master checkbox state
+    function updateMasterCheckbox() {
+        const visibleCheckboxes = document.querySelectorAll('.row-checkbox:not([style*="display: none"])');
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked:not([style*="display: none"])');
+        const masterCheckbox = document.getElementById('masterCheckbox');
+        
+        if (visibleCheckboxes.length === 0) {
+            masterCheckbox.indeterminate = false;
+            masterCheckbox.checked = false;
+        } else if (checkedBoxes.length === visibleCheckboxes.length) {
+            masterCheckbox.indeterminate = false;
+            masterCheckbox.checked = true;
+        } else if (checkedBoxes.length > 0) {
+            masterCheckbox.indeterminate = true;
+            masterCheckbox.checked = false;
+        } else {
+            masterCheckbox.indeterminate = false;
+            masterCheckbox.checked = false;
+        }
+    }
+    
+    // Update checkbox state after table draw
+    function updateCheckboxState() {
+        // Re-check selected rows after table redraw
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.checked = selectedRows.has(cb.value);
+        });
+        updateMasterCheckbox();
+        updateBulkActionButtons();
+    }
+    
+    // Open payment recording modal
+    function openPaymentModal(enquiryId) {
+        document.getElementById('enquiryId').value = enquiryId;
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentMethod').value = '';
+        document.getElementById('paymentNotes').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        modal.show();
+    }
+    
+    // Save payment record
+    function savePayment() {
+        const enquiryId = document.getElementById('enquiryId').value;
+        const amount = document.getElementById('paymentAmount').value;
+        const method = document.getElementById('paymentMethod').value;
+        const notes = document.getElementById('paymentNotes').value;
+        
+        if (!amount || !method) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        
+        // Here you would typically make an AJAX call to save the payment
+        // For now, we'll just show a success message
+        alert(`Payment of ₹${amount} recorded successfully!`);
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+        modal.hide();
+        
+        // Refresh page or update table data
+        // location.reload(); // Uncomment if you want to reload the page
+    }
+    
+    // Export selected rows
+    function exportSelected() {
+        if (selectedRows.size === 0) {
+            alert('Please select at least one row to export');
+            return;
+        }
+        
+        // Get selected row data
+        const selectedData = [];
+        selectedRows.forEach(rowId => {
+            const row = document.querySelector(`input[value="${rowId}"]`).closest('tr');
+            const rowData = {
+                name: row.cells[1].textContent.trim(),
+                mobile: row.cells[2].textContent.trim(),
+                course: row.cells[3].textContent.trim(),
+                status: row.cells[4].textContent.trim(),
+                targetFees: row.cells[5].textContent.trim(),
+                feesPaid: row.cells[6].textContent.trim(),
+                balance: row.cells[7].textContent.trim()
+            };
+            selectedData.push(rowData);
+        });
+        
+        // Convert to CSV
+        const csvContent = convertToCSV(selectedData);
+        downloadCSV(csvContent, `selected_enquiries_${new Date().toISOString().split('T')[0]}.csv`);
+    }
+    
+    // Convert data to CSV format
+    function convertToCSV(data) {
+        const headers = ['Student Name', 'Mobile', 'Course', 'Status', 'Target Fees', 'Fees Paid', 'Balance'];
+        const csvRows = [headers.join(',')];
+        
+        data.forEach(row => {
+            const values = [
+                row.name,
+                row.mobile,
+                row.course,
+                row.status,
+                row.targetFees,
+                row.feesPaid,
+                row.balance
+            ];
+            csvRows.push(values.map(val => `"${val}"`).join(','));
+        });
+        
+        return csvRows.join('\n');
+    }
+    
+    // Download CSV file
+    function downloadCSV(csvContent, filename) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+    
+    // Utility functions
+    function updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+    
+    function calculatePercentage(part, whole) {
+        if (whole === 0) return '0%';
+        return Math.round((part / whole) * 100) + '%';
+    }
+    
+    function formatCurrency(amount) {
+        return '₹' + new Intl.NumberFormat('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+    
+    // Real-time updates (if needed)
+    function startRealTimeUpdates() {
+        // You can implement WebSocket or periodic AJAX calls here
+        // to update the data in real-time
+        setInterval(() => {
+            // Check for updates and refresh data if needed
+            // This is just a placeholder
+        }, 30000); // Check every 30 seconds
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+A or Cmd+A to select all
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a' && e.target.tagName !== 'INPUT') {
+            e.preventDefault();
+            document.getElementById('selectAllBtn').click();
+        }
+        
+        // Escape to clear selection
+        if (e.key === 'Escape') {
+            selectedRows.clear();
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('masterCheckbox').checked = false;
+            updateBulkActionButtons();
+        }
+    });
+    
+    // Initialize tooltips (if using Bootstrap)
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Initialize real-time updates if needed
+    // startRealTimeUpdates();
+});
+
+// Additional utility functions that can be called from outside
+window.enquiryManager = {
+    refreshData: function() {
+        location.reload();
+    },
+    
+    exportAll: function() {
+        // Trigger DataTable export
+        dataTable.button('.buttons-csv:first').trigger();
+    },
+    
+    getSelectedCount: function() {
+        return selectedRows.size;
+    },
+    
+    clearSelection: function() {
+        selectedRows.clear();
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('masterCheckbox').checked = false;
+        updateBulkActionButtons();
+    }
+};
+
+// Auto-save form data to localStorage (for form persistence)
+function autoSaveFormData() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const key = `form_${form.id || 'default'}_${this.id || this.name}`;
+                if (this.type !== 'password') {
+                    localStorage.setItem(key, this.value);
+                }
+            });
+            
+            // Restore saved data
+            const key = `form_${form.id || 'default'}_${input.id || input.name}`;
+            const savedValue = localStorage.getItem(key);
+            if (savedValue && input.type !== 'password') {
+                input.value = savedValue;
+            }
+        });
+    });
+}
+
+// Initialize auto-save
+document.addEventListener('DOMContentLoaded', autoSaveFormData);
 </script>
+
+<style>
+/* === THEME VARIABLES === */
+:root {
+    --gradient-start: #ff7e5f;
+    --gradient-end: #feb47b;
+    --primary-color: #ff7e5f;
+    --secondary-color: #feb47b;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --hover-bg: #e9ecef;
+    --filter-tab-bg: #f8f9fa;
+}
+
+/* === ALTERNATE THEMES === */
+[data-theme="blue"] {
+    --gradient-start: #667eea;
+    --gradient-end: #764ba2;
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+}
+
+[data-theme="green"] {
+    --gradient-start: #11998e;
+    --gradient-end: #38ef7d;
+    --primary-color: #11998e;
+    --secondary-color: #38ef7d;
+}
+
+[data-theme="purple"] {
+    --gradient-start: #da22ff;
+    --gradient-end: #9733ee;
+    --primary-color: #9733ee;
+    --secondary-color: #da22ff;
+}
+
+[data-theme="teal"] {
+    --gradient-start: #1dd1a1;
+    --gradient-end: #48dbfb;
+    --primary-color: #1dd1a1;
+    --secondary-color: #48dbfb;
+}
+
+/* === MAIN THEME STYLING === */
+
+.page-header {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+}
+
+.filter-tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.total-card .number,
+.revenue-card .number {
+    color: var(--primary-color);
+}
+
+.payment-card:hover {
+    border-color: var(--primary-color);
+}
+
+/* === BASE DASHBOARD STYLES === */
+
+.counsellor-info,
+.summary-card,
+.payment-summary,
+.payment-card,
+.filter-tabs,
+.advanced-controls,
+.table-container,
+.action-footer,
+.stat-card,
+.empty-state {
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.filter-tab {
+    padding: 0.75rem 1.5rem;
+    background: var(--filter-tab-bg);
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+}
+
+.filter-tab:hover {
+    background: var(--hover-bg);
+    border-color: var(--primary-color);
+}
+
+.filter-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.filter-tab.active .filter-count {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive grid summary */
+
+.data-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.statistics-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Print Support */
+
+@media print {
+    .filter-tabs,
+    .advanced-controls,
+    .action-footer,
+    .dt-buttons {
+        display: none !important;
+    }
+
+    .page-header,
+    .table-container {
+        background: none !important;
+        color: black !important;
+        box-shadow: none;
+    }
+}
+
+
+</style>
 {% endblock %}

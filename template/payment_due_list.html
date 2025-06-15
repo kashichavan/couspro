@@ -1001,13 +1001,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentModal = new bootstrap.Modal(document.getElementById('updatePaymentModal'));
     const dateModal = new bootstrap.Modal(document.getElementById('updateDueDateModal'));
     
-    // Initialize datepicker
-    flatpickr('.datepicker', {
-        dateFormat: "Y-m-d",
-        minDate: "today",
-        allowInput: true,
-        theme: "material_orange"
-    });
+        // Initialize datepicker
+        flatpickr('.datepicker', {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            allowInput: true,
+            theme: "material_orange"
+        });
 
     // Payment Modal Handlers
     const updatePaymentBtns = document.querySelectorAll('.update-payment-btn');

@@ -1,152 +1,662 @@
 {% extends "base.html" %}
 {% block content %}
+
+<!-- Trending Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@200;300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-    .month-header {
-        border-left: 4px solid #ff9a56;
-        padding-left: 1rem;
-        margin: 2rem 0 1rem;
-        font-weight: 600;
-        color: #333;
+    :root {
+        --primary: #ff6b35;
+        --primary-dark: #e55a2b;
+        --primary-light: #ff8c42;
+        --orange-50: #fff7ed;
+        --orange-100: #ffedd5;
+        --orange-200: #fed7aa;
+        --orange-500: #f97316;
+        --orange-600: #ea580c;
+        
+        --neutral-50: #fafafa;
+        --neutral-100: #f5f5f5;
+        --neutral-200: #e5e5e5;
+        --neutral-300: #d4d4d4;
+        --neutral-400: #a3a3a3;
+        --neutral-500: #737373;
+        --neutral-600: #525252;
+        --neutral-700: #404040;
+        --neutral-800: #262626;
+        --neutral-900: #171717;
+        
+        --white: #ffffff;
+        --black: #000000;
+        
+        --gradient-primary: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+        --gradient-bg: linear-gradient(135deg, #fff7ed 0%, #ffffff 50%, #f0f9ff 100%);
+        
+        --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        
+        --border-radius: 12px;
+        --border-radius-lg: 16px;
+        --border-radius-xl: 20px;
     }
-    
-    .badge-date {
-        background: #ff9a56;
-        color: white;
+
+    * {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    body {
+        background: var(--gradient-bg);
+        color: var(--neutral-800);
+        font-weight: 400;
+        line-height: 1.6;
+    }
+
+    .app-container {
+        min-height: 100vh;
+        padding: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    .app-header {
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .app-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.025em;
+    }
+
+    .app-subtitle {
+        font-family: 'Manrope', sans-serif;
         font-weight: 500;
-        padding: 0.3rem 0.6rem;
-        border-radius: 5px;
+        color: var(--neutral-600);
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
     }
-    
-    .batch-card {
-        transition: transform 0.2s ease;
-        border-left: 3px solid #ff9a56;
+
+    /* Glassmorphism Cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
     }
-    
-    .batch-card:hover {
+
+    /* Control Panel */
+    .control-panel {
+        padding: 2rem;
+        margin-bottom: 2rem;
+        background: var(--white);
+        border-radius: var(--border-radius-xl);
+        border: 1px solid var(--neutral-200);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .control-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-items: end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--neutral-700);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-select {
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--neutral-200);
+        border-radius: var(--border-radius);
+        background: var(--white);
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Modern Buttons */
+    .btn {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 600;
+        padding: 0.875rem 1.5rem;
+        border-radius: var(--border-radius);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        letter-spacing: 0.025em;
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: var(--white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
         transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+        filter: brightness(1.05);
     }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--neutral-700);
+        border: 2px solid var(--neutral-200);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary:hover {
+        background: var(--neutral-50);
+        border-color: var(--neutral-300);
+        transform: translateY(-1px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: var(--white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    /* Stats Badge */
+    .stats-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: var(--orange-50);
+        border-radius: var(--border-radius-lg);
+        border: 1px solid var(--orange-200);
+    }
+
+    .stats-badge {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        color: var(--orange-600);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Navigation */
+    .nav-section {
+        margin-bottom: 2rem;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    /* Date Headers */
+    .date-section {
+        margin-bottom: 3rem;
+    }
+
+    .date-header {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 1.5rem;
+        color: var(--neutral-800);
+        padding: 1.5rem 2rem;
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        border-left: 5px solid var(--primary);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .date-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    /* Batch Cards */
+    .batch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .batch-card {
+        background: var(--white);
+        border-radius: var(--border-radius-xl);
+        padding: 2rem;
+        border: 1px solid var(--neutral-200);
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .batch-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .batch-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--orange-200);
+    }
+
+    .batch-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .batch-header {
+        display: flex;
+        justify-content: between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        gap: 1rem;
+    }
+
+    .batch-code {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: var(--neutral-800);
+        flex: 1;
+    }
+
+    .student-count {
+        background: var(--gradient-primary);
+        color: var(--white);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        box-shadow: var(--shadow-sm);
+        white-space: nowrap;
+    }
+
+    .batch-subject {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 500;
+        font-size: 1rem;
+        color: var(--neutral-600);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .staff-info {
+        background: var(--neutral-50);
+        border-radius: var(--border-radius);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--neutral-200);
+    }
+
+    .staff-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .staff-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .staff-label {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--neutral-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .staff-name {
+        font-weight: 500;
+        color: var(--neutral-700);
+    }
+
+    .action-bar {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .action-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+    }
+
+    .action-btn-view {
+        background: var(--gradient-primary);
+        color: var(--white);
+        box-shadow: var(--shadow-md);
+    }
+
+    .action-btn-view:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .action-btn-edit {
+        background: var(--neutral-100);
+        color: var(--neutral-600);
+        border: 2px solid var(--neutral-200);
+    }
+
+    .action-btn-edit:hover {
+        background: var(--neutral-200);
+        transform: scale(1.1);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--white);
+        border-radius: var(--border-radius-xl);
+        border: 2px dashed var(--neutral-300);
+        margin-top: 2rem;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--orange-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    .empty-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--neutral-800);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-subtitle {
+        color: var(--neutral-600);
+        margin-bottom: 2rem;
+        font-size: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .app-container {
+            padding: 1rem;
+        }
+        
+        .control-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .nav-buttons {
+            flex-direction: column;
+        }
+        
+        .batch-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .batch-card {
+            padding: 1.5rem;
+        }
+        
+        .date-header {
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+        }
+    }
+
+    /* Micro-interactions */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .batch-card {
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .batch-card:nth-child(2) { animation-delay: 0.1s; }
+    .batch-card:nth-child(3) { animation-delay: 0.2s; }
+    .batch-card:nth-child(4) { animation-delay: 0.3s; }
 </style>
 
-<h3>Batch Schedule</h3>
+<div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+        <h1 class="app-title">Monthly Batches</h1>
+        <p class="app-subtitle">Smart batch management made simple</p>
+    </header>
 
-<!-- Month Selector -->
-<form method="get" class="mb-4">
-    <div class="row g-2 align-items-center">
-        <div class="col-md-3">
-            <select name="month" class="form-select">
-                {% for month in months %}
-                    <option value="{{ month.num }}" {% if month.num == current_month %}selected{% endif %}>
-                        {{ month.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <div class="col-md-2">
-            <select name="year" class="form-select">
-                {% for year in years %}
-                    <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>
-                        {{ year }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
-        </div>
-        
-        <div class="col-md-2">
-            <a href="{% url 'batch:create_batch' %}" class="btn btn-success w-100">
-                Create Batch
-            </a>
-        </div>
-        
-        <div class="col-md-3 text-md-end">
-            <span class="text-muted">
-                {{ total_batches }} batches found
-            </span>
-        </div>
-    </div>
-</form>
-
-<!-- Navigation Buttons -->
-<div class="mb-4">
-    <div class="btn-group" role="group">
-        {% if current_month > 1 %}
-            <a href="?month={{ current_month|add:"-1" }}&year={{ current_year }}" 
-               class="btn btn-outline-secondary">
-                Previous Month
-            </a>
-        {% else %}
-            <a href="?month=12&year={{ current_year|add:"-1" }}" 
-               class="btn btn-outline-secondary">
-                Previous Month
-            </a>
-        {% endif %}
-        
-        {% if current_month < 12 %}
-            <a href="?month={{ current_month|add:"1" }}&year={{ current_year }}" 
-               class="btn btn-outline-secondary">
-                Next Month
-            </a>
-        {% else %}
-            <a href="?month=1&year={{ current_year|add:"1" }}" 
-               class="btn btn-outline-secondary">
-                Next Month
-            </a>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Batches by Date -->
-{% if grouped_batches %}
-    {% for group in grouped_batches %}
-        <div class="month-header">
-            {{ group.date|date:"D, d M Y" }}
-        </div>
-        
-        <div class="row g-3 mb-4">
-            {% for batch in group.batches %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card batch-card h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2">
-                                <h5 class="card-title mb-0">{{ batch.code }}</h5>
-                                <span class="badge bg-primary">{{ batch.students.count }} Students</span>
-                            </div>
-                            
-                            <p class="card-text text-muted mb-2">{{ batch.subject }}</p>
-                            
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <small class="text-muted">Trainer:</small> {{ batch.trainer|default:"—" }}<br>
-                                    <small class="text-muted">Tracker:</small> {{ batch.tracker|default:"—" }}
-                                </div>
-                                
-                                <div class="text-end">
-                                    <a href="{% url 'batch:batch_detail' batch.id %}" 
-                                       class="btn btn-sm btn-primary me-1" title="View Details">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{% url 'batch:edit_batch' batch.id %}" 
-                                       class="btn btn-sm btn-secondary" title="Edit Batch">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <form method="get">
+            <div class="control-section">
+                <div class="form-group">
+                    <label class="form-label">Month</label>
+                    <select name="month" class="form-select">
+                        {% for month in months %}
+                            <option value="{{ month.num }}" {% if month.num == current_month %}selected{% endif %}>
+                                {{ month.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <select name="year" class="form-select">
+                        {% for year in years %}
+                            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>
+                                {{ year }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel-fill"></i>
+                    Apply Filter
+                </button>
+                
+                <a href="{% url 'batch:create_batch' %}" class="btn btn-success">
+                    <i class="bi bi-plus-lg"></i>
+                    New Batch
+                </a>
+                
+                <div class="stats-container">
+                    <div class="stats-badge">
+                        <i class="bi bi-stack"></i>
+                        {{ total_batches }} Batches
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    {% endfor %}
-{% else %}
-    <div class="alert alert-info mb-0 mt-3">
-        No batches found for this month
+            </div>
+        </form>
     </div>
-{% endif %}
 
-<!-- Optional: Add Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
+    <!-- Navigation -->
+    <div class="nav-section">
+        <div class="nav-buttons">
+            {% if current_month > 1 %}
+                <a href="?month={{ current_month|add:"-1" }}&year={{ current_year }}" 
+                   class="btn btn-secondary">
+                    <i class="bi bi-chevron-left"></i>
+                    Previous Month
+                </a>
+            {% else %}
+                <a href="?month=12&year={{ current_year|add:"-1" }}" 
+                   class="btn btn-secondary">
+                    <i class="bi bi-chevron-left"></i>
+                    Previous Month
+                </a>
+            {% endif %}
+            
+            {% if current_month < 12 %}
+                <a href="?month={{ current_month|add:"1" }}&year={{ current_year }}" 
+                   class="btn btn-secondary">
+                    Next Month
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            {% else %}
+                <a href="?month=1&year={{ current_year|add:"1" }}" 
+                   class="btn btn-secondary">
+                    Next Month
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Batch Content -->
+    {% if grouped_batches %}
+        {% for group in grouped_batches %}
+            <div class="date-section">
+                <div class="date-header">
+                    <div class="date-icon">📅</div>
+                    <span>{{ group.date|date:"l, F j, Y" }}</span>
+                </div>
+                
+                <div class="batch-grid">
+                    {% for batch in group.batches %}
+                        <div class="batch-card">
+                            <div class="batch-header">
+                                <h3 class="batch-code">{{ batch.code }}</h3>
+                                <div class="student-count">
+                                    <i class="bi bi-people-fill"></i>
+                                    {{ batch.students.count }}
+                                </div>
+                            </div>
+                            
+                            <div class="batch-subject">
+                                <i class="bi bi-book"></i>
+                                {{ batch.subject }}
+                            </div>
+                            
+                            <div class="staff-info">
+                                <div class="staff-row">
+                                    <span class="staff-label">Trainer</span>
+                                    <span class="staff-name">{{ batch.trainer|default:"Not assigned" }}</span>
+                                </div>
+                                <div class="staff-row">
+                                    <span class="staff-label">Tracker</span>
+                                    <span class="staff-name">{{ batch.tracker|default:"Not assigned" }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="action-bar">
+                                <a href="{% url 'batch:batch_detail' batch.id %}" 
+                                   class="action-btn action-btn-view" 
+                                   title="View Details">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a href="{% url 'batch:edit_batch' batch.id %}" 
+                                   class="action-btn action-btn-edit" 
+                                   title="Edit Batch">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <h3 class="empty-title">No Batches Found</h3>
+            <p class="empty-subtitle">Create your first batch to get started with batch management</p>
+            <a href="{% url 'batch:create_batch' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i>
+                Create First Batch
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 {% endblock %}

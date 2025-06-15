@@ -700,6 +700,7 @@
                             <li><a class="dropdown-item" href="{% url 'enquiry:pending_enquiries' %}">
                                 <i class="fas fa-clock"></i> Pending Enquiries
                             </a></li>
+                             {% if user.is_superuser or user.is_staff %}
                             <li><a class="dropdown-item" href="{% url 'enquiry:monthly_student_list' %}">
                                 <i class="fas fa-users"></i> Monthly Students
                             </a></li>
@@ -713,6 +714,7 @@
                             <li><a class="dropdown-item" href="{% url 'enquiry:daywise_summary' %}">
                                 <i class="fas fa-user-tie"></i> Day-Wise Summary
                             </a></li>
+                            {% endif %}
                         </ul>
                     </li>
                     
@@ -769,9 +771,7 @@
                             <li><a class="dropdown-item" href="{% url 'batch:create_batch' %}">
                               <i class="fa-solid fa-laptop-code"></i> Add Batch
                             </a></li>
-                            <li><a class="dropdown-item" href="{% url 'batch:batch_list' %}">
-                               <i class="fa-solid fa-chalkboard"></i> Batches
-                            </a></li>
+                            
                         </ul>
                     </li>
                     
@@ -896,53 +896,116 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-// Interactive marquee functionality
-function toggleMarquee(element) {
-    element.classList.toggle('paused');
-}
+// Base.html JavaScript - Conflict-free version
 
-// Auto-pause when page becomes inactive (performance optimization)
-document.addEventListener('visibilitychange', function() {
-    const marquees = document.querySelectorAll('.marquee-content');
-    marquees.forEach(marquee => {
-        if (document.hidden) {
-            marquee.style.animationPlayState = 'paused';
-        } else {
-            marquee.style.animationPlayState = 'running';
-        }
-    });
-});
+(function() {
+    'use strict';
+    
+    // Namespace to avoid global conflicts
+    const BasePageJS = {
+        
+        // Interactive marquee functionality
+        toggleMarquee: function(element) {
+            if (element && element.classList) {
+                element.classList.toggle('paused');
+            }
+        },
 
-// Optional: Dynamic content refresh
-function refreshMarqueeData() {
-    // You can implement AJAX call here to refresh data
-    fetch('/api/monthly-target/')
-        .then(response => response.json())
-        .then(data => {
+        // Auto-pause marquees when page becomes inactive (performance optimization)
+        initMarqueeVisibilityHandler: function() {
+            document.addEventListener('visibilitychange', function() {
+                const marquees = document.querySelectorAll('.marquee-content');
+                marquees.forEach(marquee => {
+                    if (document.hidden) {
+                        marquee.style.animationPlayState = 'paused';
+                    } else {
+                        marquee.style.animationPlayState = 'running';
+                    }
+                });
+            });
+        },
+
+        // Dynamic content refresh for marquee
+        refreshMarqueeData: function() {
+            // Only run if marquee exists on current page
             const marqueeContent = document.querySelector('.marquee-content');
-            marqueeContent.innerHTML = `
-                🎯 Monthly Target: ₹${data.target_amount} |
-                💵 Collected: ₹${data.actual_collected} |
-                💸 Remaining: ₹${data.remaining} |
-                📊 Progress: ${data.percentage}% Complete |
-                📅 ${data.days_remaining} days remaining
-            `;
-        })
-        .catch(error => console.log('Marquee refresh failed:', error));
-}
- document.addEventListener('DOMContentLoaded', function () {
-    var toasts = document.querySelectorAll('.toast');
-    toasts.forEach(function (toastEl) {
-      new bootstrap.Toast(toastEl, { delay: 4000 }).show();
-    });
-  });
+            if (!marqueeContent) return;
 
-// setInterval(refreshMarqueeData, 300000);
+            fetch('/api/monthly-target/')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    marqueeContent.innerHTML = `
+                        🎯 Monthly Target: ₹${data.target_amount || 0} |
+                        💵 Collected: ₹${data.actual_collected || 0} |
+                        💸 Remaining: ₹${data.remaining || 0} |
+                        📊 Progress: ${data.percentage || 0}% Complete |
+                        📅 ${data.days_remaining || 0} days remaining
+                    `;
+                })
+                .catch(error => {
+                    console.warn('Marquee refresh failed:', error);
+                    // Silently fail - don't break other functionality
+                });
+        },
+
+        // Toast initialization with error handling
+        initToasts: function() {
+            // Check if Bootstrap is loaded
+            if (typeof bootstrap === 'undefined') {
+                console.warn('Bootstrap not loaded - toasts will not work');
+                return;
+            }
+
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(function(toastEl) {
+                try {
+                    new bootstrap.Toast(toastEl, { 
+                        delay: 4000,
+                        autohide: true 
+                    }).show();
+                } catch (error) {
+                    console.warn('Toast initialization failed:', error);
+                }
+            });
+        },
+
+        // Initialize all base functionality
+        init: function() {
+            this.initMarqueeVisibilityHandler();
+            this.initToasts();
+            
+            // Optional: Auto-refresh marquee every 30 seconds if present
+            if (document.querySelector('.marquee-content')) {
+                setInterval(() => {
+                    this.refreshMarqueeData();
+                }, 30000);
+            }
+        }
+    };
+
+    // Make toggleMarquee globally available for onclick handlers
+    window.toggleMarquee = BasePageJS.toggleMarquee.bind(BasePageJS);
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            BasePageJS.init();
+        });
+    } else {
+        // DOM already loaded
+        BasePageJS.init();
+    }
+
+    // Expose BasePageJS for other scripts if needed
+    window.BasePageJS = BasePageJS;
+
+})();
 </script>
     {% block extra_js %}
 
     {% endblock %}
-
-
 </body>
 </html>
