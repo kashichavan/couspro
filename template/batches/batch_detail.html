@@ -1,0 +1,907 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters1  %}
+
+{% block title %}{{ title }} - Enquiry Portal{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+/* Global Variables */
+:root {
+    --primary-orange: #ff7f00;
+    --dark-orange: #e67300;
+    --light-orange: #ffae42;
+    --orange-50: #fff5e6;
+    --orange-100: #ffe0b3;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f4;
+    --gray-600: #6c757d;
+    --gray-900: #212529;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 25px rgba(0,0,0,0.15);
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--gray-50);
+    color: var(--gray-900);
+    line-height: 1.6;
+}
+
+/* Table Styles */
+.table th, 
+.table td {
+    vertical-align: middle;
+    border-top: 1px solid var(--gray-100);
+    border-bottom: 1px solid var(--gray-100);
+    padding: 1rem 1.25rem;
+}
+
+.table thead th {
+    background-color: var(--orange-50);
+    color: var(--dark-orange);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--orange-50);
+    transform: scale(1.01);
+}
+
+/* Search Input */
+#searchUnassigned {
+    max-width: 300px;
+    border: 2px solid var(--gray-100);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}
+
+#searchUnassigned:focus {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 127, 0, 0.1);
+}
+
+/* Button Styling */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: var(--border-radius-sm);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: var(--primary-orange);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+    border: none;
+    color: white;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline-secondary {
+    border: 2px solid var(--gray-600);
+    color: var(--gray-600);
+    transition: var(--transition);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--gray-600);
+    color: white;
+    border-color: var(--gray-600);
+}
+
+/* Payment Summary Table */
+.table-bordered {
+    border: 1px solid var(--gray-100);
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid var(--gray-100);
+}
+
+.table-bordered thead th {
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+}
+
+/* Student Info Card */
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.student-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.125rem;
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+    flex-shrink: 0;
+}
+
+.student-details h6 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 0.95rem;
+}
+
+.student-details .text-muted {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+/* Amount Display */
+.amount {
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+.amount-success {
+    color: var(--success-color);
+}
+
+.amount-danger {
+    color: var(--danger-color);
+}
+
+/* Due Date Badge */
+.due-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: var(--orange-50);
+    color: var(--dark-orange);
+    border: 1px solid var(--orange-100);
+}
+
+.due-badge-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.btn-action-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary-orange);
+    color: var(--primary-orange);
+}
+
+.btn-action-outline:hover {
+    background-color: var(--primary-orange);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Modal Styling */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange));
+    color: white;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 1.5rem 2rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--gray-100);
+}
+
+/* Form Controls */
+.form-control {
+    border: 2px solid var(--gray-100);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 127, 0, 0.1);
+}
+
+.input-group-text {
+    background-color: var(--orange-50);
+    border: 2px solid var(--gray-100);
+    color: var(--dark-orange);
+    font-weight: 500;
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+}
+
+.toast-header {
+    border-bottom: none;
+    font-weight: 600;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .student-info {
+        gap: 0.75rem;
+    }
+
+    .student-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+}
+</style>
+
+
+<!-- ✅ Local DataTables CSS -->
+<link rel="stylesheet" href="{% static 'vendor/datatables/css/dataTables.bootstrap5.min.css' %}" />
+<!-- ✅ Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
+
+<h2>Batch: {{ batch.code }} - {{ batch.subject }}</h2>
+<p><strong>Trainer:</strong> {{ batch.trainer }} | <strong>Tracker:</strong> {{ batch.tracker }}</p>
+<p><strong>Remarks:</strong> {{ batch.remarks }}</p>
+
+<ul class="nav nav-tabs" id="batchTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="assigned-tab" data-bs-toggle="tab" data-bs-target="#assigned" type="button" role="tab">
+            Assigned Students ({{ assigned|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="unassigned-tab" data-bs-toggle="tab" data-bs-target="#unassigned" type="button" role="tab">
+            Unassigned Students ({{ unassigned|length }})
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content mt-3" id="batchTabsContent">
+    <!-- Assigned Students -->
+    <div class="tab-pane fade show active" id="assigned" role="tabpanel">
+        {% if assigned %}
+        <form method="post" action="{% url 'batch:bulk_remove_from_batch' batch.id %}" id="bulk-remove-form">
+            {% csrf_token %}
+            <div class="mb-2">
+                <button type="submit" class="btn btn-danger btn-sm">Remove Selected</button>
+            </div>
+            <table id="assigned-table" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select_all_assigned"></th>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Target Fees</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Due Date</th> <!-- ✅ New column -->
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in assigned %}
+                    {% with payment=payment_data|get_item:student.id %}
+                    <tr data-id="{{ student.id }}" 
+                        data-name="{{ student.name }}"
+                        data-balance="{{ payment.balance|default:0 }}"
+                        data-due-date="{{ student.due_date|date:'Y-m-d' }}">
+                        <td><input type="checkbox" name="enquiry_ids" value="{{ student.id }}"></td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.mobile }}</td>
+                        <td class="amount">₹{{ payment.target|default:"0.00" }}</td>
+                        <td class="amount amount-success">₹{{ payment.paid|default:"0.00" }}</td>
+                        <td class="amount amount-danger">₹{{ payment.balance|default:"0.00" }}</td>
+                        <td>
+                            {% if student.due_date %}
+                                <span class="due-badge {% if student.due_date < today %}due-badge-danger{% endif %}">
+                                    {{ student.due_date|date:"d M, Y" }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary update-payment-btn" 
+                                        data-bs-toggle="modal" data-bs-target="#updatePaymentModal"
+                                        title="Update Payment">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary update-date-btn"
+                                        data-bs-toggle="modal" data-bs-target="#updateDueDateModal"
+                                        title="Update Due Date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="submitSingleRemove({{ batch.id }}, {{ student.id }})">
+                                    Remove
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+        {% else %}
+        <div class="alert alert-info">No students assigned to this batch.</div>
+        {% endif %}
+    </div>
+
+    <!-- Unassigned Students -->
+    <div class="tab-pane fade" id="unassigned" role="tabpanel">
+        {% if unassigned %}
+        <form method="post" action="{% url 'batch:bulk_assign_to_batch' batch.id %}" id="bulk-assign-form">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between mb-2">
+                <button type="submit" class="btn btn-primary btn-sm">Assign Selected</button>
+                <input type="text" id="searchUnassigned" class="form-control form-control-sm w-25" placeholder="Search by name or mobile">
+            </div>
+            <table id="unassigned-table" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select_all_unassigned"></th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in unassigned %}
+                    <tr>
+                        <td><input type="checkbox" name="enquiry_ids" value="{{ student.id }}"></td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.mobile }}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="submitSingleAssign({{ batch.id }}, {{ student.id }})">
+                                Assign
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+        {% else %}
+        <div class="alert alert-info">No unassigned students available.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ✅ Batch Payment Summary -->
+{% if assigned %}
+<div class="mt-4">
+    <h5>Batch Payment Summary</h5>
+    <table class="table table-bordered w-50">
+        <thead>
+            <tr>
+                <th>Total Target Fees</th>
+                <th>Total Paid</th>
+                <th>Total Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>₹{{ batch_payment_summary.total_target }}</td>
+                <td>₹{{ batch_payment_summary.total_paid }}</td>
+                <td>₹{{ batch_payment_summary.total_balance }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- ✅ Toast Container -->
+<div class="toast-container"></div>
+
+<!-- ✅ Update Payment Modal -->
+<div class="modal fade" id="updatePaymentModal" tabindex="-1" aria-labelledby="updatePaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updatePaymentModalLabel">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Update Payment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updatePaymentForm">
+                    <input type="hidden" id="payment_enquiry_id">
+                    <div class="mb-3">
+                        <label for="balanceFees" class="form-label fw-semibold">Balance Fees</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="text" class="form-control" id="balanceFees" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="paymentAmount" class="form-label fw-semibold">Payment Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="paymentAmount" min="1" step="1" required>
+                        </div>
+                        <div class="form-text text-muted">Enter the amount received from the student</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitPayment">
+                    <i class="fas fa-check me-2"></i>
+                    Update Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Update Due Date Modal -->
+<div class="modal fade" id="updateDueDateModal" tabindex="-1" aria-labelledby="updateDueDateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateDueDateModalLabel">
+                    <i class="fas fa-calendar-alt"></i>
+                    Update Due Date
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateDueDateForm">
+                    <input type="hidden" id="duedate_student_id">
+                    <div class="mb-3">
+                        <label for="dueDateStudentName" class="form-label fw-semibold">Student Name</label>
+                        <input type="text" class="form-control" id="dueDateStudentName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="currentDueDate" class="form-label fw-semibold">Current Due Date</label>
+                        <input type="text" class="form-control" id="currentDueDate" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newDueDate" class="form-label fw-semibold">New Due Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="text" class="form-control datepicker" id="newDueDate" placeholder="Select a date" required>
+                        </div>
+                        <div class="form-text text-muted">Select a new due date for payment</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitDueDate">
+                    <i class="fas fa-check me-2"></i>
+                    Update Due Date
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Hidden CSRF Token for JS -->
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" id="csrf_token">
+
+<!-- ✅ Vendor Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>    
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
+<script src="{% static 'vendor/datatables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+
+<!-- ✅ Main Script -->
+<script>
+// ✅ Reusable Functions
+function showToast(title, message, type = 'info') {
+    const toastContainer = document.querySelector('.toast-container');
+    const toastId = 'toast-' + Date.now();
+    const typeConfig = {
+        success: { bg: 'bg-success', icon: 'fa-check-circle' },
+        error: { bg: 'bg-danger', icon: 'fa-exclamation-circle' },
+        warning: { bg: 'bg-warning', icon: 'fa-exclamation-triangle' },
+        info: { bg: 'bg-info', icon: 'fa-info-circle' }
+    };
+    const config = typeConfig[type] || typeConfig.info;
+    
+    const toastHTML = `
+        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+            <div class="toast-header ${config.bg} text-white">
+                <i class="fas ${config.icon} me-2"></i>
+                <strong class="me-auto">${title}</strong>
+                <small>Just now</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    new bootstrap.Toast(document.getElementById(toastId)).show();
+    
+    document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+        this.remove();
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function formatDateForDisplay(dateString) {
+    return new Date(dateString).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: '2-digit' 
+    });
+}
+
+// ✅ Table Interaction Handlers
+document.querySelectorAll('.custom-table tbody tr').forEach(row => {
+    row.addEventListener('mouseenter', () => {
+        row.style.transform = 'scale(1.02)';
+        row.style.zIndex = '1';
+    });
+    row.addEventListener('mouseleave', () => {
+        row.style.transform = '';
+        row.style.zIndex = '';
+    });
+});
+
+// ✅ Payment Update Handlers
+const paymentModal = new bootstrap.Modal(document.getElementById('updatePaymentModal'));
+document.querySelectorAll('.update-payment-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const studentId = row.dataset.id;
+        const balance = row.dataset.balance;
+        
+        document.getElementById('payment_enquiry_id').value = studentId;
+        document.getElementById('balanceFees').value = parseFloat(balance).toFixed(0);
+        document.getElementById('paymentAmount').value = '';
+        
+        paymentModal.show();
+        setTimeout(() => document.getElementById('paymentAmount').focus(), 300);
+    });
+});
+
+document.getElementById('submitPayment').addEventListener('click', function() {
+    const enquiryId = document.getElementById('payment_enquiry_id').value;
+    const paymentAmountInput = document.getElementById('paymentAmount');
+    const paymentAmount = paymentAmountInput.value;
+    const balanceFees = parseFloat(document.getElementById('balanceFees').value);
+    
+    if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
+        showToast('Validation Error', 'Please enter a valid payment amount', 'error');
+        return;
+    }
+    
+    if (parseFloat(paymentAmount) > balanceFees) {
+        showToast('Validation Error', 'Payment amount cannot exceed balance fees', 'error');
+        return;
+    }
+    
+    const submitBtn = this;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "enquiry:update_payment" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `enquiry_id=${encodeURIComponent(enquiryId)}&payment_amount=${encodeURIComponent(paymentAmount)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updatePaymentInTable(enquiryId, data);
+            showToast('Success', 'Payment updated successfully!', 'success');
+            paymentModal.hide();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('Error', data.message || 'Failed to update payment', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Network Error', 'Please check your connection and try again', 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function updatePaymentInTable(enquiryId, data) {
+    const row = document.querySelector(`tr[data-id="${enquiryId}"]`);
+    if (row) {
+        const balanceCell = row.querySelector('td:nth-child(6) .amount-danger');
+        const paidCell = row.querySelector('td:nth-child(5) .amount-success');
+        
+        if (balanceCell && paidCell) {
+            balanceCell.textContent = `₹${parseFloat(data.new_balance).toFixed(0)}`;
+            paidCell.textContent = `₹${parseFloat(data.new_paid).toFixed(0)}`;
+            row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            setTimeout(() => row.style.backgroundColor = '', 2000);
+        }
+    }
+}
+
+// ✅ Due Date Update Handlers
+const dateModal = new bootstrap.Modal(document.getElementById('updateDueDateModal'));
+document.querySelectorAll('.update-date-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const row = this.closest('tr');
+        const studentId = row.dataset.id;
+        const studentName = row.dataset.name;
+        const dueDate = row.dataset.dueDate;
+        
+        document.getElementById('duedate_student_id').value = studentId;
+        document.getElementById('dueDateStudentName').value = studentName;
+        document.getElementById('currentDueDate').value = formatDateForDisplay(dueDate);
+        document.getElementById('newDueDate').value = '';
+        
+        dateModal.show();
+    });
+});
+
+document.getElementById('submitDueDate').addEventListener('click', function() {
+    const studentId = document.getElementById('duedate_student_id').value;
+    const newDueDate = document.getElementById('newDueDate').value;
+    
+    if (!newDueDate) {
+        showToast('Validation Error', 'Please select a new due date', 'error');
+        return;
+    }
+    
+    const submitBtn = this;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "enquiry:update_due_date" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `student_id=${studentId}&new_due_date=${newDueDate}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateDueDateInTable(studentId, newDueDate);
+            showToast('Success', 'Due date updated successfully!', 'success');
+            dateModal.hide();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('Error', data.message || 'Failed to update due date', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Network Error', 'Please check your connection and try again', 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function updateDueDateInTable(studentId, newDueDate) {
+    const row = document.querySelector(`tr[data-id="${studentId}"]`);
+    if (row) {
+        const dueDateCell = row.querySelector('.due-badge');
+        if (dueDateCell) {
+            dueDateCell.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${formatDateForDisplay(newDueDate)}`;
+            dueDateCell.className = 'due-badge';
+            
+            if (new Date(newDueDate) < new Date()) {
+                dueDateCell.classList.add('due-badge-danger');
+            }
+        }
+        row.dataset.dueDate = newDueDate;
+        row.style.backgroundColor = 'rgba(255, 127, 0, 0.1)';
+        setTimeout(() => row.style.backgroundColor = '', 2000);
+    }
+}
+
+// ✅ Flatpickr Initialization
+flatpickr('.datepicker', {
+    dateFormat: "Y-m-d",
+    minDate: "today",
+    allowInput: true,
+    theme: "material_orange"
+});
+
+// ✅ Checkbox Selectors
+document.getElementById('select_all_assigned')?.addEventListener('change', function () {
+    document.querySelectorAll('#assigned-table input[name="enquiry_ids"]').forEach(cb => cb.checked = this.checked);
+});
+
+document.getElementById('select_all_unassigned')?.addEventListener('change', function () {
+    document.querySelectorAll('#unassigned-table input[name="enquiry_ids"]').forEach(cb => cb.checked = this.checked);
+});
+
+function submitDynamicPost(url) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+
+    const csrfToken = document.querySelector('#csrf_token').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+
+    form.appendChild(csrfInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function submitSingleRemove(batchId, studentId) {
+    const url = `/batch/${batchId}/remove/${studentId}/`;
+    submitDynamicPost(url);
+}
+
+function submitSingleAssign(batchId, studentId) {
+    const url = `/batch/${batchId}/assign/${studentId}/`;
+    submitDynamicPost(url);
+}
+
+// ✅ DataTables Initialization
+$(document).ready(function () {
+    $('#assigned-table').DataTable({
+        paging: true,
+        searching: true,
+        responsive: true,
+        columnDefs: [{ orderable: false, targets: [0, -1] }]
+    });
+
+    const unassignedTable = $('#unassigned-table').DataTable({
+        paging: true,
+        searching: true,
+        responsive: true,
+        columnDefs: [{ orderable: false, targets: [0, -1] }]
+    });
+
+    $('#searchUnassigned').on('keyup', function () {
+        unassignedTable.search(this.value).draw();
+    });
+});
+</script>
+{% endblock %}

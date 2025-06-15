@@ -22,4 +22,5 @@ urlpatterns = [
     path('jet/', include('jet.urls', 'jet')),
     path('',include('enquiry.urls')),
     path('accounts/', include('accounts.urls')),
+    path('batch/',include('batches.urls')),
 ]

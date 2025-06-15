@@ -30,6 +30,11 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://dev.kashichavan.xyz',
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,8 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'batches',
     'enquiry',
      'django.contrib.humanize',
+      'widget_tweaks',
      
 ]
 

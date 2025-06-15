@@ -1,215 +1,593 @@
 {% extends "base.html" %}
 {% load humanize %}
-{% block content %}
 {% load custom_filters %}
 
+
+
+{% block content %}
 <div class="container-fluid py-4">
   <!-- Month Filter Header -->
-  <div class="card mb-4 fade-in">
-    <div class="card-body">
-      <form id="month-filter-form" class="row g-3 align-items-end">
-        <div class="col-md-4">
-          <label for="month-select" class="form-label fw-bold">Select Month</label>
-          <select id="month-select" name="month" class="form-select form-select-lg">
-            <option value="">All Time</option>
-            {% for value, label in month_choices %}
-              <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        
-        <div class="col-md-3">
-          <button type="submit" class="btn btn-primary btn-lg px-4">
-            <i class="fas fa-filter me-2"></i>Filter Data
-          </button>
-          <button type="button" id="reset-btn" class="btn btn-outline-secondary btn-lg px-4 ms-2">
-            <i class="fas fa-undo me-2"></i>Reset
-          </button>
-        </div>
-      </form>
-    </div>
+  <div class="filter-section fade-in">
+    <h2 class="filter-title">
+      <i class="fas fa-chart-line me-2"></i>
+      Counsellor Performance Dashboard
+    </h2>
+    <form id="month-filter-form" class="row g-3 align-items-end">
+      <div class="col-md-6 col-lg-4">
+        <label for="month-select" class="form-label fw-bold text-dark">Select Month</label>
+        <select id="month-select" name="month" class="form-select form-select-modern">
+          <option value="">All Time</option>
+          {% for value, label in month_choices %}
+            <option value="{{ value }}" {% if value == selected_month %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="col-md-6 col-lg-4">
+        <button type="submit" class="btn btn-modern-primary me-2">
+          <i class="fas fa-filter me-2"></i>Filter Data
+        </button>
+        <button type="button" id="reset-btn" class="btn btn-modern-secondary">
+          <i class="fas fa-undo me-2"></i>Reset
+        </button>
+      </div>
+    </form>
   </div>
 
   <!-- Stats Summary Cards -->
-<div class="row g-4 mb-4">
-  <!-- Total Telephonic -->
-  <div class="col-md-2">
-    <div class="card bg-light border-start border-4 border-info">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-phone-alt fa-2x text-info"></i>
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <p class="mb-1 text-muted">Total Telephonic</p>
-            <h4 class="mb-0" id="total-telephonic">0</h4>
-          </div>
-        </div>
+  <div class="stats-grid slide-in">
+    <!-- Total Telephonic -->
+    <div class="stat-card telephonic">
+      <div class="stat-icon telephonic">
+        <i class="fas fa-phone-alt fa-lg"></i>
       </div>
+      <div class="stat-label">Total Telephonic</div>
+      <div class="stat-value" id="total-telephonic">0</div>
+    </div>
+
+    <!-- Total Walkin -->
+    <div class="stat-card walkin">
+      <div class="stat-icon walkin">
+        <i class="fas fa-walking fa-lg"></i>
+      </div>
+      <div class="stat-label">Total Walkin</div>
+      <div class="stat-value" id="total-walkin">0</div>
+    </div>
+
+    <!-- Joined -->
+    <div class="stat-card joined">
+      <div class="stat-icon joined">
+        <i class="fas fa-user-graduate fa-lg"></i>
+      </div>
+      <div class="stat-label">Total Joined</div>
+      <div class="stat-value" id="total-joined">0</div>
+    </div>
+
+    <!-- Pending -->
+    <div class="stat-card pending">
+      <div class="stat-icon pending">
+        <i class="fas fa-user-clock fa-lg"></i>
+      </div>
+      <div class="stat-label">Pending</div>
+      <div class="stat-value" id="total-pending">0</div>
+    </div>
+
+    <!-- Dropout -->
+    <div class="stat-card dropout">
+      <div class="stat-icon dropout">
+        <i class="fas fa-user-minus fa-lg"></i>
+      </div>
+      <div class="stat-label">Dropouts</div>
+      <div class="stat-value" id="total-dropout">0</div>
+    </div>
+
+    <!-- Fees Collected -->
+    <div class="stat-card fees">
+      <div class="stat-icon fees">
+        <i class="fas fa-money-bill-wave fa-lg"></i>
+      </div>
+      <div class="stat-label">Fees Collected</div>
+      <div class="stat-value" id="total-fees">₹0</div>
     </div>
   </div>
 
-  <!-- Total Walkin -->
-  <div class="col-md-2">
-    <div class="card bg-light border-start border-4 border-warning">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-walking fa-2x text-warning"></i>
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <p class="mb-1 text-muted">Total Walkin</p>
-            <h4 class="mb-0" id="total-walkin">0</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Data Table -->
+  <div class="table-container fade-in">
+    <table id="counsellor-table" class="table table-modern table-hover align-middle">
+      <thead>
+        <tr>
+          <!-- Primary Columns -->
+          <th><i class="fas fa-user me-1"></i>Counsellor</th>
+          
+          <!-- Walkin Group -->
+          <th><i class="fas fa-walking me-1"></i>Walkin</th>
+          <th>J</th>
+          <th>P</th>
+          <th>D</th>
 
-  <!-- Joined -->
-  <div class="col-md-2">
-    <div class="card bg-light border-start border-4 border-success">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-user-graduate fa-2x text-success"></i>
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <p class="mb-1 text-muted">Total Joined</p>
-            <h4 class="mb-0" id="total-joined">0</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          <!-- Telephonic Group -->
+          <th><i class="fas fa-phone me-1"></i>Telephonic</th>
+          <th>J</th>
+          <th>P</th>
+          <th>D</th>
 
-  <!-- Pending -->
-  <div class="col-md-2">
-    <div class="card bg-light border-start border-4 border-warning">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-user-clock fa-2x text-warning"></i>
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <p class="mb-1 text-muted">Pending</p>
-            <h4 class="mb-0" id="total-pending">0</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          <!-- Status Totals -->
+          <th><i class="fas fa-check me-1"></i>Joined</th>
+          <th><i class="fas fa-clock me-1"></i>Pending</th>
+          <th><i class="fas fa-times me-1"></i>Dropout</th>
+          
+          <!-- Financials -->
+          <th><i class="fas fa-rupee-sign me-1"></i>Fees Collected</th>
+          <th><i class="fas fa-exclamation-triangle me-1"></i>Pending Balance</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        {% for stat in stats %}
+        <tr data-counsellor-id="{{ stat.counsellor.id }}" class="table-row">
+          <!-- Counsellor -->
+          <td class="counsellor-cell">
+            {% with selected_month|split_month as month_data %}
+              <a href="{% url 'enquiry:counsellor_monthly_details' counsellor_id=stat.counsellor.id year=month_data.year month=month_data.month %}" class="counsellor-link">
+                {{ stat.counsellor.name }}
+              </a>
+            {% endwith %}
+          </td>
 
-  <!-- Dropout -->
-  <div class="col-md-2">
-    <div class="card bg-light border-start border-4 border-danger">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-user-minus fa-2x text-danger"></i>
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <p class="mb-1 text-muted">Dropouts</p>
-            <h4 class="mb-0" id="total-dropout">0</h4>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          <!-- Walkin Group -->
+          <td class="text-center">
+            <span class="badge-modern badge-walkin">{{ stat.total_walkin }}</span>
+          </td>
+          <td class="text-center fw-bold">{{ stat.joined_walkin }}</td>
+          <td class="text-center fw-bold">{{ stat.pending_walkin }}</td>
+          <td class="text-center fw-bold">{{ stat.dropout_walkin }}</td>
 
-  <!-- Fees Collected -->
-  <div class="col-md-2">
-    <div class="card bg-light border-start border-4 border-info">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-money-bill-wave fa-2x text-info"></i>
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <p class="mb-1 text-muted">Fees Collected</p>
-            <h4 class="mb-0" id="total-fees">₹0</h4>
-          </div>
-        </div>
-      </div>
-    </div>
+          <!-- Telephonic Group -->
+          <td class="text-center">
+            <span class="badge-modern badge-telephonic">{{ stat.total_telephonic }}</span>
+          </td>
+          <td class="text-center fw-bold">{{ stat.joined_telephonic }}</td>
+          <td class="text-center fw-bold">{{ stat.pending_telephonic }}</td>
+          <td class="text-center fw-bold">{{ stat.dropout_telephonic }}</td>
+
+          <!-- Status Totals -->
+          <td class="text-center">
+            <span class="status-badge-modern status-joined">{{ stat.joined }}</span>
+          </td>
+          <td class="text-center">
+            <span class="status-badge-modern status-pending">{{ stat.pending }}</span>
+          </td>
+          <td class="text-center">
+            <span class="status-badge-modern status-dropout">{{ stat.dropout }}</span>
+          </td>
+
+          <!-- Financials -->
+          <td class="text-end">
+            <span class="money-positive">₹{{ stat.fees_paid|intcomma }}</span>
+          </td>
+          <td class="text-end">
+            <span class="money-negative">₹{{ stat.fees_balance|intcomma }}</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="14" class="text-center py-5">
+            <div class="text-muted">
+              <i class="fas fa-search fa-3x mb-3 opacity-50"></i>
+              <h5>No data found</h5>
+              <p>Try adjusting your filters or check back later.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
-<!-- Data Table -->
-<table id="counsellor-table" class="table table-striped table-hover table-bordered align-middle">
-  <thead class="table-dark">
-    <tr>
-      <!-- Primary Columns -->
-      <th>Counsellor</th>
-      
-      <!-- Walkin Group -->
-      <th>Walkin</th>
-      <th>J</th>
-      <th>P</th>
-      <th>D</th>
 
-      <!-- Telephonic Group -->
-      <th>Telephonic</th>
-      <th>J</th>
-      <th>P</th>
-      <th>D</th>
 
-      <!-- Status Totals -->
-      <th>Joined</th>
-      <th>Pending</th>
-      <th>Dropout</th>
-      
-      <!-- Financials -->
-      <th>Fees Collected</th>
-      <th>Pending Balance</th>
-    </tr>
-  </thead>
-  <tbody id="table-body">
-    {% for stat in stats %}
-    <tr data-counsellor-id="{{ stat.counsellor.id }}" class="table-row">
-      <!-- Counsellor -->
-      <td class="counsellor-cell">
-        {% with selected_month|split_month as month_data %}
-          <a href="{% url 'enquiry:counsellor_monthly_details' counsellor_id=stat.counsellor.id year=month_data.year month=month_data.month %}">
-            {{ stat.counsellor.name }}
-          </a>
-        {% endwith %}
-      </td>
+<!-- Google Fonts - Trending Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-      <!-- Walkin Group -->
-      <td class="text-center"><span class="badge bg-warning">{{ stat.total_walkin }}</span></td>
-      <td class="text-center">{{ stat.joined_walkin }}</td>
-      <td class="text-center">{{ stat.pending_walkin }}</td>
-      <td class="text-center">{{ stat.dropout_walkin }}</td>
+<style>
+:root {
+    --primary-orange: #FF6B35;
+    --secondary-orange: #FF8C42;
+    --light-orange: #FFE5D9;
+    --dark-orange: #E55A2B;
+    --accent-orange: #FF9500;
+    --white: #FFFFFF;
+    --light-gray: #F8F9FA;
+    --medium-gray: #E9ECEF;
+    --dark-gray: #495057;
+    --text-dark: #212529;
+    --shadow-light: 0 2px 10px rgba(255, 107, 53, 0.1);
+    --shadow-medium: 0 4px 20px rgba(255, 107, 53, 0.15);
+    --shadow-heavy: 0 8px 30px rgba(255, 107, 53, 0.2);
+    --gradient-orange: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+    --gradient-light: linear-gradient(135deg, #FFE5D9 0%, #FFF0E6 100%);
+}
 
-      <!-- Telephonic Group -->
-      <td class="text-center"><span class="badge bg-info">{{ stat.total_telephonic }}</span></td>
-      <td class="text-center">{{ stat.joined_telephonic }}</td>
-      <td class="text-center">{{ stat.pending_telephonic }}</td>
-      <td class="text-center">{{ stat.dropout_telephonic }}</td>
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #FFF5F0 0%, #FFFFFF 50%, #FFF8F4 100%);
+    min-height: 100vh;
+    color: var(--text-dark);
+}
 
-      <!-- Status Totals -->
-      <td class="text-center"><span class="status-badge status-joined">{{ stat.joined }}</span></td>
-      <td class="text-center"><span class="status-badge status-pending">{{ stat.pending }}</span></td>
-      <td class="text-center"><span class="status-badge status-dropout">{{ stat.dropout }}</span></td>
+/* Modern Card Styling */
+.modern-card {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 107, 53, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
 
-      <!-- Financials -->
-      <td class="fees-collected text-end">₹{{ stat.fees_paid|intcomma }}</td>
-      <td class="fees-pending text-end text-danger">₹{{ stat.fees_balance|intcomma }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="14" class="text-center py-4">
-        <i class="fas fa-search fa-2x text-muted mb-2"></i>
-        <p class="text-muted">No data found</p>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+.modern-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+}
 
+/* Filter Section */
+.filter-section {
+    background: var(--gradient-light);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 107, 53, 0.1);
+}
+
+.filter-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: var(--dark-orange);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+/* Custom Form Controls */
+.form-select-modern {
+    border: 2px solid var(--medium-gray);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+.form-select-modern:focus {
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    outline: none;
+}
+
+/* Modern Buttons */
+.btn-modern-primary {
+    background: var(--gradient-orange);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    color: var(--white);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+}
+
+.btn-modern-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: var(--white);
+}
+
+.btn-modern-secondary {
+    background: var(--white);
+    border: 2px solid var(--primary-orange);
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    color: var(--primary-orange);
+    transition: all 0.3s ease;
+}
+
+.btn-modern-secondary:hover {
+    background: var(--primary-orange);
+    color: var(--white);
+    transform: translateY(-2px);
+}
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border-left: 4px solid var(--primary-orange);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-orange);
+    border-radius: 0 16px 0 50px;
+    opacity: 0.1;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stat-card.telephonic { border-left-color: #17A2B8; }
+.stat-card.walkin { border-left-color: #FFC107; }
+.stat-card.joined { border-left-color: #28A745; }
+.stat-card.pending { border-left-color: #FD7E14; }
+.stat-card.dropout { border-left-color: #DC3545; }
+.stat-card.fees { border-left-color: var(--primary-orange); }
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-icon.telephonic { background: rgba(23, 162, 184, 0.1); color: #17A2B8; }
+.stat-icon.walkin { background: rgba(255, 193, 7, 0.1); color: #FFC107; }
+.stat-icon.joined { background: rgba(40, 167, 69, 0.1); color: #28A745; }
+.stat-icon.pending { background: rgba(253, 126, 20, 0.1); color: #FD7E14; }
+.stat-icon.dropout { background: rgba(220, 53, 69, 0.1); color: #DC3545; }
+.stat-icon.fees { background: var(--light-orange); color: var(--primary-orange); }
+
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1;
+}
+
+/* Modern Table */
+.table-container {
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 107, 53, 0.08);
+}
+
+.table-modern {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.table-modern thead {
+    background: var(--gradient-orange);
+}
+
+.table-modern thead th {
+    color: var(--white);
+    font-weight: 600;
+    border: none;
+    padding: 1rem 0.75rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table-modern tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.table-modern tbody tr:hover {
+    background: rgba(255, 107, 53, 0.02);
+    transform: scale(1.01);
+}
+
+.table-modern td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Modern Badges */
+.badge-modern {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-walkin {
+    background: rgba(255, 193, 7, 0.1);
+    color: #B8860B;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.badge-telephonic {
+    background: rgba(23, 162, 184, 0.1);
+    color: #0C7489;
+    border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.status-badge-modern {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-joined { 
+    background: linear-gradient(135deg, #D4EDDA, #C3E6CB); 
+    color: #155724; 
+    border: 1px solid #B8DABC;
+}
+
+.status-pending { 
+    background: linear-gradient(135deg, #FFF3CD, #FFEAA7); 
+    color: #856404; 
+    border: 1px solid #F0D43A;
+}
+
+.status-dropout { 
+    background: linear-gradient(135deg, #F8D7DA, #F5C6CB); 
+    color: #721C24; 
+    border: 1px solid #F1B0B7;
+}
+
+/* Counsellor Link Styling */
+.counsellor-link {
+    color: var(--primary-orange);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.counsellor-link:hover {
+    color: var(--dark-orange);
+    text-decoration: none;
+}
+
+.counsellor-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: var(--gradient-orange);
+    transition: width 0.3s ease;
+}
+
+.counsellor-link:hover::after {
+    width: 100%;
+}
+
+/* Money Formatting */
+.money-positive {
+    color: var(--primary-orange);
+    font-weight: 600;
+}
+
+.money-negative {
+    color: #DC3545;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .filter-section {
+        padding: 1.5rem;
+    }
+}
+
+/* DataTables Custom Styling */
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    border: 2px solid var(--medium-gray);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--primary-orange);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--gradient-orange) !important;
+    border-color: var(--primary-orange) !important;
+    color: white !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--light-orange) !important;
+    border-color: var(--primary-orange) !important;
+    color: var(--dark-orange) !important;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.8s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -218,37 +596,35 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> 
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> 
 
-<style>
-.status-badge {
-    padding: 0.4em 0.6em;
-    border-radius: 0.25em;
-    font-weight: bold;
-}
-.status-joined { background-color: #d4edda; color: #155724; }
-.status-pending { background-color: #fff3cd; color: #856404; }
-.status-dropout { background-color: #f8d7da; color: #721c24; }
-</style>
-
 <script>
 $(document).ready(function() {
-    // Initialize DataTable
+    // Initialize DataTable with modern styling
     let table = $('#counsellor-table').DataTable({
         responsive: true,
         paging: true,
         searching: true,
         ordering: true,
         info: true,
+        pageLength: 15,
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
         language: {
             search: "Search counsellors:",
-            lengthMenu: "Show _MENU_ entries",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            lengthMenu: "Show _MENU_ entries per page",
+            info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
+            infoEmpty: "No counsellors found",
+            infoFiltered: "(filtered from _MAX_ total entries)",
             paginate: {
                 first: "First",
                 last: "Last",
                 next: "Next",
-                previous: "Previous"
-            }
-        }
+                previous: "Prev"
+            },
+            emptyTable: "No counsellor data available"
+        },
+        columnDefs: [
+            { targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], className: "text-center" },
+            { targets: [12, 13], className: "text-end" }
+        ]
     });
 
     // Handle month filter submission
@@ -256,23 +632,16 @@ $(document).ready(function() {
         e.preventDefault();
         const selectedMonth = $('#month-select').val();
         
-        // Update download link
-        $('#download-link').attr('href', 
-            "{% url 'enquiry:download_monthly_summary_by_counsellor_excel' %}?month=" + selectedMonth
-        );
-
-        // Show loading spinner
-        $('#table-container').hide();
-        $('#loading-spinner').show();
-        $('#error-message').addClass('d-none');
+        // Add loading state
+        const filterBtn = $(this).find('button[type="submit"]');
+        const originalText = filterBtn.html();
+        filterBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading...').prop('disabled', true);
 
         // Fetch filtered data
         $.ajax({
             url: "{% url 'enquiry:monthly_summary_by_counsellor' %}",
             type: 'GET',
-            data: {
-                month: selectedMonth
-            },
+            data: { month: selectedMonth },
             success: function(response) {
                 // Extract table HTML from response
                 const parser = new DOMParser();
@@ -290,28 +659,39 @@ $(document).ready(function() {
                     searching: true,
                     ordering: true,
                     info: true,
+                    pageLength: 15,
+                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
                     language: {
                         search: "Search counsellors:",
-                        lengthMenu: "Show _MENU_ entries",
-                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        lengthMenu: "Show _MENU_ entries per page",
+                        info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
+                        infoEmpty: "No counsellors found",
+                        infoFiltered: "(filtered from _MAX_ total entries)",
                         paginate: {
                             first: "First",
                             last: "Last",
                             next: "Next",
-                            previous: "Previous"
-                        }
-                    }
+                            previous: "Prev"
+                        },
+                        emptyTable: "No counsellor data available"
+                    },
+                    columnDefs: [
+                        { targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], className: "text-center" },
+                        { targets: [12, 13], className: "text-end" }
+                    ]
                 });
 
                 // Update summary stats
                 updateSummaryStats();
+                
+                // Show success feedback
+                showNotification('Data filtered successfully!', 'success');
             },
             error: function() {
-                $('#error-message').removeClass('d-none');
+                showNotification('Error loading data. Please try again.', 'error');
             },
             complete: function() {
-                $('#loading-spinner').hide();
-                $('#table-container').show();
+                filterBtn.html(originalText).prop('disabled', false);
             }
         });
     });
@@ -326,45 +706,72 @@ $(document).ready(function() {
     updateSummaryStats();
 
     function updateSummaryStats() {
-    let totalTelephonic = 0;
-    let totalWalkin = 0;
-    let totalJoined = 0;
-    let totalPending = 0;
-    let totalDropout = 0;
-    let totalFees = 0;
+        let totalTelephonic = 0;
+        let totalWalkin = 0;
+        let totalJoined = 0;
+        let totalPending = 0;
+        let totalDropout = 0;
+        let totalFees = 0;
 
-    $('#counsellor-table tbody tr').each(function() {
-        // Total Walkin (column 1)
-        totalWalkin += parseInt($(this).find('td:eq(1)').text()) || 0;
+        $('#counsellor-table tbody tr:not(.dataTables_empty)').each(function() {
+            // Extract numbers from badges and text
+            const walkinText = $(this).find('td:eq(1) .badge-walkin').text() || '0';
+            const telephonicText = $(this).find('td:eq(5) .badge-telephonic').text() || '0';
+            const joinedText = $(this).find('td:eq(9) .status-joined').text() || '0';
+            const pendingText = $(this).find('td:eq(10) .status-pending').text() || '0';
+            const dropoutText = $(this).find('td:eq(11) .status-dropout').text() || '0';
+            const feesText = $(this).find('td:eq(12) .money-positive').text().replace('₹', '').replace(/,/g, '') || '0';
+
+            totalWalkin += parseInt(walkinText) || 0;
+            totalTelephonic += parseInt(telephonicText) || 0;
+            totalJoined += parseInt(joinedText) || 0;
+            totalPending += parseInt(pendingText) || 0;
+            totalDropout += parseInt(dropoutText) || 0;
+            totalFees += parseInt(feesText) || 0;
+        });
+
+        // Animate number updates
+        animateNumber('#total-telephonic', totalTelephonic);
+        animateNumber('#total-walkin', totalWalkin);
+        animateNumber('#total-joined', totalJoined);
+        animateNumber('#total-pending', totalPending);
+        animateNumber('#total-dropout', totalDropout);
+        animateNumber('#total-fees', totalFees, true);
+    }
+
+    function animateNumber(selector, targetValue, isCurrency = false) {
+        const element = $(selector);
+        const currentValue = parseInt(element.text().replace(/[₹,]/g, '')) || 0;
+        const increment = (targetValue - currentValue) / 20;
+        let current = currentValue;
+
+        const timer = setInterval(function() {
+            current += increment;
+            if ((increment > 0 && current >= targetValue) || (increment < 0 && current <= targetValue)) {
+                current = targetValue;
+                clearInterval(timer);
+            }
+            
+            const displayValue = Math.round(current);
+            const formattedValue = new Intl.NumberFormat('en-IN').format(displayValue);
+            element.text(isCurrency ? '₹' + formattedValue : displayValue);
+        }, 50);
+    }
+
+    function showNotification(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const notification = $(`
+            <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
         
-        // Total Telephonic (column 5)
-        totalTelephonic += parseInt($(this).find('td:eq(5)').text()) || 0;
-
-        // Total Joined (column 10)
-        totalJoined += parseInt($(this).find('td:eq(10)').text()) || 0;
-
-        // Total Pending (column 11)
-        totalPending += parseInt($(this).find('td:eq(11)').text()) || 0;
-
-        // Total Dropout (column 12)
-        totalDropout += parseInt($(this).find('td:eq(12)').text()) || 0;
-
-        // Fees Collected (column 13)
-        const feesText = $(this).find('td:eq(13)').text().replace('₹', '').replace(/,/g, '');
-        totalFees += parseInt(feesText) || 0;
-    });
-
-    // Format numbers with commas
-    const formattedFees = new Intl.NumberFormat('en-IN').format(totalFees);
-    
-    // Update stats
-    $('#total-telephonic').text(totalTelephonic);
-    $('#total-walkin').text(totalWalkin);
-    $('#total-joined').text(totalJoined);
-    $('#total-pending').text(totalPending);
-    $('#total-dropout').text(totalDropout);
-    $('#total-fees').text('₹' + formattedFees);
-}
+        $('body').append(notification);
+        setTimeout(() => notification.fadeOut(), 3000);
+    }
 });
 </script>
 {% endblock %}

@@ -1,0 +1,34 @@
+<div class="card batch-card h-100 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h6 class="card-title mb-1">{{ batch.code }}</h6>
+                <p class="card-text mb-1 text-truncate">{{ batch.subject }}</p>
+                <div class="small text-muted">
+                    <i class="bi bi-person"></i> {{ batch.students.count }} students
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-end">
+                <div class="mb-1">
+                    <span class="badge bg-light text-dark border">
+                        {{ batch.trainer|default:"—" }}
+                    </span>
+                </div>
+                <div>
+                    <span class="badge bg-light text-dark border">
+                        {{ batch.tracker|default:"—" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end mt-2">
+            <a href="{% url 'batch:batch_detail' batch.id %}" class="btn btn-sm btn-outline-primary me-1" title="View Details">
+                <i class="bi bi-eye"></i>
+            </a>
+            <a href="{% url 'batch:edit_batch' batch.id %}" class="btn btn-sm btn-outline-secondary" title="Edit Batch">
+                <i class="bi bi-pencil"></i>
+            </a>
+        </div>
+    </div>
+</div>

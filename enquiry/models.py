@@ -143,10 +143,11 @@ class Enquiry(models.Model):
                 if self.target_fees is not None
                 else None
             )
-        if self.batch:
+        if self.pk and self.batches.count() > 0:
             self.is_joined_batch = True
         else:
             self.is_joined_batch = False
+    
 
 
         super().save(*args, **kwargs)

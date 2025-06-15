@@ -64,6 +64,11 @@ def split_month(value):
         return {'year': year, 'month': month}
     except:
         return {'year': timezone.now().year, 'month': timezone.now().month}
+    
+    
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(str(key))
 
 
 

@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create New Batch{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #ff9a56 0%, #ffad56 25%, #ffc356 50%, #fff 75%, #f8f9fa 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Responsive Background Effects */
+    body::before, body::after {
+        content: '';
+        position: fixed;
+        width: 150%;
+        height: 150%;
+        background: radial-gradient(circle, rgba(255, 154, 86, 0.05) 0%, transparent 50%);
+        animation: float 20s ease-in-out infinite;
+        z-index: -1;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 2.5rem 3rem;
+        box-shadow: 
+            0 15px 30px rgba(255, 154, 86, 0.1),
+            0 8px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 154, 86, 0.2);
+        position: relative;
+        animation: slideInUp 0.6s ease-out;
+        overflow: hidden;
+        margin: 1.5rem auto;
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #ff9a56, #ffad56);
+        animation: shimmer 2s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ff9a56, #ff6b3d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* Responsive Grid Layout */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.4rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    textarea.form-control {
+        min-height: 80px;
+    }
+
+    .btn-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .btn-container {
+            flex-direction: row;
+            justify-content: center;
+        }
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        max-width: 300px;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .form-card {
+            padding: 2rem 1.5rem;
+            border-radius: 16px;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .form-grid {
+            gap: 1.2rem;
+        }
+    }
+
+    /* Floating label adjustments */
+    .floating-label .form-label {
+        top: 0.8rem;
+        left: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0 0.3rem;
+    }
+
+    .floating-label .form-control:focus + .form-label,
+    .floating-label .form-control:not(:placeholder-shown) + .form-label {
+        transform: translateY(-18px) scale(0.8);
+        color: #ff9a56;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1 class="form-title">Create New Batch</h1>
+            <p class="form-subtitle">Set up a new training batch with all the essential details</p>
+        </div>
+
+        <form method="post" id="batchForm" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.code.id_for_label }}">Batch Code</label>
+                    {{ form.code }}
+                    {% if form.code.errors %}
+                        {{ form.code.errors }}
+                    {% endif %}
+                    <div class="error-message" id="code-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                        {{ form.subject.errors }}
+                    {% endif %}
+                    <div class="error-message" id="subject-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.trainer.id_for_label }}">Trainer</label>
+                    {{ form.trainer }}
+                    {% if form.trainer.errors %}
+                        {{ form.trainer.errors }}
+                    {% endif %}
+                    <div class="error-message" id="trainer-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.tracker.id_for_label }}">Tracker</label>
+                    {{ form.tracker }}
+                    {% if form.tracker.errors %}
+                        {{ form.tracker.errors }}
+                    {% endif %}
+                    <div class="error-message" id="tracker-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.batch_date.id_for_label }}">Batch Date</label>
+                    {{ form.batch_date }}
+                    {% if form.batch_date.errors %}
+                        {{ form.batch_date.errors }}
+                    {% endif %}
+                    <div class="error-message" id="batch_date-error"></div>
+                </div>
+
+                <div class="form-group form-grid-full">
+                    <label class="form-label" for="{{ form.remarks.id_for_label }}">Remarks</label>
+                    {{ form.remarks }}
+                    {% if form.remarks.errors %}
+                        {{ form.remarks.errors }}
+                    {% endif %}
+                    <div class="error-message" id="remarks-error"></div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    Create Batch
+                </button>
+                <a href="{% url 'batch:batch_list' %}" class="btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('batchForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formFields = form.querySelectorAll('.form-control, .form-select');
+
+    // Real-time validation
+    formFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            validateField(this);
+        });
+
+        field.addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateField(this);
+            }
+        });
+    });
+
+    // Custom validation functions
+    function validateField(field) {
+        const fieldName = field.name;
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        // Clear previous error state
+        field.classList.remove('error', 'success');
+        const errorDiv = document.getElementById(fieldName + '-error');
+        if (errorDiv) {
+            errorDiv.classList.remove('show');
+        }
+
+        // Field-specific validation
+        switch(fieldName) {
+            case 'code':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Batch code is required';
+                } else if (value.includes(' ')) {
+                    isValid = false;
+                    errorMessage = 'Batch code should not contain spaces';
+                } else if (value.length < 3) {
+                    isValid = false;
+                    errorMessage = 'Batch code should be at least 3 characters';
+                }
+                break;
+            
+            case 'subject':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Subject is required';
+                }
+                break;
+            
+            case 'trainer':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Please select a trainer';
+                }
+                break;
+            
+            case 'tracker':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Please select a tracker';
+                }
+                break;
+        }
+
+        // Apply validation result
+        if (!isValid) {
+            field.classList.add('error');
+            if (errorDiv) {
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+            }
+        } else if (value) {
+            field.classList.add('success');
+        }
+
+        return isValid;
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let isFormValid = true;
+        
+        // Validate all fields
+        formFields.forEach(field => {
+            if (!validateField(field)) {
+                isFormValid = false;
+            }
+        });
+
+        if (isFormValid) {
+            // Add loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            
+            // Simulate form submission delay for better UX
+            setTimeout(() => {
+                form.submit();
+            }, 500);
+        } else {
+            // Shake the form on validation error
+            const formCard = document.querySelector('.form-card');
+            formCard.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                formCard.style.animation = '';
+            }, 500);
+        }
+    });
+
+    // Enhanced input animations
+    formFields.forEach(field => {
+        field.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+
+        field.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+
+    // Auto-format batch code
+    const codeField = document.querySelector('[name="code"]');
+    if (codeField) {
+        codeField.addEventListener('input', function() {
+            // Convert to uppercase and remove spaces
+            this.value = this.value.toUpperCase().replace(/\s/g, '');
+        });
+    }
+
+    // Date field enhancement
+    const dateField = document.querySelector('[name="batch_date"]');
+    if (dateField) {
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        dateField.setAttribute('min', today);
+    }
+});
+</script>
+{% endblock %}

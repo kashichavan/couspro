@@ -756,6 +756,24 @@
                             {% endif %}
                         </ul>
                     </li>
+
+                    <!-- Management Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                           <i class="fa-solid fa-school"></i> Batches
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'batch:batch_list' %}">
+                               <i class="fa-solid fa-chalkboard"></i> Batches
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'batch:create_batch' %}">
+                              <i class="fa-solid fa-laptop-code"></i> Add Batch
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'batch:batch_list' %}">
+                               <i class="fa-solid fa-chalkboard"></i> Batches
+                            </a></li>
+                        </ul>
+                    </li>
                     
 
                 </ul>

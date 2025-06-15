@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .month-header {
+        border-left: 4px solid #ff9a56;
+        padding-left: 1rem;
+        margin: 2rem 0 1rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .badge-date {
+        background: #ff9a56;
+        color: white;
+        font-weight: 500;
+        padding: 0.3rem 0.6rem;
+        border-radius: 5px;
+    }
+    
+    .batch-card {
+        transition: transform 0.2s ease;
+        border-left: 3px solid #ff9a56;
+    }
+    
+    .batch-card:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<h3>Batch Schedule</h3>
+
+<!-- Month Selector -->
+<form method="get" class="mb-4">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select name="month" class="form-select">
+                {% for month in months %}
+                    <option value="{{ month.num }}" {% if month.num == current_month %}selected{% endif %}>
+                        {{ month.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <select name="year" class="form-select">
+                {% for year in years %}
+                    <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>
+                        {{ year }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+        
+        <div class="col-md-2">
+            <a href="{% url 'batch:create_batch' %}" class="btn btn-success w-100">
+                Create Batch
+            </a>
+        </div>
+        
+        <div class="col-md-3 text-md-end">
+            <span class="text-muted">
+                {{ total_batches }} batches found
+            </span>
+        </div>
+    </div>
+</form>
+
+<!-- Navigation Buttons -->
+<div class="mb-4">
+    <div class="btn-group" role="group">
+        {% if current_month > 1 %}
+            <a href="?month={{ current_month|add:"-1" }}&year={{ current_year }}" 
+               class="btn btn-outline-secondary">
+                Previous Month
+            </a>
+        {% else %}
+            <a href="?month=12&year={{ current_year|add:"-1" }}" 
+               class="btn btn-outline-secondary">
+                Previous Month
+            </a>
+        {% endif %}
+        
+        {% if current_month < 12 %}
+            <a href="?month={{ current_month|add:"1" }}&year={{ current_year }}" 
+               class="btn btn-outline-secondary">
+                Next Month
+            </a>
+        {% else %}
+            <a href="?month=1&year={{ current_year|add:"1" }}" 
+               class="btn btn-outline-secondary">
+                Next Month
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Batches by Date -->
+{% if grouped_batches %}
+    {% for group in grouped_batches %}
+        <div class="month-header">
+            {{ group.date|date:"D, d M Y" }}
+        </div>
+        
+        <div class="row g-3 mb-4">
+            {% for batch in group.batches %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card batch-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <h5 class="card-title mb-0">{{ batch.code }}</h5>
+                                <span class="badge bg-primary">{{ batch.students.count }} Students</span>
+                            </div>
+                            
+                            <p class="card-text text-muted mb-2">{{ batch.subject }}</p>
+                            
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <small class="text-muted">Trainer:</small> {{ batch.trainer|default:"—" }}<br>
+                                    <small class="text-muted">Tracker:</small> {{ batch.tracker|default:"—" }}
+                                </div>
+                                
+                                <div class="text-end">
+                                    <a href="{% url 'batch:batch_detail' batch.id %}" 
+                                       class="btn btn-sm btn-primary me-1" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'batch:edit_batch' batch.id %}" 
+                                       class="btn btn-sm btn-secondary" title="Edit Batch">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info mb-0 mt-3">
+        No batches found for this month
+    </div>
+{% endif %}
+
+<!-- Optional: Add Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
+{% endblock %}

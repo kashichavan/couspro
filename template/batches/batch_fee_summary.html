@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Fee Summary for Batch: {{ batch.code }} - {{ batch.subject }}</h3>
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Student Name</th>
+      <th>Target Fees (₹)</th>
+      <th>Paid (₹)</th>
+      <th>Balance (₹)</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in summary %}
+    <tr>
+      <td>{{ item.student.name }}</td>
+      <td>{{ item.target_fees }}</td>
+      <td>{{ item.fees_paid }}</td>
+      <td>{{ item.fees_balance }}</td>
+      <td>
+        {% if item.is_fully_paid %}
+          <span class="text-success">Fully Paid</span>
+        {% else %}
+          <span class="text-danger">Pending</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    <tr class="table-info fw-bold">
+      <td>Total</td>
+      <td>₹{{ total_target }}</td>
+      <td>₹{{ total_paid }}</td>
+      <td>₹{{ total_balance }}</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}
