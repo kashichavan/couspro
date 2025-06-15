@@ -862,6 +862,7 @@
 
     <!-- Add this at the top of your body -->
    <!-- Enhanced Marquee with Progress Bar -->
+{% if user.is_authenticated %}
 <div class="marquee-container marquee-progress">
     <div class="marquee-content">
         🎯 Monthly Target: ₹{{ monthly_target.target_amount|floatformat:2 }} |
@@ -871,6 +872,8 @@
         📅 {{ monthly_target.days_remaining }} days remaining
     </div>
 </div>
+{% endif %}
+
 
     <!-- Main Content Container - IMPROVED -->
     <div class="main-content-wrapper">
