@@ -27,10 +27,11 @@ class TrackerForm(forms.ModelForm):
             raise forms.ValidationError("Phone number must be at least 10 digits long.")
         return phone
 
+
+
 from django import forms
 from .models import Batch, Trainer, Tracker
 from enquiry.models import Enquiry
-from django.forms.widgets import SelectDateWidget
 
 class BatchForm(forms.ModelForm):
     batch_date = forms.DateField(
@@ -42,9 +43,15 @@ class BatchForm(forms.ModelForm):
         })
     )
 
+    students = forms.ModelMultipleChoiceField(
+        queryset=Enquiry.objects.all(),
+        required=False,
+        widget=forms.SelectMultiple(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Batch
-        fields = ['code', 'subject', 'trainer', 'tracker', 'batch_date', 'remarks']
+        fields = ['code', 'subject', 'trainer', 'tracker', 'batch_date', 'remarks', 'students']
         widgets = {
             'code': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -54,12 +61,8 @@ class BatchForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Subject (e.g., Python Full Stack)'
             }),
-            'trainer': forms.Select(attrs={
-                'class': 'form-select',
-            }),
-            'tracker': forms.Select(attrs={
-                'class': 'form-select',
-            }),
+            'trainer': forms.Select(attrs={'class': 'form-select'}),
+            'tracker': forms.Select(attrs={'class': 'form-select'}),
             'remarks': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
