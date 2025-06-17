@@ -558,64 +558,157 @@
             <th><i class="fas fa-cogs me-1"></i>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          {% for item in summary %}
-          <tr data-counsellor="{{ item.counsellor_name }}">
-            <td class="fw-semibold">
-              <div class="d-flex align-items-center">
-                <div class="avatar me-2">{{ item.counsellor_name|first }}</div>
-                {{ item.counsellor_name }}
-              </div>
-            </td>
-            <td>{{ item.counsellor_mobile }}</td>
-            <td><span class="badge bg-primary rounded-pill">{{ item.total_enquiries }}</span></td>
-            <td><span class="badge bg-info rounded-pill">{{ item.telephonic_count }}</span></td>
-            <td><span class="badge bg-success rounded-pill">{{ item.telephonic_joined }}</span></td>
-            <td><span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span></td>
-            <td><span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span></td>
-            <td><span class="badge bg-success rounded-pill">{{ item.joined_count }}</span></td>
-            <td>
-              {% if item.counsellor_id and item.previous_converted_count %}
-                <a href="{% url 'enquiry:previous_converted_list' counsellor_id=item.counsellor_id %}?start_date={{ start_date }}&end_date={{ end_date }}" 
-                   class="text-decoration-none">
-                  <span class="badge bg-primary">{{ item.previous_converted_count }}</span>
-                </a>
-              {% else %}
-                <span class="badge bg-secondary">{{ item.previous_converted_count }}</span>
-              {% endif %}
-            </td>
-            <td><span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span></td>
-            <td><span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span></td>
-            <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>
-            <td class="fw-bold text-orange">₹{{ item.fees_target|floatformat:2 }}</td>
-            <td class="fw-bold {% if item.fees_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-              ₹{{ item.fees_balance|floatformat:2 }}
-            </td>
-            <td>
-              {% if item.total_enquiries > 0 %}
-                {% widthratio item.joined_count item.total_enquiries 100 as conversion_rate %}
-                <span class="badge {% if conversion_rate >= 50 %}bg-success{% elif conversion_rate >= 25 %}bg-warning{% else %}bg-danger{% endif %}">
-                  {{ conversion_rate }}%
-                </span>
-              {% else %}
-                <span class="badge bg-secondary">0%</span>
-              {% endif %}
-            </td>
-            <td>
-              <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-outline-primary" title="View Details" 
-                        onclick="viewCounsellorDetails('{{ item.counsellor_name }}')">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button type="button" class="btn btn-outline-success" title="Send Report" 
-                        onclick="sendReport('{{ item.counsellor_name }}')">
-                  <i class="fas fa-paper-plane"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
+      <tbody>
+  {% for item in summary %}
+  <tr data-counsellor="{{ item.counsellor_name }}">
+    <td class="fw-semibold">
+      <div class="d-flex align-items-center">
+        <div class="avatar me-2">{{ item.counsellor_name|first }}</div>
+        {{ item.counsellor_name }}
+      </div>
+    </td>
+
+    <td>{{ item.counsellor_mobile }}</td>
+
+    <!-- Total Enquiries -->
+    <td>
+      {% if item.counsellor_id and item.total_enquiries %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'total' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" class="text-decoration-none">
+          <span class="badge bg-primary rounded-pill">{{ item.total_enquiries }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.total_enquiries }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Telephonic -->
+    <td>
+      {% if item.counsellor_id and item.telephonic_count %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'telephonic' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-info rounded-pill">{{ item.telephonic_count }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.telephonic_count }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Telephonic Joined -->
+    <td>
+      {% if item.counsellor_id and item.telephonic_joined %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'telephonic_joined' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-success rounded-pill">{{ item.telephonic_joined }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.telephonic_joined }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Walk-in -->
+    <td>
+      {% if item.counsellor_id and item.walkin_count %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'walkin' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.walkin_count }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Walk-in Joined -->
+    <td>
+      {% if item.counsellor_id and item.walkin_joined %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'walkin_joined' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-success rounded-pill">{{ item.walkin_joined }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.walkin_joined }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Joined -->
+    <td>
+      {% if item.counsellor_id and item.joined_count %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'joined' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-success rounded-pill">{{ item.joined_count }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.joined_count }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Previous Converted -->
+    <td>
+      {% if item.counsellor_id and item.previous_converted_count %}
+        <a href="{% url 'enquiry:previous_converted_list' item.counsellor_id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-primary rounded-pill">{{ item.previous_converted_count }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.previous_converted_count }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Pending -->
+    <td>
+      {% if item.counsellor_id and item.pending_count %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'pending' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-warning rounded-pill">{{ item.pending_count }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.pending_count }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Dropout -->
+    <td>
+      {% if item.counsellor_id and item.dropout_count %}
+        <a href="{% url 'enquiry:enquiry_list_by_filter' item.counsellor_id 'dropout' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}">
+          <span class="badge bg-danger rounded-pill">{{ item.dropout_count }}</span>
+        </a>
+      {% else %}
+        <span class="badge bg-secondary rounded-pill">{{ item.dropout_count }}</span>
+      {% endif %}
+    </td>
+
+    <!-- Fees Paid -->
+    <td class="fw-bold text-success">₹{{ item.fees_paid|floatformat:2 }}</td>
+
+    <!-- Fees Target -->
+    <td class="fw-bold text-orange">₹{{ item.fees_target|floatformat:2 }}</td>
+
+    <!-- Fees Balance -->
+    <td class="fw-bold {% if item.fees_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+      ₹{{ item.fees_balance|floatformat:2 }}
+    </td>
+
+    <!-- Conversion Rate -->
+    <td>
+      {% if item.total_enquiries > 0 %}
+        {% widthratio item.joined_count item.total_enquiries 100 as conversion_rate %}
+        <span class="badge {% if conversion_rate >= 50 %}bg-success{% elif conversion_rate >= 25 %}bg-warning{% else %}bg-danger{% endif %}">
+          {{ conversion_rate }}%
+        </span>
+      {% else %}
+        <span class="badge bg-secondary">0%</span>
+      {% endif %}
+    </td>
+
+    <!-- Action Buttons -->
+    <td>
+      <div class="btn-group btn-group-sm" role="group">
+        <button type="button" class="btn btn-outline-primary" title="View Details" 
+                onclick="viewCounsellorDetails('{{ item.counsellor_name }}')">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button type="button" class="btn btn-outline-success" title="Send Report" 
+                onclick="sendReport('{{ item.counsellor_name }}')">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
         <tfoot class="table-light">
           <tr>
             <th colspan="2" class="text-center">TOTALS</th>

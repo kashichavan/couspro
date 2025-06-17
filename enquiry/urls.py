@@ -84,4 +84,7 @@ urlpatterns = [
     path('merge/', views.MergeEnquiriesView.as_view(), name='merge_enquiries'),
 
      path('previous-converted/<int:counsellor_id>/', views.previous_converted_list, name='previous_converted_list'),
+     
+     path('filter/<int:counsellor_id>/<str:filter_type>/', views.enquiry_list_by_filter, name='enquiry_list_by_filter'),
+
 ]

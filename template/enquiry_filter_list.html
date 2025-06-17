@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary-orange: #ff6b35;
+    --secondary-orange: #ff8c42;
+    --light-orange: #ffa366;
+    --dark-orange: #e55a2b;
+    --cream-white: #fffbf7;
+    --pure-white: #ffffff;
+    --text-dark: #2c3e50;
+    --text-muted: #6c757d;
+    --shadow-light: 0 2px 10px rgba(255, 107, 53, 0.1);
+    --shadow-medium: 0 4px 20px rgba(255, 107, 53, 0.15);
+    --border-radius: 12px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, var(--cream-white) 0%, #fff5f0 100%);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-orange) 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .page-header h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .page-header .subtitle {
+    font-weight: 400;
+    opacity: 0.9;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+  }
+
+  .stats-cards {
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--pure-white);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 107, 53, 0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .stat-card .icon {
+    font-size: 2.5rem;
+    color: var(--primary-orange);
+    margin-bottom: 1rem;
+  }
+
+  .stat-card .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-card .label {
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+
+  .table-container {
+    background: var(--pure-white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 107, 53, 0.1);
+  }
+
+  .table-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .table-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-export {
+    background: var(--primary-orange);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-export:hover {
+    background: var(--dark-orange);
+    transform: translateY(-1px);
+    color: white;
+  }
+
+  .custom-datatable {
+    width: 100% !important;
+  }
+
+  .custom-datatable thead th {
+    background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-orange) 100%);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border: none;
+    padding: 1rem 0.8rem;
+    position: relative;
+  }
+
+  .custom-datatable thead th:first-child {
+    border-radius: var(--border-radius) 0 0 0;
+  }
+
+  .custom-datatable thead th:last-child {
+    border-radius: 0 var(--border-radius) 0 0;
+  }
+
+  .custom-datatable tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+  }
+
+  .custom-datatable tbody tr:hover {
+    background-color: rgba(255, 107, 53, 0.05);
+    transform: scale(1.001);
+    cursor: pointer;
+  }
+
+  .enquiry-row {
+    transition: all 0.2s ease;
+  }
+
+  .enquiry-row:hover {
+    background-color: rgba(255, 107, 53, 0.05) !important;
+    cursor: pointer;
+  }
+
+  .enquiry-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .enquiry-link:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .name-cell {
+    position: relative;
+  }
+
+  .name-cell .enquiry-link {
+    font-weight: 600;
+    color: var(--text-dark);
+    transition: color 0.2s ease;
+  }
+
+  .name-cell:hover .enquiry-link {
+    color: var(--primary-orange);
+  }
+
+  .external-link-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--primary-orange);
+  }
+
+  .name-cell:hover .external-link-icon {
+    opacity: 1;
+  }
+
+  .custom-datatable tbody td {
+    padding: 1rem 0.8rem;
+    vertical-align: middle;
+    border: none;
+    font-weight: 400;
+  }
+
+  .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-active {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+  }
+
+  .status-pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+
+  .status-inactive {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  .contact-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .contact-icon {
+    color: var(--primary-orange);
+  }
+
+  .fees-amount {
+    font-weight: 600;
+    color: var(--primary-orange);
+  }
+
+  .dataTables_wrapper .dataTables_filter input {
+    border: 2px solid rgba(255, 107, 53, 0.2);
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--primary-orange);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  }
+
+  .dataTables_wrapper .dataTables_length select {
+    border: 2px solid rgba(255, 107, 53, 0.2);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--primary-orange);
+    border-color: var(--primary-orange);
+  }
+
+  .page-link {
+    color: var(--primary-orange);
+  }
+
+  .page-link:hover {
+    color: var(--dark-orange);
+    background-color: rgba(255, 107, 53, 0.1);
+    border-color: rgba(255, 107, 53, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .page-header h1 {
+      font-size: 2rem;
+    }
+    
+    .table-container {
+      padding: 1rem;
+    }
+    
+    .table-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .export-buttons {
+      justify-content: center;
+    }
+  }
+
+  .loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .spinner {
+    border: 3px solid rgba(255, 107, 53, 0.1);
+    border-top: 3px solid var(--primary-orange);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1><i class="fas fa-chart-line me-3"></i>{{ label }}</h1>
+    <div class="subtitle">{{ counsellor.name }} • {{ start_date }} to {{ end_date }}</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Stats Cards -->
+  <div class="row stats-cards">
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="stat-card">
+        <div class="icon"><i class="fas fa-users"></i></div>
+        <div class="number" id="total-enquiries">{{ enquiries|length }}</div>
+        <div class="label">Total Enquiries</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="stat-card">
+        <div class="icon"><i class="fas fa-user-check"></i></div>
+        <div class="number" id="active-count">0</div>
+        <div class="label">Active Students</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="stat-card">
+        <div class="icon"><i class="fas fa-rupee-sign"></i></div>
+        <div class="number" id="total-fees">₹0</div>
+        <div class="label">Total Fees</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="stat-card">
+        <div class="icon"><i class="fas fa-percentage"></i></div>
+        <div class="number" id="conversion-rate">0%</div>
+        <div class="label">Conversion Rate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <div class="table-header">
+      <h2 class="table-title">Enquiry Details</h2>
+      <div class="export-buttons">
+        <button class="btn-export" onclick="exportToCSV()">
+          <i class="fas fa-file-csv"></i> CSV
+        </button>
+        <button class="btn-export" onclick="exportToPDF()">
+          <i class="fas fa-file-pdf"></i> PDF
+        </button>
+        <button class="btn-export" onclick="window.print()">
+          <i class="fas fa-print"></i> Print
+        </button>
+      </div>
+    </div>
+
+    <div class="loading-spinner" id="loading">
+      <div class="spinner"></div>
+      <p class="mt-2">Loading data...</p>
+    </div>
+
+    <table class="table custom-datatable" id="enquiriesTable">
+      <thead>
+        <tr>
+          <th><i class="fas fa-user me-2"></i>Name</th>
+          <th><i class="fas fa-phone me-2"></i>Contact Number</th>
+          <th><i class="fas fa-desktop me-2"></i>Enquiry Type</th>
+          <th><i class="fas fa-info-circle me-2"></i>Status</th>
+          <th><i class="fas fa-calendar-plus me-2"></i>Enquiry Date</th>
+          <th><i class="fas fa-calendar-check me-2"></i>Joined Date</th>
+          <th><i class="fas fa-rupee-sign me-2"></i>Fees Paid</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in enquiries %}
+          <tr class="enquiry-row" onclick="window.location.href='{% url 'enquiry:enquiry_details' e.id %}'">
+            <td class="name-cell">
+              <a href="{% url 'enquiry:enquiry_details' e.id %}" class="enquiry-link">
+                {{ e.name }}
+                <i class="fas fa-external-link-alt external-link-icon"></i>
+              </a>
+            </td>
+            <td>
+              <div class="contact-info">
+                <i class="fas fa-phone contact-icon"></i>
+                <span>{{ e.mobile }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark">{{ e.enquiry_type }}</span>
+            </td>
+            <td>
+              <span class="status-badge status-{{ e.status|lower }}">{{ e.status }}</span>
+            </td>
+            <td>{{ e.enquiry_date|date:"M d, Y" }}</td>
+            <td>
+              {% if e.joined_date %}
+                {{ e.joined_date|date:"M d, Y" }}
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="fees-amount">₹{{ e.fees_paid|floatformat:2 }}</span>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-4">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p class="text-muted">No records found for the selected period.</p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Hide loading immediately
+    $('#loading').hide();
+    
+    // Calculate initial stats without DataTables
+    updateStats();
+    
+    // Initialize DataTable with minimal configuration
+    const table = $('#enquiriesTable').DataTable({
+        "pageLength": 25,
+        "order": [[4, "desc"]],
+        "language": {
+            "search": "",
+            "searchPlaceholder": "Search enquiries..."
+        }
+    });
+
+    // Handle row clicks for enquiry navigation
+    $('#enquiriesTable tbody').on('click', 'tr.enquiry-row', function(e) {
+        // Don't trigger row click if user clicked on the name link directly
+        if (!$(e.target).closest('a').length) {
+            const link = $(this).find('.enquiry-link').attr('href');
+            if (link) {
+                window.location.href = link;
+            }
+        }
+    });
+
+    // Add click indication
+    $('#enquiriesTable tbody').on('mousedown', 'tr.enquiry-row', function() {
+        $(this).css('transform', 'scale(0.998)');
+    });
+
+    $('#enquiriesTable tbody').on('mouseup mouseleave', 'tr.enquiry-row', function() {
+        $(this).css('transform', 'scale(1.001)');
+    });
+    function updateStats() {
+        const visibleData = table.rows({search: 'applied'}).data();
+        let activeCount = 0;
+        let totalFees = 0;
+        let joinedCount = 0;
+
+        visibleData.each(function(row) {
+            // Count active students (assuming 'Active' status)
+            if (row[3] && row[3].toLowerCase().includes('active')) {
+                activeCount++;
+            }
+            
+            // Count joined students (those with joined date)
+            if (row[5] && row[5] !== '—' && !row[5].includes('text-muted')) {
+                joinedCount++;
+            }
+            
+            // Sum fees (extract number from currency format)
+            const feesText = $(row[6]).text() || row[6];
+            const fees = parseFloat(feesText.replace(/[₹,]/g, '')) || 0;
+            totalFees += fees;
+        });
+
+        const totalEnquiries = visibleData.length;
+        const conversionRate = totalEnquiries > 0 ? ((joinedCount / totalEnquiries) * 100).toFixed(1) : 0;
+
+        // Update stat cards with animation
+        animateCounter($('#total-enquiries'), totalEnquiries);
+        animateCounter($('#active-count'), activeCount);
+        $('#total-fees').text('₹' + totalFees.toLocaleString('en-IN', {maximumFractionDigits: 0}));
+        $('#conversion-rate').text(conversionRate + '%');
+    }
+
+    // Animate counter function
+    function animateCounter($element, targetValue) {
+        const currentValue = parseInt($element.text()) || 0;
+        const increment = targetValue > currentValue ? 1 : -1;
+        const duration = 500;
+        const steps = Math.abs(targetValue - currentValue);
+        const stepDuration = steps > 0 ? duration / steps : 0;
+
+        if (steps === 0) return;
+
+        let current = currentValue;
+        const timer = setInterval(function() {
+            current += increment;
+            $element.text(current);
+            
+            if (current === targetValue) {
+                clearInterval(timer);
+            }
+        }, stepDuration);
+    }
+
+    // Export functions
+    window.exportToCSV = function() {
+        let csv = 'Name,Contact Number,Enquiry Mode,Status,Enquiry Date,Joined Date,Fees Paid\n';
+        
+        $('#enquiriesTable tbody tr:visible').each(function() {
+            const $row = $(this);
+            if ($row.find('td[colspan]').length > 0) return; // Skip empty state
+            
+            const rowData = [];
+            $row.find('td').each(function() {
+                const cellText = $(this).text().trim().replace(/"/g, '""');
+                rowData.push('"' + cellText + '"');
+            });
+            csv += rowData.join(',') + '\n';
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'enquiries_report.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    window.exportToPDF = function() {
+        // Simple PDF export - you might want to use a more sophisticated library
+        window.print();
+    };
+});
+
+// Print styles
+const printStyles = `
+<style type="text/css" media="print">
+    body { background: white !important; }
+    .page-header { background: #ff6b35 !important; -webkit-print-color-adjust: exact; }
+    .table-container { box-shadow: none !important; }
+    .export-buttons { display: none !important; }
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate { display: none !important; }
+</style>
+`;
+document.head.insertAdjacentHTML('beforeend', printStyles);
+</script>
+{% endblock %}

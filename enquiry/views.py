@@ -1494,10 +1494,10 @@ def daywise_counsellor_summary(request):
         )
 
         telephonic_all = base_queryset.filter(
-            enquiry_type__in=['direct_telephonic', 'someone_telephonic']
+            enquiry_type__in=['direct_telephonic', 'someone_telephonic','telephonic_to_walkin']
         )
         walkin_all = base_queryset.filter(
-            enquiry_type__in=['direct_walkin', 'someone_walkin', 'telephonic_to_walkin']
+            enquiry_type__in=['direct_walkin', 'someone_walkin' ]
         )
 
         prev_converted_qs = Enquiry.objects.filter(
@@ -2333,4 +2333,89 @@ class MergeEnquiriesView(View):
 
         return redirect('enquiry:search_by_two_mobiles')
     
-    
+
+
+
+
+
+
+@manager_required
+def enquiry_list_by_filter(request, counsellor_id, filter_type):
+    from datetime import date
+    from django.contrib import messages
+    from django.shortcuts import get_object_or_404, render
+    from enquiry.models import Enquiry, Counsellor
+
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    try:
+        start_date = date.fromisoformat(start_date) if start_date else date.today()
+        end_date = date.fromisoformat(end_date) if end_date else date.today()
+    except ValueError:
+        start_date = end_date = date.today()
+        messages.error(request, "Invalid date format. Showing today's data.")
+
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+        messages.error(request, "Start date should be before end date.")
+
+    counsellor = get_object_or_404(Counsellor, id=counsellor_id)
+
+    base_query = Enquiry.objects.filter(
+        counsellor=counsellor,
+        enquiry_date__range=(start_date, end_date)
+    )
+
+    filter_type_map = {
+        'total': {
+            'query': base_query,
+            'label': 'Total Enquiries',
+        },
+        'telephonic': {
+            'query': base_query.filter(enquiry_type__icontains='telephonic'),
+            'label': 'Telephonic Enquiries',
+        },
+        'telephonic_joined': {
+            'query': base_query.filter(enquiry_type__icontains='telephonic', status='joined'),
+            'label': 'Telephonic Joined',
+        },
+        'walkin': {
+            'query': base_query.filter(enquiry_type__icontains='walkin'),
+            'label': 'Walk-in Enquiries',
+        },
+        'walkin_joined': {
+            'query': base_query.filter(enquiry_type__icontains='walkin', status='joined'),
+            'label': 'Walk-in Joined',
+        },
+        'joined': {
+            'query': base_query.filter(status='joined'),
+            'label': 'Joined Enquiries',
+        },
+        'pending': {
+            'query': base_query.filter(status='pending'),
+            'label': 'Pending Enquiries',
+        },
+        'dropout': {
+            'query': base_query.filter(status='dropout'),
+            'label': 'Dropout Enquiries',
+        }
+    }
+
+    selected = filter_type_map.get(filter_type)
+
+    if selected:
+        enquiries = selected['query']
+        label = selected['label']
+    else:
+        enquiries = Enquiry.objects.none()
+        label = 'Unknown Filter'
+
+    return render(request, 'enquiry_filter_list.html', {
+        'enquiries': enquiries,
+        'filter_type': filter_type,
+        'label': label,
+        'counsellor': counsellor,
+        'start_date': start_date,
+        'end_date': end_date,
+    })
