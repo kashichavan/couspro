@@ -2062,9 +2062,8 @@ def mark_joined_batch(request, enquiry_id):
     except Enquiry.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Enquiry not found'})
     
-from django.db.models import Count, Q, F, Sum
+from django.db.models import Count, Q, F, Sum, Case, When, Value, IntegerField
 from django.db.models.functions import TruncDate
-from django.db.models import Case, When, Value, IntegerField
 from django.shortcuts import render
 from django.utils import timezone
 from .models import Enquiry
@@ -2075,16 +2074,13 @@ def today_enquiries(request):
     today = timezone.now().astimezone(india_tz).date()
     filter_by = request.GET.get('filter_by', 'created')
 
-    # Base queryset filtering
+    # Base queryset for today
     if filter_by == 'created':
         enquiries = Enquiry.objects.annotate(
             local_created_date=TruncDate(F('created_at'), tzinfo=india_tz)
         ).filter(local_created_date=today)
     else:
         enquiries = Enquiry.objects.filter(enquiry_date=today)
-
-    # Get current enquiry IDs for today
-    enquiry_ids_today = enquiries.values_list('id', flat=True)
 
     # Previous enquiries converted today
     previous_converted_today = Enquiry.objects.filter(
@@ -2093,14 +2089,14 @@ def today_enquiries(request):
         status='joined'
     )
 
-    # Combine both sets for breakdown
+    # All involved counsellor IDs
     all_counsellor_ids = set(
         enquiries.values_list('counsellor_id', flat=True)
     ).union(
         previous_converted_today.values_list('counsellor_id', flat=True)
     )
 
-    # Base breakdown for today enquiries
+    # Breakdown per counsellor
     counsellor_breakdown = (
         enquiries
         .select_related('counsellor')
@@ -2108,29 +2104,31 @@ def today_enquiries(request):
         .annotate(
             total=Count('id'),
 
+            # Walk-in Enquiries (only direct types)
             walkin=Count(Case(
-                When(enquiry_type__icontains='walkin', then=Value(1)),
+                When(enquiry_type__in=['direct_walkin', 'someone_walkin'], then=Value(1)),
                 output_field=IntegerField()
             )),
             walkin_joined=Count(Case(
-                When(enquiry_type__icontains='walkin', status='joined', then=Value(1)),
+                When(enquiry_type__in=['direct_walkin', 'someone_walkin'], status='joined', then=Value(1)),
                 output_field=IntegerField()
             )),
 
+            # Telephonic (including telephonic_to_walkin)
             telephonic=Count(Case(
-                When(enquiry_type__icontains='telephonic', then=Value(1)),
+                When(enquiry_type__in=['direct_telephonic', 'someone_telephonic', 'telephonic_to_walkin'], then=Value(1)),
                 output_field=IntegerField()
             )),
             telephonic_joined=Count(Case(
-                When(enquiry_type__icontains='telephonic', status='joined', then=Value(1)),
+                When(enquiry_type__in=['direct_telephonic', 'someone_telephonic', 'telephonic_to_walkin'], status='joined', then=Value(1)),
                 output_field=IntegerField()
             )),
 
+            # Other categories
             dropout=Count(Case(
                 When(status='dropout', then=Value(1)),
                 output_field=IntegerField()
             )),
-
             paid_enquiries=Count(Case(
                 When(fees_paid__gt=0, then=Value(1)),
                 output_field=IntegerField()
@@ -2143,21 +2141,18 @@ def today_enquiries(request):
         .order_by('counsellor__name')
     )
 
-    # Create a map for previous enquiry conversions today
+    # Previous conversions count map
     prev_conversion_map = previous_converted_today.values('counsellor_id').annotate(
         prev_converted=Count('id')
     )
-    prev_map = {
-        item['counsellor_id']: item['prev_converted']
-        for item in prev_conversion_map
-    }
+    prev_map = {item['counsellor_id']: item['prev_converted'] for item in prev_conversion_map}
 
-    # Add previous conversions to each breakdown row
+    # Append previous conversions to existing breakdown
     for block in counsellor_breakdown:
         cid = block['counsellor__id']
         block['previous_converted_today'] = prev_map.get(cid, 0)
 
-    # Add rows for counsellors who only had conversions today (not fresh enquiries)
+    # Add counsellors who only had previous conversions
     existing_ids = {c['counsellor__id'] for c in counsellor_breakdown}
     only_conversion_ids = set(prev_map.keys()) - existing_ids
 
@@ -2170,7 +2165,7 @@ def today_enquiries(request):
 
         for c in extra_counsellors:
             cid = c['counsellor__id']
-            counsellor_breakdown = list(counsellor_breakdown)  # ensure it's mutable
+            counsellor_breakdown = list(counsellor_breakdown)
             counsellor_breakdown.append({
                 'counsellor__id': cid,
                 'counsellor__name': c['counsellor__name'],
@@ -2193,6 +2188,7 @@ def today_enquiries(request):
     }
 
     return render(request, 'today_enquiries.html', context)
+
 
 
 
@@ -2337,8 +2333,6 @@ class MergeEnquiriesView(View):
 
 
 
-
-
 @manager_required
 def enquiry_list_by_filter(request, counsellor_id, filter_type):
     from datetime import date
@@ -2362,43 +2356,61 @@ def enquiry_list_by_filter(request, counsellor_id, filter_type):
 
     counsellor = get_object_or_404(Counsellor, id=counsellor_id)
 
-    base_query = Enquiry.objects.filter(
+    # Consistent with summary view
+    base_queryset = Enquiry.objects.filter(
         counsellor=counsellor,
-        enquiry_date__range=(start_date, end_date)
+        created_at__date__range=(start_date, end_date)
     )
 
+    # Consistent filtering
+    telephonic_types = ['direct_telephonic', 'someone_telephonic', 'telephonic_to_walkin']
+    walkin_types = ['direct_walkin', 'someone_walkin']
+
+    # Previous converted
+    prev_converted_qs = Enquiry.objects.filter(
+        counsellor=counsellor,
+        enquiry_date__lt=start_date,
+        joined_date__range=(start_date, end_date),
+        status='joined'
+    )
+
+    # Filters map (aligned with your summary)
     filter_type_map = {
         'total': {
-            'query': base_query,
+            'query': base_queryset,
             'label': 'Total Enquiries',
         },
         'telephonic': {
-            'query': base_query.filter(enquiry_type__icontains='telephonic'),
+            'query': base_queryset.filter(enquiry_type__in=telephonic_types),
             'label': 'Telephonic Enquiries',
         },
         'telephonic_joined': {
-            'query': base_query.filter(enquiry_type__icontains='telephonic', status='joined'),
+            'query': base_queryset.filter(enquiry_type__in=telephonic_types, status='joined'),
             'label': 'Telephonic Joined',
         },
         'walkin': {
-            'query': base_query.filter(enquiry_type__icontains='walkin'),
+            'query': base_queryset.filter(enquiry_type__in=walkin_types),
             'label': 'Walk-in Enquiries',
         },
         'walkin_joined': {
-            'query': base_query.filter(enquiry_type__icontains='walkin', status='joined'),
+            'query': base_queryset.filter(enquiry_type__in=walkin_types, status='joined'),
             'label': 'Walk-in Joined',
         },
         'joined': {
-            'query': base_query.filter(status='joined'),
+            'query': base_queryset.filter(status='joined'),
             'label': 'Joined Enquiries',
         },
         'pending': {
-            'query': base_query.filter(status='pending'),
+            'query': base_queryset.filter(status='pending'),
             'label': 'Pending Enquiries',
         },
         'dropout': {
-            'query': base_query.filter(status='dropout'),
+            'query': base_queryset.filter(status='dropout'),
             'label': 'Dropout Enquiries',
+        },
+        'previous_converted': {
+            'query': prev_converted_qs,
+            'label': 'Previously Converted Enquiries',
         }
     }
 
