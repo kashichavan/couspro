@@ -763,19 +763,24 @@
     </div>
     {% endif %}
 </div>
-
-
-
-
-<ul class="nav nav-tabs" id="batchTabs" role="tablist">
+<!-- Tab Navigation - Add this BEFORE the div class="tab-content mt-3" -->
+<ul class="nav nav-tabs mb-0" id="batchTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="assigned-tab" data-bs-toggle="tab" data-bs-target="#assigned" type="button" role="tab">
-            Assigned Students ({{ assigned|length }})
+        <button class="nav-link active" id="assigned-tab" data-bs-toggle="tab" 
+                data-bs-target="#assigned" type="button" role="tab" 
+                aria-controls="assigned" aria-selected="true">
+            <i class="fas fa-users me-2"></i>
+            Assigned Students
+            <span class="badge bg-primary ms-2" id="assigned-count">{{ assigned|length }}</span>
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="unassigned-tab" data-bs-toggle="tab" data-bs-target="#unassigned" type="button" role="tab">
-            Unassigned Students ({{ unassigned|length }})
+        <button class="nav-link" id="unassigned-tab" data-bs-toggle="tab" 
+                data-bs-target="#unassigned" type="button" role="tab" 
+                aria-controls="unassigned" aria-selected="false">
+            <i class="fas fa-user-plus me-2"></i>
+            Unassigned Students
+            <span class="badge bg-secondary ms-2" id="unassigned-count">{{ unassigned|length }}</span>
         </button>
     </li>
 </ul>
@@ -929,9 +934,6 @@
         {% endif %}
     </div>
 </div>
-
-
-
 <!-- ✅ Toast Container -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11"></div>
 
@@ -1025,1051 +1027,594 @@
 
 {% endblock %}
 
-
-
 {% block extra_js %}
-<!-- ✅ Batch Detail Script - Fully Isolated -->
+
+<!-- ✅ Vendor Scripts -->
+
+
+<!-- ✅ Main Script -->
 <script>
-(function() {
-    'use strict';
+// ✅ Global variables for pagination
+let currentPage = {
+    assigned: 1,
+    unassigned: 1
+};
+let rowsPerPage = 10;
+let filteredData = {
+    assigned: [],
+    unassigned: []
+};
+
+// ✅ Reusable Functions
+function showToast(title, message, type = 'info') {
+    const toastContainer = document.querySelector('.toast-container');
+    const toastId = 'toast-' + Date.now();
+    const typeConfig = {
+        success: { bg: 'bg-success', icon: 'fa-check-circle' },
+        error: { bg: 'bg-danger', icon: 'fa-exclamation-circle' },
+        warning: { bg: 'bg-warning', icon: 'fa-exclamation-triangle' },
+        info: { bg: 'bg-info', icon: 'fa-info-circle' }
+    };
+    const config = typeConfig[type] || typeConfig.info;
     
-    // ✅ Create isolated namespace to prevent conflicts
-    window.BatchDetailManager = window.BatchDetailManager || {};
+    const toastHTML = `
+        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+            <div class="toast-header ${config.bg} text-white">
+                <i class="fas ${config.icon} me-2"></i>
+                <strong class="me-auto">${title}</strong>
+                <small>Just now</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
     
-    // ✅ Check dependencies
-    if (typeof $ === 'undefined') {
-        console.warn('jQuery not loaded, batch functionality may not work');
-        return;
-    }
-
-    // ✅ Private scope variables
-    const BATCH_NAMESPACE = 'batch-detail-';
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+    new bootstrap.Toast(document.getElementById(toastId)).show();
     
-    const BatchManager = {
-        // ✅ Namespaced configuration
-        config: {
-            currentPage: {
-                assigned: 1,
-                unassigned: 1
-            },
-            rowsPerPage: 10,
-            filteredData: {
-                assigned: [],
-                unassigned: []
-            },
-            debounceTimers: {},
-            initialized: false
-        },
-        
-        // ✅ Utility Functions
-        utils: {
-            showToast: function(title, message, type = 'info') {
-                const toastContainer = document.querySelector('.toast-container');
-                if (!toastContainer) {
-                    console.warn('Toast container not found');
-                    return;
-                }
-                
-                const toastId = BATCH_NAMESPACE + 'toast-' + Date.now();
-                const typeConfig = {
-                    success: { bg: 'bg-success', icon: 'fa-check-circle' },
-                    error: { bg: 'bg-danger', icon: 'fa-exclamation-circle' },
-                    warning: { bg: 'bg-warning', icon: 'fa-exclamation-triangle' },
-                    info: { bg: 'bg-info', icon: 'fa-info-circle' }
-                };
-                const config = typeConfig[type] || typeConfig.info;
-                
-                const toastHTML = `
-                    <div id="${toastId}" class="toast ${BATCH_NAMESPACE}toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                        <div class="toast-header ${config.bg} text-white">
-                            <i class="fas ${config.icon} me-2"></i>
-                            <strong class="me-auto">${title}</strong>
-                            <small>Just now</small>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                    </div>
-                `;
-                
-                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-                const toastElement = document.getElementById(toastId);
-                if (toastElement && typeof bootstrap !== 'undefined') {
-                    const bsToast = new bootstrap.Toast(toastElement);
-                    bsToast.show();
-                    
-                    toastElement.addEventListener('hidden.bs.toast', function() {
-                        this.remove();
-                    });
-                }
-            },
+    document.getElementById(toastId).addEventListener('hidden.bs.toast', function() {
+        this.remove();
+    });
+}
 
-            getCookie: function(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.startsWith(name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            },
-
-            formatDateForDisplay: function(dateString) {
-                if (!dateString) return '';
-                try {
-                    return new Date(dateString).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: '2-digit' 
-                    });
-                } catch (e) {
-                    return dateString;
-                }
-            },
-
-            debounce: function(func, wait, key) {
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(BatchManager.config.debounceTimers[key]);
-                        delete BatchManager.config.debounceTimers[key];
-                        func.apply(this, args);
-                    };
-                    clearTimeout(BatchManager.config.debounceTimers[key]);
-                    BatchManager.config.debounceTimers[key] = setTimeout(later, wait);
-                };
-            },
-
-            isValidElement: function(element) {
-                return element && element.nodeType === Node.ELEMENT_NODE;
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
-        },
-
-        // ✅ Search functionality
-        search: {
-            performSearch: function(tableType) {
-                if (!['assigned', 'unassigned'].includes(tableType)) return;
-                
-                const searchInput = document.getElementById(`search${tableType.charAt(0).toUpperCase() + tableType.slice(1)}`);
-                if (!BatchManager.utils.isValidElement(searchInput)) return;
-                
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
-                const noResultsDiv = document.getElementById(`${tableType}-no-results`);
-                
-                let visibleRows = [];
-                let hasVisibleRows = false;
-                
-                rows.forEach(row => {
-                    const name = (row.dataset.name || '').toLowerCase();
-                    const mobile = (row.dataset.mobile || '').toLowerCase();
-                    const isMatch = name.includes(searchTerm) || mobile.includes(searchTerm);
-                    
-                    if (isMatch) {
-                        visibleRows.push(row);
-                        hasVisibleRows = true;
-                    }
-                });
-                
-                // Store filtered data
-                BatchManager.config.filteredData[tableType] = visibleRows;
-                BatchManager.config.currentPage[tableType] = 1;
-                
-                // Show/hide results
-                if (hasVisibleRows) {
-                    if (noResultsDiv) noResultsDiv.style.display = 'none';
-                    BatchManager.pagination.displayPage(tableType);
-                } else {
-                    if (noResultsDiv) noResultsDiv.style.display = 'block';
-                    BatchManager.pagination.hideAllRows(tableType);
-                    BatchManager.pagination.updatePaginationInfo(tableType, 0, 0, 0);
-                }
-            }
-        },
-
-        // ✅ Pagination functionality
-        pagination: {
-            hideAllRows: function(tableType) {
-                const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
-                rows.forEach(row => {
-                    if (BatchManager.utils.isValidElement(row)) {
-                        row.style.display = 'none';
-                    }
-                });
-            },
-
-            displayPage: function(tableType) {
-                const data = BatchManager.config.filteredData[tableType] || [];
-                const currentPage = BatchManager.config.currentPage[tableType] || 1;
-                const rowsPerPage = BatchManager.config.rowsPerPage;
-                
-                const startIndex = (currentPage - 1) * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, data.length);
-                
-                // Hide all rows first
-                this.hideAllRows(tableType);
-                
-                // Show rows for current page
-                for (let i = startIndex; i < endIndex; i++) {
-                    if (data[i] && BatchManager.utils.isValidElement(data[i])) {
-                        data[i].style.display = '';
-                    }
-                }
-                
-                this.updatePaginationInfo(tableType, startIndex + 1, endIndex, data.length);
-                this.updatePaginationButtons(tableType);
-            },
-
-            updatePaginationInfo: function(tableType, start, end, total) {
-                const elements = {
-                    start: document.getElementById(`${tableType}-start`),
-                    end: document.getElementById(`${tableType}-end`),
-                    total: document.getElementById(`${tableType}-total`),
-                    pageInfo: document.getElementById(`${tableType}-page-info`)
-                };
-                
-                if (elements.start) elements.start.textContent = start;
-                if (elements.end) elements.end.textContent = end;
-                if (elements.total) elements.total.textContent = total;
-                
-                const totalPages = Math.ceil(total / BatchManager.config.rowsPerPage) || 0;
-                const currentPage = BatchManager.config.currentPage[tableType] || 1;
-                
-                if (elements.pageInfo) {
-                    elements.pageInfo.textContent = totalPages > 0 ? 
-                        `Page ${currentPage} of ${totalPages}` : 'Page 0 of 0';
-                }
-            },
-
-            updatePaginationButtons: function(tableType) {
-                const data = BatchManager.config.filteredData[tableType] || [];
-                const totalPages = Math.ceil(data.length / BatchManager.config.rowsPerPage) || 0;
-                const currentPage = BatchManager.config.currentPage[tableType] || 1;
-                
-                const prevBtn = document.getElementById(`${tableType}-prev`);
-                const nextBtn = document.getElementById(`${tableType}-next`);
-                
-                if (prevBtn) prevBtn.disabled = currentPage <= 1;
-                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
-            },
-
-            changePage: function(tableType, direction) {
-                const data = BatchManager.config.filteredData[tableType] || [];
-                const totalPages = Math.ceil(data.length / BatchManager.config.rowsPerPage) || 0;
-                const currentPage = BatchManager.config.currentPage[tableType] || 1;
-                
-                const newPage = currentPage + direction;
-                if (newPage >= 1 && newPage <= totalPages) {
-                    BatchManager.config.currentPage[tableType] = newPage;
-                    this.displayPage(tableType);
-                }
-            },
-
-            initializeTable: function(tableType) {
-                const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
-                BatchManager.config.filteredData[tableType] = Array.from(rows);
-                this.displayPage(tableType);
-            }
-        },
-
-        // ✅ Table update functions
-        tableUpdates: {
-            updatePaymentInTable: function(enquiryId, data) {
-                const row = document.querySelector(`tr[data-id="${enquiryId}"]`);
-                if (!BatchManager.utils.isValidElement(row)) return;
-                
-                const balanceCell = row.querySelector('td:nth-child(6)');
-                const paidCell = row.querySelector('td:nth-child(5)');
-                
-                if (balanceCell && paidCell && data) {
-                    balanceCell.textContent = `₹${parseFloat(data.new_balance || 0).toFixed(0)}`;
-                    paidCell.textContent = `₹${parseFloat(data.new_paid || 0).toFixed(0)}`;
-                    
-                    // Highlight effect
-                    row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-                    setTimeout(() => {
-                        if (BatchManager.utils.isValidElement(row)) {
-                            row.style.backgroundColor = '';
-                        }
-                    }, 2000);
-                }
-            },
-
-            updateDueDateInTable: function(studentId, newDueDate) {
-                const row = document.querySelector(`tr[data-id="${studentId}"]`);
-                if (!BatchManager.utils.isValidElement(row)) return;
-                
-                const dueDateCell = row.querySelector('.due-badge');
-                if (dueDateCell) {
-                    dueDateCell.innerHTML = BatchManager.utils.formatDateForDisplay(newDueDate);
-                    dueDateCell.className = 'due-badge';
-                    
-                    // Check if overdue
-                    try {
-                        const today = new Date();
-                        const dueDate = new Date(newDueDate);
-                        if (dueDate < today) {
-                            dueDateCell.classList.add('due-badge-danger');
-                        }
-                    } catch (e) {
-                        console.warn('Date comparison failed:', e);
-                    }
-                    
-                    // Update data attribute
-                    row.dataset.dueDate = newDueDate;
-                    
-                    // Highlight effect
-                    row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-                    setTimeout(() => {
-                        if (BatchManager.utils.isValidElement(row)) {
-                            row.style.backgroundColor = '';
-                        }
-                    }, 2000);
-                }
-            }
-        },
-
-        // ✅ Form submission functions
-        forms: {
-            submitSingleAssign: function(batchId, studentId) {
-                if (!confirm('Are you sure you want to assign this student to the batch?')) {
-                    return;
-                }
-                
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `${window.location.origin}/batch/${batchId}/assign/${studentId}/`;
-                form.style.display = 'none';
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = BatchManager.utils.getCookie('csrftoken');
-                
-                const studentInput = document.createElement('input');
-                studentInput.type = 'hidden';
-                studentInput.name = 'enquiry_ids';
-                studentInput.value = studentId;
-                
-                form.appendChild(csrfInput);
-                form.appendChild(studentInput);
-                document.body.appendChild(form);
-                
-                BatchManager.utils.showToast('Processing', 'Assigning student to batch...', 'info');
-                form.submit();
-            },
-
-            submitSingleRemove: function(batchId, studentId) {
-                if (!confirm('Are you sure you want to remove this student from the batch?')) {
-                    return;
-                }
-                
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `${window.location.origin}/batch/${batchId}/remove/${studentId}/`;
-                form.style.display = 'none';
-                
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = BatchManager.utils.getCookie('csrftoken');
-                
-                const studentInput = document.createElement('input');
-                studentInput.type = 'hidden';
-                studentInput.name = 'enquiry_ids';
-                studentInput.value = studentId;
-                
-                form.appendChild(csrfInput);
-                form.appendChild(studentInput);
-                document.body.appendChild(form);
-                
-                BatchManager.utils.showToast('Processing', 'Removing student from batch...', 'info');
-                form.submit();
-            }
-        },
-
-        // ✅ Event handlers setup
-        events: {
-            setupPaymentModal: function() {
-                const paymentModal = document.getElementById('updatePaymentModal');
-                if (!paymentModal) return;
-                
-                let modal;
-                try {
-                    modal = new bootstrap.Modal(paymentModal);
-                } catch (e) {
-                    console.warn('Bootstrap Modal initialization failed:', e);
-                    return;
-                }
-                
-                // Payment button handler - use event delegation with namespace
-                const paymentHandler = function(e) {
-                    const btn = e.target.closest('.update-payment-btn');
-                    if (!btn) return;
-                    
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const row = btn.closest('tr');
-                    if (!row) return;
-                    
-                    const studentId = row.dataset.id;
-                    const balance = row.dataset.balance;
-                    
-                    const elements = {
-                        enquiryId: document.getElementById('payment_enquiry_id'),
-                        balanceFees: document.getElementById('balanceFees'),
-                        paymentAmount: document.getElementById('paymentAmount')
-                    };
-                    
-                    if (elements.enquiryId) elements.enquiryId.value = studentId || '';
-                    if (elements.balanceFees) elements.balanceFees.value = parseFloat(balance || 0).toFixed(0);
-                    if (elements.paymentAmount) elements.paymentAmount.value = '';
-                    
-                    modal.show();
-                    setTimeout(() => {
-                        if (elements.paymentAmount) elements.paymentAmount.focus();
-                    }, 300);
-                };
-                
-                // Remove existing listeners and add new one
-                document.removeEventListener('click', paymentHandler);
-                document.addEventListener('click', paymentHandler);
-                
-                // Submit payment handler
-                const submitPaymentBtn = document.getElementById('submitPayment');
-                if (submitPaymentBtn) {
-                    const submitHandler = function(e) {
-                        e.preventDefault();
-                        
-                        const elements = {
-                            enquiryId: document.getElementById('payment_enquiry_id'),
-                            paymentAmount: document.getElementById('paymentAmount'),
-                            balanceFees: document.getElementById('balanceFees')
-                        };
-                        
-                        const enquiryId = elements.enquiryId?.value;
-                        const paymentAmount = elements.paymentAmount?.value;
-                        const balanceFees = parseFloat(elements.balanceFees?.value || 0);
-                        
-                        if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
-                            BatchManager.utils.showToast('Validation Error', 'Please enter a valid payment amount', 'error');
-                            return;
-                        }
-                        
-                        if (parseFloat(paymentAmount) > balanceFees) {
-                            BatchManager.utils.showToast('Validation Error', 'Payment amount cannot exceed balance fees', 'error');
-                            return;
-                        }
-                        
-                        const submitBtn = this;
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                        submitBtn.disabled = true;
-                        
-                        fetch(`${window.location.origin}/enquiry/update-payment/`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRFToken': BatchManager.utils.getCookie('csrftoken')
-                            },
-                            body: `enquiry_id=${encodeURIComponent(enquiryId)}&payment_amount=${encodeURIComponent(paymentAmount)}`
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && data.success) {
-                                BatchManager.tableUpdates.updatePaymentInTable(enquiryId, data);
-                                BatchManager.utils.showToast('Success', 'Payment updated successfully!', 'success');
-                                modal.hide();
-                                setTimeout(() => location.reload(), 1500);
-                            } else {
-                                BatchManager.utils.showToast('Error', data?.message || 'Failed to update payment', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Payment update error:', error);
-                            BatchManager.utils.showToast('Network Error', 'Please check your connection and try again', 'error');
-                        })
-                        .finally(() => {
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        });
-                    };
-                    
-                    // Remove existing listener and add new one
-                    submitPaymentBtn.removeEventListener('click', submitHandler);
-                    submitPaymentBtn.addEventListener('click', submitHandler);
-                }
-            },
-
-            setupDueDateModal: function() {
-                const dateModal = document.getElementById('updateDueDateModal');
-                if (!dateModal) return;
-                
-                let modal;
-                try {
-                    modal = new bootstrap.Modal(dateModal);
-                } catch (e) {
-                    console.warn('Bootstrap Modal initialization failed:', e);
-                    return;
-                }
-                
-                // Due date button handler
-                const dueDateHandler = function(e) {
-                    const btn = e.target.closest('.update-date-btn');
-                    if (!btn) return;
-                    
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const row = btn.closest('tr');
-                    if (!row) return;
-                    
-                    const studentId = row.dataset.id;
-                    const studentName = row.dataset.name;
-                    const dueDate = row.dataset.dueDate;
-                    
-                    const elements = {
-                        studentId: document.getElementById('duedate_student_id'),
-                        studentName: document.getElementById('dueDateStudentName'),
-                        currentDueDate: document.getElementById('currentDueDate'),
-                        newDueDate: document.getElementById('newDueDate')
-                    };
-                    
-                    if (elements.studentId) elements.studentId.value = studentId || '';
-                    if (elements.studentName) elements.studentName.value = studentName || '';
-                    if (elements.currentDueDate) elements.currentDueDate.value = BatchManager.utils.formatDateForDisplay(dueDate);
-                    if (elements.newDueDate) elements.newDueDate.value = '';
-                    
-                    modal.show();
-                };
-                
-                document.removeEventListener('click', dueDateHandler);
-                document.addEventListener('click', dueDateHandler);
-                
-                // Submit due date handler
-                const submitDueDateBtn = document.getElementById('submitDueDate');
-                if (submitDueDateBtn) {
-                    const submitHandler = function(e) {
-                        e.preventDefault();
-                        
-                        const studentId = document.getElementById('duedate_student_id')?.value;
-                        const newDueDate = document.getElementById('newDueDate')?.value;
-                        
-                        if (!newDueDate) {
-                            BatchManager.utils.showToast('Validation Error', 'Please select a new due date', 'error');
-                            return;
-                        }
-                        
-                        const submitBtn = this;
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
-                        submitBtn.disabled = true;
-                        
-                        fetch(`${window.location.origin}/enquiry/update-due-date/`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRFToken': BatchManager.utils.getCookie('csrftoken')
-                            },
-                            body: `student_id=${studentId}&new_due_date=${newDueDate}`
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && data.success) {
-                                BatchManager.tableUpdates.updateDueDateInTable(studentId, newDueDate);
-                                BatchManager.utils.showToast('Success', 'Due date updated successfully!', 'success');
-                                modal.hide();
-                                setTimeout(() => location.reload(), 1500);
-                            } else {
-                                BatchManager.utils.showToast('Error', data?.message || 'Failed to update due date', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Due date update error:', error);
-                            BatchManager.utils.showToast('Network Error', 'Please check your connection and try again', 'error');
-                        })
-                        .finally(() => {
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        });
-                    };
-                    
-                    submitDueDateBtn.removeEventListener('click', submitHandler);
-                    submitDueDateBtn.addEventListener('click', submitHandler);
-                }
-            },
-
-            setupAssignRemoveButtons: function() {
-                // Single handler for both assign and remove buttons
-                const buttonHandler = function(e) {
-                    // Handle assign buttons
-                    if (e.target.matches('button[onclick*="submitSingleAssign"]') || 
-                        e.target.closest('button[onclick*="submitSingleAssign"]')) {
-                        
-                        const button = e.target.matches('button') ? e.target : e.target.closest('button');
-                        const onclickAttr = button?.getAttribute('onclick');
-                        
-                        if (onclickAttr) {
-                            const matches = onclickAttr.match(/submitSingleAssign\((\d+),\s*(\d+)\)/);
-                            if (matches) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                BatchManager.forms.submitSingleAssign(matches[1], matches[2]);
-                            }
-                        }
-                    }
-                    
-                    // Handle remove buttons
-                    if (e.target.matches('button[onclick*="submitSingleRemove"]') || 
-                        e.target.closest('button[onclick*="submitSingleRemove"]')) {
-                        
-                        const button = e.target.matches('button') ? e.target : e.target.closest('button');
-                        const onclickAttr = button?.getAttribute('onclick');
-                        
-                        if (onclickAttr) {
-                            const matches = onclickAttr.match(/submitSingleRemove\((\d+),\s*(\d+)\)/);
-                            if (matches) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                BatchManager.forms.submitSingleRemove(matches[1], matches[2]);
-                            }
-                        }
-                    }
-                };
-                
-                // Remove and add event listener to prevent duplicates
-                document.removeEventListener('click', buttonHandler);
-                document.addEventListener('click', buttonHandler);
-            },
-
-            setupSelectAll: function() {
-                // Select All Assigned
-                const selectAllAssigned = document.getElementById('select_all_assigned');
-                if (selectAllAssigned) {
-                    const handler = function() {
-                        const checkboxes = document.querySelectorAll('#assigned input[name="enquiry_ids"]');
-                        checkboxes.forEach(checkbox => {
-                            const row = checkbox.closest('tr');
-                            if (row && row.style.display !== 'none') {
-                                checkbox.checked = this.checked;
-                            }
-                        });
-                    };
-                    
-                    selectAllAssigned.removeEventListener('change', handler);
-                    selectAllAssigned.addEventListener('change', handler);
-                }
-
-                // Select All Unassigned
-                const selectAllUnassigned = document.getElementById('select_all_unassigned');
-                if (selectAllUnassigned) {
-                    const handler = function() {
-                        const checkboxes = document.querySelectorAll('#unassigned input[name="enquiry_ids"]');
-                        checkboxes.forEach(checkbox => {
-                            const row = checkbox.closest('tr');
-                            if (row && row.style.display !== 'none') {
-                                checkbox.checked = this.checked;
-                            }
-                        });
-                    };
-                    
-                    selectAllUnassigned.removeEventListener('change', handler);
-                    selectAllUnassigned.addEventListener('change', handler);
-                }
-            },
-
-            setupForms: function() {
-                // Bulk Assign Form
-                const bulkAssignForm = document.getElementById('bulk-assign-form');
-                if (bulkAssignForm) {
-                    const handler = function(e) {
-                        const checkedBoxes = document.querySelectorAll('#unassigned input[name="enquiry_ids"]:checked');
-                        if (checkedBoxes.length === 0) {
-                            e.preventDefault();
-                            BatchManager.utils.showToast('Selection Required', 'Please select at least one student to assign', 'warning');
-                            return false;
-                        }
-                        
-                        if (!confirm(`Are you sure you want to assign ${checkedBoxes.length} student(s) to this batch?`)) {
-                            e.preventDefault();
-                            return false;
-                        }
-                        
-                        BatchManager.utils.showToast('Processing', `Assigning ${checkedBoxes.length} student(s) to batch...`, 'info');
-                    };
-                    
-                    bulkAssignForm.removeEventListener('submit', handler);
-                    bulkAssignForm.addEventListener('submit', handler);
-                }
-
-                // Bulk Remove Form
-                const bulkRemoveForm = document.getElementById('bulk-remove-form');
-                if (bulkRemoveForm) {
-                    const handler = function(e) {
-                        const checkedBoxes = document.querySelectorAll('#assigned input[name="enquiry_ids"]:checked');
-                        if (checkedBoxes.length === 0) {
-                            e.preventDefault();
-                            BatchManager.utils.showToast('Selection Required', 'Please select at least one student to remove', 'warning');
-                            return false;
-                        }
-                        
-                        if (!confirm(`Are you sure you want to remove ${checkedBoxes.length} student(s) from this batch?`)) {
-                            e.preventDefault();
-                            return false;
-                        }
-                        
-                        BatchManager.utils.showToast('Processing', `Removing ${checkedBoxes.length} student(s) from batch...`, 'info');
-                    };
-                    
-                    bulkRemoveForm.removeEventListener('submit', handler);
-                    bulkRemoveForm.addEventListener('submit', handler);
-                }
-            },
-
-            setupSearch: function() {
-                // Search handlers with proper debouncing
-                const searchAssigned = document.getElementById('searchAssigned');
-                const searchUnassigned = document.getElementById('searchUnassigned');
-                
-                if (searchAssigned) {
-                    const handler = BatchManager.utils.debounce(() => {
-                        BatchManager.search.performSearch('assigned');
-                    }, 300, 'search-assigned');
-                    
-                    searchAssigned.removeEventListener('input', handler);
-                    searchAssigned.addEventListener('input', handler);
-                }
-                
-                searchUnassigned.removeEventListener('input', handler);
-                    searchUnassigned.addEventListener('input', handler);
-                }
-            },
-
-            setupPagination: function() {
-                // Assigned pagination buttons
-                const assignedPrev = document.getElementById('assigned-prev');
-                const assignedNext = document.getElementById('assigned-next');
-                
-                if (assignedPrev) {
-                    const handler = () => BatchManager.pagination.changePage('assigned', -1);
-                    assignedPrev.removeEventListener('click', handler);
-                    assignedPrev.addEventListener('click', handler);
-                }
-                
-                if (assignedNext) {
-                    const handler = () => BatchManager.pagination.changePage('assigned', 1);
-                    assignedNext.removeEventListener('click', handler);
-                    assignedNext.addEventListener('click', handler);
-                }
-                
-                // Unassigned pagination buttons
-                const unassignedPrev = document.getElementById('unassigned-prev');
-                const unassignedNext = document.getElementById('unassigned-next');
-                
-                if (unassignedPrev) {
-                    const handler = () => BatchManager.pagination.changePage('unassigned', -1);
-                    unassignedPrev.removeEventListener('click', handler);
-                    unassignedPrev.addEventListener('click', handler);
-                }
-                
-                if (unassignedNext) {
-                    const handler = () => BatchManager.pagination.changePage('unassigned', 1);
-                    unassignedNext.removeEventListener('click', handler);
-                    unassignedNext.addEventListener('click', handler);
-                }
-            },
-
-            setupDatePicker: function() {
-                // Initialize Flatpickr for due date modal
-                const newDueDateInput = document.getElementById('newDueDate');
-                if (newDueDateInput && typeof flatpickr !== 'undefined') {
-                    try {
-                        flatpickr(newDueDateInput, {
-                            dateFormat: "Y-m-d",
-                            minDate: "today",
-                            allowInput: true,
-                            clickOpens: true
-                        });
-                    } catch (e) {
-                        console.warn('Flatpickr initialization failed:', e);
-                    }
-                }
-            }
-        },
-
-        // ✅ Main initialization
-        init: function() {
-            if (this.config.initialized) {
-                console.warn('BatchManager already initialized');
-                return;
-            }
-            
-            try {
-                // Initialize pagination tables
-                this.pagination.initializeTable('assigned');
-                this.pagination.initializeTable('unassigned');
-                
-                // Setup all event handlers
-                this.events.setupPaymentModal();
-                this.events.setupDueDateModal();
-                this.events.setupAssignRemoveButtons();
-                this.events.setupSelectAll();
-                this.events.setupForms();
-                this.events.setupSearch();
-                this.events.setupPagination();
-                this.events.setupDatePicker();
-                
-                this.config.initialized = true;
-                console.log('BatchManager initialized successfully');
-                
-                // Show success message
-                this.utils.showToast('System Ready', 'Batch management system loaded successfully', 'success');
-                
-            } catch (error) {
-                console.error('BatchManager initialization failed:', error);
-                this.utils.showToast('Initialization Error', 'Some features may not work properly', 'error');
-            }
-        },
-
-        // ✅ Cleanup function
-        destroy: function() {
-            // Clear all debounce timers
-            Object.keys(this.config.debounceTimers).forEach(key => {
-                clearTimeout(this.config.debounceTimers[key]);
-            });
-            this.config.debounceTimers = {};
-            
-            // Remove all toasts
-            document.querySelectorAll(`.${BATCH_NAMESPACE}toast`).forEach(toast => {
-                toast.remove();
-            });
-            
-            this.config.initialized = false;
-            console.log('BatchManager destroyed');
         }
-    };
-
-    // ✅ Expose BatchManager to global namespace
-    window.BatchDetailManager = BatchManager;
-
-    // ✅ Auto-initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => BatchManager.init(), 100);
-        });
-    } else {
-        setTimeout(() => BatchManager.init(), 100);
     }
+    return cookieValue;
+}
 
-    // ✅ Global functions for backwards compatibility
-    window.submitSingleAssign = function(batchId, studentId) {
-        BatchManager.forms.submitSingleAssign(batchId, studentId);
-    };
+function formatDateForDisplay(dateString) {
+    return new Date(dateString).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: '2-digit' 
+    });
+}
 
-    window.submitSingleRemove = function(batchId, studentId) {
-        BatchManager.forms.submitSingleRemove(batchId, studentId);
-    };
-
-    // ✅ Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-        if (BatchManager.config.initialized) {
-            BatchManager.destroy();
+// ✅ Search functionality
+function searchTable(tableType) {
+    const searchInput = document.getElementById(`search${tableType.charAt(0).toUpperCase() + tableType.slice(1)}`);
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
+    const noResultsDiv = document.getElementById(`${tableType}-no-results`);
+    
+    let visibleRows = [];
+    let hasVisibleRows = false;
+    
+    rows.forEach(row => {
+        const name = row.dataset.name.toLowerCase();
+        const mobile = row.dataset.mobile.toLowerCase();
+        const isMatch = name.includes(searchTerm) || mobile.includes(searchTerm);
+        
+        if (isMatch) {
+            visibleRows.push(row);
+            hasVisibleRows = true;
         }
     });
-
-})();
-
-// ✅ Additional utility functions outside the main scope
-document.addEventListener('DOMContentLoaded', function() {
-    // Enhanced table row highlighting
-    const addRowHoverEffects = function() {
-        const tables = document.querySelectorAll('#assigned-tbody, #unassigned-tbody');
-        tables.forEach(tbody => {
-            tbody.addEventListener('mouseenter', function(e) {
-                if (e.target.closest('tr.student-row')) {
-                    e.target.closest('tr.student-row').classList.add('table-hover-highlight');
-                }
-            }, true);
-            
-            tbody.addEventListener('mouseleave', function(e) {
-                if (e.target.closest('tr.student-row')) {
-                    e.target.closest('tr.student-row').classList.remove('table-hover-highlight');
-                }
-            }, true);
-        });
-    };
-
-    // Enhanced checkbox interactions
-    const addCheckboxEnhancements = function() {
-        document.addEventListener('change', function(e) {
-            if (e.target.matches('input[name="enquiry_ids"]')) {
-                const row = e.target.closest('tr');
-                if (row) {
-                    if (e.target.checked) {
-                        row.classList.add('table-row-selected');
-                    } else {
-                        row.classList.remove('table-row-selected');
-                    }
-                }
-            }
-        });
-    };
-
-    // Enhanced form validation
-    const addFormValidation = function() {
-        const forms = document.querySelectorAll('form[id*="bulk-"]');
-        forms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const submitBtn = form.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    const originalText = submitBtn.innerHTML;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                    submitBtn.disabled = true;
-                    
-                    // Re-enable after 5 seconds as fallback
-                    setTimeout(() => {
-                        if (submitBtn.disabled) {
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    }, 5000);
-                }
-            });
-        });
-    };
-
-    // Enhanced keyboard shortcuts
-    const addKeyboardShortcuts = function() {
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + F to focus search
-            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                const activeTab = document.querySelector('.tab-pane.active');
-                if (activeTab) {
-                    const searchInput = activeTab.querySelector('input[type="search"]');
-                    if (searchInput) {
-                        e.preventDefault();
-                        searchInput.focus();
-                    }
-                }
-            }
-            
-            // Escape to clear search
-            if (e.key === 'Escape') {
-                const focusedElement = document.activeElement;
-                if (focusedElement && focusedElement.type === 'search') {
-                    focusedElement.value = '';
-                    focusedElement.dispatchEvent(new Event('input'));
-                }
-            }
-        });
-    };
-
-    // Enhanced error handling
-    const addGlobalErrorHandling = function() {
-        window.addEventListener('error', function(e) {
-            console.error('Global error caught:', e.error);
-            if (window.BatchDetailManager && window.BatchDetailManager.utils) {
-                window.BatchDetailManager.utils.showToast(
-                    'System Error', 
-                    'An unexpected error occurred. Please refresh the page.', 
-                    'error'
-                );
-            }
-        });
-
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled promise rejection:', e.reason);
-            if (window.BatchDetailManager && window.BatchDetailManager.utils) {
-                window.BatchDetailManager.utils.showToast(
-                    'Network Error', 
-                    'A network request failed. Please check your connection.', 
-                    'error'
-                );
-            }
-        });
-    };
-
-    // Initialize all enhancements
-    setTimeout(() => {
-        addRowHoverEffects();
-        addCheckboxEnhancements();
-        addFormValidation();
-        addKeyboardShortcuts();
-        addGlobalErrorHandling();
-    }, 200);
-});
-
-// ✅ CSS styles to add to the page (add this to your CSS file)
-const additionalStyles = `
-<style>
-.table-hover-highlight {
-    background-color: rgba(0, 123, 255, 0.05) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
+    
+    // Store filtered data
+    filteredData[tableType] = visibleRows;
+    currentPage[tableType] = 1; // Reset to first page
+    
+    // Show/hide no results message
+    if (hasVisibleRows) {
+        noResultsDiv.style.display = 'none';
+        displayPage(tableType);
+    } else {
+        noResultsDiv.style.display = 'block';
+        hideAllRows(tableType);
+        updatePaginationInfo(tableType, 0, 0, 0);
+    }
 }
 
-.table-row-selected {
-    background-color: rgba(40, 167, 69, 0.1) !important;
-    border-left: 3px solid #28a745;
+function hideAllRows(tableType) {
+    const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
+    rows.forEach(row => row.style.display = 'none');
 }
 
-.batch-detail-toast {
-    min-width: 300px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.due-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.due-badge-danger {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.pagination-info {
-    font-size: 0.875rem;
-    color: #6c757d;
-}
-
-@media (max-width: 768px) {
-    .table-responsive {
-        font-size: 0.875rem;
+function displayPage(tableType) {
+    const data = filteredData[tableType];
+    const startIndex = (currentPage[tableType] - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, data.length);
+    
+    // Hide all rows first
+    hideAllRows(tableType);
+    
+    // Show rows for current page
+    for (let i = startIndex; i < endIndex; i++) {
+        if (data[i]) {
+            data[i].style.display = '';
+        }
     }
     
-    .btn-sm {
-        padding: 0.125rem 0.25rem;
-        font-size: 0.75rem;
+    updatePaginationInfo(tableType, startIndex + 1, endIndex, data.length);
+    updatePaginationButtons(tableType);
+}
+
+function updatePaginationInfo(tableType, start, end, total) {
+    document.getElementById(`${tableType}-start`).textContent = start;
+    document.getElementById(`${tableType}-end`).textContent = end;
+    document.getElementById(`${tableType}-total`).textContent = total;
+    
+    const totalPages = Math.ceil(total / rowsPerPage);
+    document.getElementById(`${tableType}-page-info`).textContent = 
+        totalPages > 0 ? `Page ${currentPage[tableType]} of ${totalPages}` : 'Page 0 of 0';
+}
+
+function updatePaginationButtons(tableType) {
+    const data = filteredData[tableType];
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+    
+    document.getElementById(`${tableType}-prev`).disabled = currentPage[tableType] <= 1;
+    document.getElementById(`${tableType}-next`).disabled = currentPage[tableType] >= totalPages;
+}
+
+function changePage(tableType, direction) {
+    const data = filteredData[tableType];
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+    
+    const newPage = currentPage[tableType] + direction;
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPage[tableType] = newPage;
+        displayPage(tableType);
     }
 }
-</style>
-`;
 
-// Add styles to document head if not already present
-if (!document.querySelector('#batch-detail-styles')) {
-    const styleSheet = document.createElement('div');
-    styleSheet.id = 'batch-detail-styles';
-    styleSheet.innerHTML = additionalStyles;
-    document.head.appendChild(styleSheet);
+// ✅ Initialize tables
+function initializeTable(tableType) {
+    const rows = document.querySelectorAll(`#${tableType}-tbody .student-row`);
+    filteredData[tableType] = Array.from(rows);
+    displayPage(tableType);
 }
 
+// ✅ Payment Update Handlers
+const paymentModal = new bootstrap.Modal(document.getElementById('updatePaymentModal'));
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.update-payment-btn')) {
+        const btn = e.target.closest('.update-payment-btn');
+        const row = btn.closest('tr');
+        const studentId = row.dataset.id;
+        const balance = row.dataset.balance;
+        
+        document.getElementById('payment_enquiry_id').value = studentId;
+        document.getElementById('balanceFees').value = parseFloat(balance).toFixed(0);
+        document.getElementById('paymentAmount').value = '';
+        
+        paymentModal.show();
+        setTimeout(() => document.getElementById('paymentAmount').focus(), 300);
+    }
+});
+
+document.getElementById('submitPayment').addEventListener('click', function() {
+    const enquiryId = document.getElementById('payment_enquiry_id').value;
+    const paymentAmountInput = document.getElementById('paymentAmount');
+    const paymentAmount = paymentAmountInput.value;
+    const balanceFees = parseFloat(document.getElementById('balanceFees').value);
+    
+    if (!paymentAmount || isNaN(paymentAmount) || parseFloat(paymentAmount) <= 0) {
+        showToast('Validation Error', 'Please enter a valid payment amount', 'error');
+        return;
+    }
+    
+    if (parseFloat(paymentAmount) > balanceFees) {
+        showToast('Validation Error', 'Payment amount cannot exceed balance fees', 'error');
+        return;
+    }
+    
+    const submitBtn = this;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "enquiry:update_payment" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `enquiry_id=${encodeURIComponent(enquiryId)}&payment_amount=${encodeURIComponent(paymentAmount)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updatePaymentInTable(enquiryId, data);
+            showToast('Success', 'Payment updated successfully!', 'success');
+            paymentModal.hide();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('Error', data.message || 'Failed to update payment', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Network Error', 'Please check your connection and try again', 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function updatePaymentInTable(enquiryId, data) {
+    const row = document.querySelector(`tr[data-id="${enquiryId}"]`);
+    if (row) {
+        const balanceCell = row.querySelector('td:nth-child(6)');
+        const paidCell = row.querySelector('td:nth-child(5)');
+        
+        if (balanceCell && paidCell) {
+            balanceCell.textContent = `₹${parseFloat(data.new_balance).toFixed(0)}`;
+            paidCell.textContent = `₹${parseFloat(data.new_paid).toFixed(0)}`;
+            row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            setTimeout(() => row.style.backgroundColor = '', 2000);
+        }
+    }
+}
+
+// ✅ Due Date Update Handlers
+const dateModal = new bootstrap.Modal(document.getElementById('updateDueDateModal'));
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.update-date-btn')) {
+        const btn = e.target.closest('.update-date-btn');
+        const row = btn.closest('tr');
+        const studentId = row.dataset.id;
+        const studentName = row.dataset.name;
+        const dueDate = row.dataset.dueDate;
+        
+        document.getElementById('duedate_student_id').value = studentId;
+        document.getElementById('dueDateStudentName').value = studentName;
+        document.getElementById('currentDueDate').value = formatDateForDisplay(dueDate);
+        document.getElementById('newDueDate').value = '';
+        
+        dateModal.show();
+    }
+});
+
+document.getElementById('submitDueDate').addEventListener('click', function() {
+    const studentId = document.getElementById('duedate_student_id').value;
+    const newDueDate = document.getElementById('newDueDate').value;
+    
+    if (!newDueDate) {
+        showToast('Validation Error', 'Please select a new due date', 'error');
+        return;
+    }
+    
+    const submitBtn = this;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+    submitBtn.disabled = true;
+    
+    fetch('{% url "enquiry:update_due_date" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `student_id=${studentId}&new_due_date=${newDueDate}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateDueDateInTable(studentId, newDueDate);
+            showToast('Success', 'Due date updated successfully!', 'success');
+            dateModal.hide();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('Error', data.message || 'Failed to update due date', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Network Error', 'Please check your connection and try again', 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+// ✅ Continue from updateDueDateInTable function
+function updateDueDateInTable(studentId, newDueDate) {
+    const row = document.querySelector(`tr[data-id="${studentId}"]`);
+    if (row) {
+        const dueDateCell = row.querySelector('.due-badge');
+        if (dueDateCell) {
+            dueDateCell.innerHTML = formatDateForDisplay(newDueDate);
+            dueDateCell.className = 'due-badge';
+            
+            // Check if new date is overdue
+            const today = new Date();
+            const dueDate = new Date(newDueDate);
+            if (dueDate < today) {
+                dueDateCell.classList.add('due-badge-danger');
+            }
+            
+            // Update row data attribute
+            row.dataset.dueDate = newDueDate;
+            
+            // Highlight the updated row
+            row.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            setTimeout(() => row.style.backgroundColor = '', 2000);
+        }
+    }
+}
+
+// ✅ Bulk Operations
+function submitSingleAssign(batchId, studentId) {
+    if (confirm('Are you sure you want to assign this student to the batch?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/batch/${batchId}/assign/${studentId}/`;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCookie('csrftoken');
+        
+        const studentInput = document.createElement('input');
+        studentInput.type = 'hidden';
+        studentInput.name = 'enquiry_ids';
+        studentInput.value = studentId;
+        
+        form.appendChild(csrfInput);
+        form.appendChild(studentInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function submitSingleRemove(batchId, studentId) {
+    if (confirm('Are you sure you want to remove this student from the batch?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/batch/${batchId}/remove/${studentId}/`;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCookie('csrftoken');
+        
+        const studentInput = document.createElement('input');
+        studentInput.type = 'hidden';
+        studentInput.name = 'enquiry_ids';
+        studentInput.value = studentId;
+        
+        form.appendChild(csrfInput);
+        form.appendChild(studentInput);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// ✅ Select All Functionality
+document.getElementById('select_all_assigned')?.addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('#assigned input[name="enquiry_ids"]:not([style*="display: none"])');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.closest('tr').style.display !== 'none') {
+            checkbox.checked = this.checked;
+        }
+    });
+});
+
+document.getElementById('select_all_unassigned')?.addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('#unassigned input[name="enquiry_ids"]:not([style*="display: none"])');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.closest('tr').style.display !== 'none') {
+            checkbox.checked = this.checked;
+        }
+    });
+});
+
+// ✅ Form Validation
+document.getElementById('bulk-assign-form')?.addEventListener('submit', function(e) {
+    const checkedBoxes = document.querySelectorAll('#unassigned input[name="enquiry_ids"]:checked');
+    if (checkedBoxes.length === 0) {
+        e.preventDefault();
+        showToast('Selection Required', 'Please select at least one student to assign', 'warning');
+        return false;
+    }
+    
+    if (!confirm(`Are you sure you want to assign ${checkedBoxes.length} student(s) to this batch?`)) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+document.getElementById('bulk-remove-form')?.addEventListener('submit', function(e) {
+    const checkedBoxes = document.querySelectorAll('#assigned input[name="enquiry_ids"]:checked');
+    if (checkedBoxes.length === 0) {
+        e.preventDefault();
+        showToast('Selection Required', 'Please select at least one student to remove', 'warning');
+        return false;
+    }
+    
+    if (!confirm(`Are you sure you want to remove ${checkedBoxes.length} student(s) from this batch?`)) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// ✅ Search Event Listeners
+document.getElementById('searchAssigned')?.addEventListener('input', function() {
+    searchTable('assigned');
+});
+
+document.getElementById('searchUnassigned')?.addEventListener('input', function() {
+    searchTable('unassigned');
+});
+
+// ✅ Initialize Flatpickr for Date Picker
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date picker
+    flatpickr('.datepicker', {
+        dateFormat: 'Y-m-d',
+        minDate: 'today',
+        allowInput: true,
+        clickOpens: true,
+        theme: 'light'
+    });
+    
+    // Initialize tables
+    initializeTable('assigned');
+    initializeTable('unassigned');
+    
+    // Clear search on tab change
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            const targetTab = e.target.getAttribute('data-bs-target');
+            if (targetTab === '#assigned') {
+                document.getElementById('searchAssigned').value = '';
+                searchTable('assigned');
+            } else if (targetTab === '#unassigned') {
+                document.getElementById('searchUnassigned').value = '';
+                searchTable('unassigned');
+            }
+        });
+    });
+    
+    // Auto-focus search when tab is clicked
+    document.getElementById('assigned-tab')?.addEventListener('click', function() {
+        setTimeout(() => document.getElementById('searchAssigned')?.focus(), 100);
+    });
+    
+    document.getElementById('unassigned-tab')?.addEventListener('click', function() {
+        setTimeout(() => document.getElementById('searchUnassigned')?.focus(), 100);
+    });
+});
+
+// ✅ Keyboard Shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + F to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        const activeTab = document.querySelector('.tab-pane.active');
+        if (activeTab?.id === 'assigned') {
+            document.getElementById('searchAssigned')?.focus();
+        } else if (activeTab?.id === 'unassigned') {
+            document.getElementById('searchUnassigned')?.focus();
+        }
+    }
+    
+    // Escape to clear search
+    if (e.key === 'Escape') {
+        const activeTab = document.querySelector('.tab-pane.active');
+        if (activeTab?.id === 'assigned') {
+            const searchInput = document.getElementById('searchAssigned');
+            if (searchInput && searchInput.value) {
+                searchInput.value = '';
+                searchTable('assigned');
+            }
+        } else if (activeTab?.id === 'unassigned') {
+            const searchInput = document.getElementById('searchUnassigned');
+            if (searchInput && searchInput.value) {
+                searchInput.value = '';
+                searchTable('unassigned');
+            }
+        }
+    }
+});
+
+// ✅ Performance Optimization - Debounce search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Apply debounced search
+const debouncedAssignedSearch = debounce(() => searchTable('assigned'), 300);
+const debouncedUnassignedSearch = debounce(() => searchTable('unassigned'), 300);
+
+// Replace immediate search with debounced versions
+document.getElementById('searchAssigned')?.addEventListener('input', debouncedAssignedSearch);
+document.getElementById('searchUnassigned')?.addEventListener('input', debouncedUnassignedSearch);
+
+// ✅ Auto-save functionality for forms (optional enhancement)
+function autoSaveFormData() {
+    const forms = ['bulk-assign-form', 'bulk-remove-form'];
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) {
+            const checkboxes = form.querySelectorAll('input[type="checkbox"][name="enquiry_ids"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const selectedIds = Array.from(form.querySelectorAll('input[name="enquiry_ids"]:checked'))
+                                          .map(cb => cb.value);
+                    // Store in memory (not localStorage as per artifact restrictions)
+                    window.selectedStudents = window.selectedStudents || {};
+                    window.selectedStudents[formId] = selectedIds;
+                });
+            });
+        }
+    });
+}
+
+// ✅ Initialize auto-save on page load
+document.addEventListener('DOMContentLoaded', autoSaveFormData);
+
+// ✅ Utility function to highlight table rows on hover
+function addTableHoverEffects() {
+    const tables = ['assigned-table', 'unassigned-table'];
+    tables.forEach(tableId => {
+        const table = document.getElementById(tableId);
+        if (table) {
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(13, 110, 253, 0.05)';
+                });
+                row.addEventListener('mouseleave', function() {
+                    if (!this.style.backgroundColor.includes('rgba(16, 185, 129')) {
+                        this.style.backgroundColor = '';
+                    }
+                });
+            });
+        }
+    });
+}
+
+// Initialize hover effects
+document.addEventListener('DOMContentLoaded', addTableHoverEffects);
+
+console.log('Batch management script loaded successfully!');
 </script>
 
 {% endblock %}
