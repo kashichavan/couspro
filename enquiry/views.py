@@ -850,27 +850,20 @@ def download_monthly_summary_excel(request):
 
 from django.db.models import Q, Sum
 from decimal import Decimal
-
-def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
-    stats = []
-    counsellors = Counsellor.objects.all().prefetch_related('enquiry_set')
-    from django.db.models import Q, Sum
 from decimal import Decimal
 
 def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
     stats = []
-    counsellors = Counsellor.objects.all().prefetch_related('enquiry_set')
+    counsellors = Counsellor.objects.all().prefetch_related('enquiries')
 
-    # List of all telephonic-related enquiry types
     TELEPHONIC_TYPES = [
         'someone_telephonic',
         'direct_telephonic',
         'telephonic_to_walkin',
     ]
 
-
     for counsellor in counsellors:
-        queryset = Enquiry.objects.filter(counsellor=counsellor)
+        queryset = counsellor.enquiries.all()
 
         if month_filter:
             try:
@@ -882,34 +875,24 @@ def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=No
         if status_filter:
             queryset = queryset.filter(status=status_filter)
 
-        # Split by visit_type
         telephonic_q = Q(enquiry_type__in=TELEPHONIC_TYPES)
         walkin_q = ~telephonic_q
 
-        # Total Telephonic / Walkin
         total_telephonic = queryset.filter(telephonic_q).count()
         total_walkin = queryset.filter(walkin_q).count()
-        
-        print(total_telephonic)
-        
 
-        # Joined
         joined_telephonic = queryset.filter(telephonic_q, status='joined').count()
         joined_walkin = queryset.filter(walkin_q, status='joined').count()
         joined_total = joined_telephonic + joined_walkin
-        print(joined_telephonic)
 
-        # Pending
         pending_telephonic = queryset.filter(telephonic_q, status='pending').count()
         pending_walkin = queryset.filter(walkin_q, status='pending').count()
         pending_total = pending_telephonic + pending_walkin
 
-        # Dropout
         dropout_telephonic = queryset.filter(telephonic_q, status='dropout').count()
         dropout_walkin = queryset.filter(walkin_q, status='dropout').count()
         dropout_total = dropout_telephonic + dropout_walkin
 
-        # Fees
         fees_data = queryset.aggregate(Sum('fees_paid'), Sum('fees_balance'))
         fees_paid = fees_data['fees_paid__sum'] or Decimal('0.00')
         fees_balance = fees_data['fees_balance__sum'] or Decimal('0.00')
@@ -920,18 +903,19 @@ def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=No
             'total_walkin': total_walkin,
             'joined_telephonic': joined_telephonic,
             'joined_walkin': joined_walkin,
-            'joined': joined_total,  # ✅ Precomputed total
+            'joined': joined_total,
             'pending_telephonic': pending_telephonic,
             'pending_walkin': pending_walkin,
-            'pending': pending_total,  # ✅ Precomputed total
+            'pending': pending_total,
             'dropout_telephonic': dropout_telephonic,
             'dropout_walkin': dropout_walkin,
-            'dropout': dropout_total,  # ✅ Precomputed total
+            'dropout': dropout_total,
             'fees_paid': float(fees_paid),
             'fees_balance': float(fees_balance),
         })
 
     return stats
+
 
 # views.py
 import calendar
