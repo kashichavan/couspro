@@ -120,30 +120,44 @@ def add_counsellor(request):
     else:
         form = CounsellorForm()
     return render(request, 'add_counsellor.html', {'form': form})
-
+from .cache import get_or_set_cache
 @login_required(login_url='accounts:login')
 def today_followups(request):
     today = get_ist_time().date()
-    enquiries = Enquiry.objects.filter(followup_date=today, status='pending')
-    return render(request, 'today_followups.html', {'enquiries': enquiries, 'today': today})
+    key = f"today_followups_{today}"
 
+    def fetch():
+        return list(Enquiry.objects.filter(followup_date=today, status='pending'))
+
+    enquiries = get_or_set_cache(key, fetch, timeout=300)
+    return render(request, 'today_followups.html', {'enquiries': enquiries, 'today': today})
 
 
 @login_required(login_url='accounts:login')
 def joined_students(request):
-    students = Enquiry.objects.filter(status='joined').order_by('-created_at')
+    def fetch():
+        return list(Enquiry.objects.filter(status='joined').order_by('-created_at'))
+
+    students = get_or_set_cache("joined_students", fetch, timeout=600)
     return render(request, 'joined_students.html', {'enquiries': students})
+
 
 @login_required(login_url='accounts:login')
 def dropout_students(request):
-    students = Enquiry.objects.filter(status='dropout').order_by('-created_at')
+    def fetch():
+        return list(Enquiry.objects.filter(status='dropout').order_by('-created_at'))
+
+    students = get_or_set_cache("dropout_students", fetch, timeout=600)
     return render(request, 'dropout_students.html', {'enquiries': students})
+
 
 @login_required(login_url='accounts:login')
 def pending_enquiries(request):
-    enquiries = Enquiry.objects.filter(status='pending').order_by('-followup_date')
-    return render(request, 'pending_enquiries.html', {'enquiries': enquiries})
+    def fetch():
+        return list(Enquiry.objects.filter(status='pending').order_by('-followup_date'))
 
+    enquiries = get_or_set_cache("pending_enquiries", fetch, timeout=600)
+    return render(request, 'pending_enquiries.html', {'enquiries': enquiries})
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -152,43 +166,33 @@ import calendar
 
 from .models import Enquiry
 
-
-
 @login_required(login_url='accounts:login')
 def dashboard(request):
+    context = get_or_set_cache(
+        'dashboard_data',
+        lambda: build_dashboard_context(),
+        timeout=600
+    )
+    return render(request, 'dashboard.html', context)
+
+def build_dashboard_context():
     now_ist = get_ist_time()
     today = now_ist.date()
-
-    # Debug logs
-    print("IST Now:", now_ist)
-    print("Today (IST Date):", today)
-
     current_month = today.month
     current_year = today.year
     current_day = today.day
 
-    # Status counts
     pending_count = Enquiry.objects.filter(status='pending').count()
     joined_count = Enquiry.objects.filter(status='joined').count()
     dropout_count = Enquiry.objects.filter(status='dropout').count()
     total_enquiries = pending_count + joined_count + dropout_count
 
-    # Chart data
     max_height = 200
     pending_percentage = (pending_count / total_enquiries * max_height) if total_enquiries else 0
     joined_percentage = (joined_count / total_enquiries * max_height) if total_enquiries else 0
     dropout_percentage = (dropout_count / total_enquiries * max_height) if total_enquiries else 0
 
-    # Today's followups - correct for DateField
-    today_followup_qs = Enquiry.objects.filter(followup_date=today)
-    today_followup_count = today_followup_qs.count()
-    print("Today's followups (QS):", today_followup_qs)
-    print("Count:", today_followup_count)
-
-    # Recent enquiries
     recent_enquiries = Enquiry.objects.order_by('-created_at')[:10]
-
-    # Upcoming followups
     next_week = today + timedelta(days=7)
     upcoming_followups = Enquiry.objects.filter(
         followup_date__gte=today,
@@ -196,7 +200,6 @@ def dashboard(request):
         status='pending'
     ).order_by('followup_date')[:10]
 
-    # Calendar view
     cal = calendar.monthcalendar(current_year, current_month)
     month_name = calendar.month_name[current_month]
     weekday_names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -208,12 +211,12 @@ def dashboard(request):
         ).values_list('followup_date__day', flat=True).distinct()
     )
 
-    context = {
+    return {
         'pending_count': pending_count,
         'joined_count': joined_count,
         'dropout_count': dropout_count,
         'total_enquiries': total_enquiries,
-        'today_followup_count': today_followup_count,
+        'today_followup_count': Enquiry.objects.filter(followup_date=today).count(),
         'pending_percentage': pending_percentage,
         'joined_percentage': joined_percentage,
         'dropout_percentage': dropout_percentage,
@@ -227,8 +230,6 @@ def dashboard(request):
         'followup_dates': followup_dates,
         'weekday_names': weekday_names,
     }
-
-    return render(request, 'dashboard.html', context)
 
 
 @login_required(login_url='accounts:login')
@@ -296,7 +297,6 @@ def enquiry_details(request, enquiry_id):
     comments = enquiry.comments.all()
     return render(request, 'enquiry_details.html', {'enquiry': enquiry, 'comments': comments})
 
-
 class EnquiryListView(LoginRequiredMixin, ListView):
     model = Enquiry
     template_name = 'enquiry_list.html'
@@ -304,7 +304,14 @@ class EnquiryListView(LoginRequiredMixin, ListView):
     login_url = 'accounts:login'
 
     def get_queryset(self):
-        return Enquiry.objects.select_related('counsellor').prefetch_related('comments').all()
+        cache_key = 'enquiry_list_view'
+
+        # You can adjust timeout (in seconds) as needed
+        return get_or_set_cache(
+            cache_key,
+            lambda: Enquiry.objects.select_related('counsellor').prefetch_related('comments').all(),
+            timeout=300  # 5 minutes
+        )
 
 from django.http import HttpResponse
 import openpyxl

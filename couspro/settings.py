@@ -89,7 +89,6 @@ TIME_ZONE = 'Asia/Kolkata'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -155,4 +154,19 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 LOGIN_REDIRECT_URL = 'enquiry:dashboard'  # Redirect after login
 LOGIN_URL = 'accounts:login'  # URL to redirect to when login is required
 LOGOUT_REDIRECT_URL = '/' 
+
+
+
+# settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'local-django-cache',
+        'TIMEOUT': 600,  # default 10 minutes
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000
+        }
+    }
+}
+
 

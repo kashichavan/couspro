@@ -24,13 +24,16 @@ class CollegeInfo(models.Model):
     def __str__(self):
         return self.college_name
 
+from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from decimal import Decimal
 
 class Enquiry(models.Model):
     STATUS_CHOICES = [
         ('joined', 'Joined'),
         ('pending', 'Pending'),
         ('dropout', 'Dropout'),
-        
     ]
 
     SUBJECT_CHOICES = [
@@ -47,22 +50,37 @@ class Enquiry(models.Model):
         ('telephonic_to_walkin', 'Telephonic To Walkin'),
     ]
 
+    VISIT_TYPE_CHOICES = [
+        ('alone_walkin', 'Alone Walkin'),
+        ('came_with_parents', 'Came with parents'),
+        ('student_reference', 'Student Reference'),
+        ('old_student_reference', 'Old Student Reference'),
+        ('came_with_relatives', 'Came with relatives'),
+        ('telephonic', 'Telephonic'),
+    ]
+
+    # 🔹 Basic Info
     name = models.CharField(max_length=100)
     mobile = models.CharField(max_length=15, unique=True)
+    parent_number = models.CharField(max_length=15, blank=True, null=True)
+    native_district_name = models.CharField(max_length=30, blank=True, null=True)
+
+    # 🔹 Status & Type
     subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)
+    other_subject_name = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     enquiry_type = models.CharField(max_length=30, choices=ENQUIRY_TYPE_CHOICES, default='direct_telephonic')
-    counsellor = models.ForeignKey(Counsellor, on_delete=models.CASCADE)
+    visit_type = models.CharField(max_length=30, choices=VISIT_TYPE_CHOICES, default='alone_walkin')
+
+    # 🔹 Dates
     created_at = models.DateTimeField(auto_now_add=True)
     followup_date = models.DateField(null=True, blank=True)
     enquiry_date = models.DateField(null=True, blank=True)
-    parent_number = models.CharField(max_length=15, blank=True, null=True)
-    
-    
+    joined_date = models.DateField(null=True, blank=True)
     fees_paid_date = models.DateField(null=True, blank=True)
-    
-    native_district_name=models.CharField(max_length=30,blank=True,null=True)
+    due_date = models.DateField(null=True, blank=True)
 
+    # 🔹 Fees
     target_fees = models.DecimalField(
         max_digits=12, decimal_places=2,
         null=True, blank=True,
@@ -78,36 +96,17 @@ class Enquiry(models.Model):
         null=True, blank=True,
         help_text="Remaining balance (calculated automatically)"
     )
-    due_date = models.DateField(
-        null=True, blank=True,
-        help_text="Deadline for full fees payment"
-    )
-    
-    
-    other_subject_name = models.CharField(
-        max_length=100, 
-        blank=True, 
-        null=True,
-        help_text="Specify the subject if 'Other' is selected"
-    )
 
-    is_joined_batch = models.BooleanField(
-    default=False,
-    help_text="True if the student has joined a batch"
-)
+    # 🔹 Flags
+    is_joined_batch = models.BooleanField(default=False)
 
-    joined_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text="Date when the student joined"
-    )
-    
+    # 🔹 Relationships
+    counsellor = models.ForeignKey('Counsellor', on_delete=models.CASCADE, related_name='enquiries')
 
     def clean(self):
         if self.target_fees is not None and self.fees_paid > self.target_fees:
             raise ValidationError("Fees paid cannot exceed target fees.")
 
-    # models.py
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         previous_status = None
@@ -119,7 +118,7 @@ class Enquiry(models.Model):
             except Enquiry.DoesNotExist:
                 previous_status = None
 
-        # Handle joined_date logic based on status change
+        # Handle joined date
         if previous_status != self.status:
             if self.status == 'joined':
                 self.joined_date = timezone.now().date()
@@ -129,7 +128,7 @@ class Enquiry(models.Model):
             elif self.status == 'pending':
                 self.joined_date = None
 
-        # Handle fee-related fields
+        # Fees logic
         if self.status != 'joined':
             self.target_fees = None
             self.fees_paid = Decimal('0.00')
@@ -143,40 +142,33 @@ class Enquiry(models.Model):
                 if self.target_fees is not None
                 else None
             )
-        if self.pk and self.batches.count() > 0:
+
+        # Update is_joined_batch flag
+        if self.pk and hasattr(self, 'batches') and self.batches.count() > 0:
             self.is_joined_batch = True
         else:
             self.is_joined_batch = False
-    
-
 
         super().save(*args, **kwargs)
-    
-
 
     @property
     def is_fully_paid(self):
         return self.target_fees is not None and self.fees_paid >= self.target_fees
 
-    
-    
-    VISIT_TYPE_CHOICES = [
-        ('alone_walkin', 'Alone Walkin'),
-        ('came_with_parents', 'Came with parents'),
-        ('student_reference', 'Student Reference'),
-        ('old_student_reference', 'Old Student Reference'),
-        ('came_with_relatives', 'Came with relatives'),
-        ('telephonic','Telephonic'),
-    ]
+    def __str__(self):
+        return f"{self.name} ({self.mobile})"
 
-    visit_type = models.CharField(
-        max_length=30, 
-        choices=VISIT_TYPE_CHOICES, 
-        default='alone_walkin',
-        help_text="How did the student come for enquiry?"
-    )
-    
-    
+    class Meta:
+        indexes = [
+            models.Index(fields=['created_at']),
+            models.Index(fields=['joined_date']),
+            models.Index(fields=['status']),
+            models.Index(fields=['counsellor']),
+            models.Index(fields=['enquiry_date']),
+            models.Index(fields=['enquiry_type']),
+        ]
+        ordering = ['-created_at']
+
 
 
 class Comment(models.Model):
@@ -187,10 +179,14 @@ class Comment(models.Model):
     class Meta:
         get_latest_by = 'created_at'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['enquiry']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"Comment on {self.created_at}"
-    
+
     
     
     
