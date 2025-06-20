@@ -1,12 +1,19 @@
+# enquiry/signals.py
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from accounts.models import CustomUser
-from .models import Counsellor
+from accounts.models import CustomUser  # Assuming CustomUser is your auth model
+from enquiry.models import Counsellor
 
-@receiver(post_save, sender=CustomUser)
+#@receiver(post_save, sender=CustomUser)
 def create_counsellor_for_user(sender, instance, created, **kwargs):
     if created and instance.role == 'counselor':
-        Counsellor.objects.create(user=instance, mobile='', department='')
+        # Use `name` instead of `user`
+        Counsellor.objects.create(
+            name=f"{instance.first_name} {instance.last_name}",  # Or instance.email
+            mobile='',  # Set default values as needed
+            department=''
+        )
 
 
 

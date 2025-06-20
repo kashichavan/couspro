@@ -1,33 +1,20 @@
 import json
-from django.utils.dateparse import parse_datetime
-from enquiry.models import Comment, Enquiry
 
-# Load the new comment structure
-with open('comments.json', 'r', encoding='utf-8') as f:
-    comments_data = json.load(f)
+with open('cleaned_data.json', 'r') as f:
+    data = json.load(f)
 
-for mobile, comment_list in comments_data.items():
-    try:
-        # Get the Enquiry based on mobile number
-        enquiry = Enquiry.objects.get(mobile=mobile)
+user_ids = set()
+cleaned_data = []
 
-        # Delete old comments for this enquiry
-        Comment.objects.filter(enquiry=enquiry).delete()
-        print(f"Deleted old comments for enquiry with mobile {mobile}")
+for entry in data:
+    if entry['model'] == 'accounts.counselorprofile':
+        user_id = entry['fields']['user']
+        if user_id in user_ids:
+            continue  # Skip duplicate
+        user_ids.add(user_id)
+    cleaned_data.append(entry)
 
-        # Create new comments
-        for comment_data in comment_list:
-            comment_text = comment_data['comment']
-            created_at = parse_datetime(comment_data['created_at'])
+with open('cleaned_data.json', 'w') as f:
+    json.dump(cleaned_data, f, indent=2)
 
-            Comment.objects.create(
-                enquiry=enquiry,
-                comment=comment_text,
-                created_at=created_at
-            )
-            print(f"Added comment for {mobile}: {comment_text}")
-
-    except Enquiry.DoesNotExist:
-        print(f"Enquiry with mobile {mobile} not found. Skipping...")
-    except Exception as e:
-        print(f"Error processing comments for {mobile}: {str(e)}")
+print("Duplicates removed. Cleaned data saved to 'cleaned_data.json'")
