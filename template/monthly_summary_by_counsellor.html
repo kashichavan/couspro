@@ -109,6 +109,8 @@
         <th><i class="fas fa-check me-1"></i>Joined</th>
         <th><i class="fas fa-clock me-1"></i>Pending</th>
         <th><i class="fas fa-times me-1"></i>Dropout</th>
+
+         <th><i class="fas fa-history me-1"></i>Prev C</th>
         
         <!-- Financials -->
         <th><i class="fas fa-rupee-sign me-1"></i>Fees Collected</th>
@@ -148,6 +150,9 @@
         <td class="text-center"><span class="status-badge-modern status-joined">{{ stat.joined }}</span></td>
         <td class="text-center"><span class="status-badge-modern status-pending">{{ stat.pending }}</span></td>
         <td class="text-center"><span class="status-badge-modern status-dropout">{{ stat.dropout }}</span></td>
+
+
+         <td class="text-center"><span class="status-badge-modern status-joined">{{ stat.previous_month_conversion }}</span></td>
 
         <!-- Financials -->
         <td class="text-end"><span class="money-positive">₹{{ stat.fees_paid|intcomma }}</span></td>

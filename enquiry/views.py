@@ -850,7 +850,8 @@ def download_monthly_summary_excel(request):
 
 from django.db.models import Q, Sum
 from decimal import Decimal
-from decimal import Decimal
+from datetime import datetime
+import calendar
 
 def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
     stats = []
@@ -864,11 +865,32 @@ def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=No
 
     for counsellor in counsellors:
         queryset = counsellor.enquiries.all()
+        previous_month_conversion = 0
 
         if month_filter:
             try:
-                year, month = map(int, month_filter.split('-'))
-                queryset = queryset.filter(created_at__year=year, created_at__month=month)
+                current_year, current_month = map(int, month_filter.split('-'))
+
+                current_start = datetime(current_year, current_month, 1)
+                current_end_day = calendar.monthrange(current_year, current_month)[1]
+                current_end = datetime(current_year, current_month, current_end_day)
+
+                previous_month = current_month - 1 or 12
+                previous_year = current_year if current_month != 1 else current_year - 1
+                prev_start = datetime(previous_year, previous_month, 1)
+                prev_end_day = calendar.monthrange(previous_year, previous_month)[1]
+                prev_end = datetime(previous_year, previous_month, prev_end_day)
+
+                # Filter current month enquiries
+                queryset = queryset.filter(created_at__year=current_year, created_at__month=current_month)
+
+                # 🔁 Previous month conversion without status_updated_at
+                previous_month_conversion = counsellor.enquiries.filter(
+                    created_at__range=(prev_start, prev_end),
+                    joined_date__year=current_year,
+                    joined_date__month=current_month
+                ).count()
+
             except ValueError:
                 pass
 
@@ -912,9 +934,11 @@ def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=No
             'dropout': dropout_total,
             'fees_paid': float(fees_paid),
             'fees_balance': float(fees_balance),
+            'previous_month_conversion': previous_month_conversion,
         })
 
     return stats
+
 
 
 # views.py
