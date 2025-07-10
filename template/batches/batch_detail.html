@@ -792,7 +792,12 @@
         <form method="post" action="{% url 'batch:bulk_remove_from_batch' batch.id %}" id="bulk-remove-form">
             {% csrf_token %}
             <div class="mb-3 d-flex justify-content-between align-items-center">
-                <button type="submit" class="btn btn-danger btn-sm">Remove Selected</button>
+                <div>
+                    <button type="submit" class="btn btn-danger btn-sm">Remove Selected</button>
+                    <button type="button" class="btn btn-success btn-sm ms-2" id="downloadAssigned">
+                        <i class="fas fa-download me-1"></i> Download List
+                    </button>
+                </div>
                 <input type="text" id="searchAssigned" class="search-box" style="width: 250px;" placeholder="Search assigned students...">
             </div>
             
@@ -883,7 +888,12 @@
         <form method="post" action="{% url 'batch:bulk_assign_to_batch' batch.id %}" id="bulk-assign-form">
             {% csrf_token %}
             <div class="mb-3 d-flex justify-content-between align-items-center">
-                <button type="submit" class="btn btn-primary btn-sm">Assign Selected</button>
+                <div>
+                    <button type="submit" class="btn btn-primary btn-sm">Assign Selected</button>
+                    <button type="button" class="btn btn-success btn-sm ms-2" id="downloadUnassigned">
+                        <i class="fas fa-download me-1"></i> Download List
+                    </button>
+                </div>
                 <input type="text" id="searchUnassigned" class="search-box" style="width: 250px;" placeholder="Search by name or mobile...">
             </div>
             
@@ -1345,7 +1355,6 @@ document.getElementById('submitDueDate').addEventListener('click', function() {
     });
 });
 
-// ✅ Continue from updateDueDateInTable function
 function updateDueDateInTable(studentId, newDueDate) {
     const row = document.querySelector(`tr[data-id="${studentId}"]`);
     if (row) {
@@ -1473,6 +1482,67 @@ document.getElementById('searchAssigned')?.addEventListener('input', function() 
 
 document.getElementById('searchUnassigned')?.addEventListener('input', function() {
     searchTable('unassigned');
+});
+
+// ✅ Download Functionality
+function downloadCSV(data, filename) {
+    const csvContent = "data:text/csv;charset=utf-8," + data.map(row => row.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function prepareStudentData(tableType) {
+    const headers = tableType === 'assigned' 
+        ? ["Name", "Contact", "Target Fees", "Paid", "Balance", "Due Date"]
+        : ["Name", "Mobile"];
+    
+    const rows = [];
+    rows.push(headers);
+    
+    // Get all visible rows (including paginated and filtered)
+    const visibleRows = filteredData[tableType];
+    
+    visibleRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const studentData = tableType === 'assigned'
+            ? [
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim(),
+                cells[3].textContent.trim().replace('₹', ''),
+                cells[4].textContent.trim().replace('₹', ''),
+                cells[5].textContent.trim().replace('₹', ''),
+                cells[6].textContent.trim()
+            ]
+            : [
+                cells[1].textContent.trim(),
+                cells[2].textContent.trim()
+            ];
+        rows.push(studentData);
+    });
+    
+    return rows;
+}
+
+// Event listeners for download buttons
+document.getElementById('downloadAssigned')?.addEventListener('click', function() {
+    const data = prepareStudentData('assigned');
+    const batchCode = "{{ batch.code }}".replace(/\s+/g, '_');
+    const filename = `Assigned_Students_${batchCode}_${new Date().toISOString().slice(0,10)}.csv`;
+    downloadCSV(data, filename);
+    showToast('Download Started', 'Assigned students list is being downloaded', 'success');
+});
+
+document.getElementById('downloadUnassigned')?.addEventListener('click', function() {
+    const data = prepareStudentData('unassigned');
+    const batchCode = "{{ batch.code }}".replace(/\s+/g, '_');
+    const filename = `Unassigned_Students_${batchCode}_${new Date().toISOString().slice(0,10)}.csv`;
+    downloadCSV(data, filename);
+    showToast('Download Started', 'Unassigned students list is being downloaded', 'success');
 });
 
 // ✅ Initialize Flatpickr for Date Picker

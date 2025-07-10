@@ -863,6 +863,109 @@ def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=No
         'telephonic_to_walkin',
     ]
 
+    # Default to current month
+    now = datetime.now()
+    selected_year = now.year
+    selected_month = now.month
+
+    if month_filter:
+        try:
+            selected_year, selected_month = map(int, month_filter.split('-'))
+        except ValueError:
+            pass
+
+    # Current month range
+    current_start = datetime(selected_year, selected_month, 1)
+    current_end_day = calendar.monthrange(selected_year, selected_month)[1]
+    current_end = datetime(selected_year, selected_month, current_end_day, 23, 59, 59)
+
+    # Previous month range
+    if selected_month == 1:
+        prev_month = 12
+        prev_year = selected_year - 1
+    else:
+        prev_month = selected_month - 1
+        prev_year = selected_year
+
+    prev_start = datetime(prev_year, prev_month, 1)
+    prev_end_day = calendar.monthrange(prev_year, prev_month)[1]
+    prev_end = datetime(prev_year, prev_month, prev_end_day, 23, 59, 59)
+
+    for counsellor in counsellors:
+        base_queryset = counsellor.enquiries.all()
+
+        # Filter for selected month
+        queryset = base_queryset.filter(created_at__year=selected_year, created_at__month=selected_month)
+
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        # ✅ Previous month enquiry → joined this month
+        previous_month_conversion = base_queryset.filter(
+            created_at__range=(prev_start, prev_end),
+            joined_date__range=(current_start, current_end),
+            status='joined'
+        ).count()
+
+        # Telephonic vs walk-in
+        telephonic_q = Q(enquiry_type__in=TELEPHONIC_TYPES)
+        walkin_q = ~telephonic_q
+
+        total_telephonic = queryset.filter(telephonic_q).count()
+        total_walkin = queryset.filter(walkin_q).count()
+
+        joined_telephonic = queryset.filter(telephonic_q, status='joined').count()
+        joined_walkin = queryset.filter(walkin_q, status='joined').count()
+        joined_total = joined_telephonic + joined_walkin
+
+        pending_telephonic = queryset.filter(telephonic_q, status='pending').count()
+        pending_walkin = queryset.filter(walkin_q, status='pending').count()
+        pending_total = pending_telephonic + pending_walkin
+
+        dropout_telephonic = queryset.filter(telephonic_q, status='dropout').count()
+        dropout_walkin = queryset.filter(walkin_q, status='dropout').count()
+        dropout_total = dropout_telephonic + dropout_walkin
+
+        # ✅ Fees paid and balance (this month's enquiries only)
+        fees_data = queryset.aggregate(Sum('fees_paid'), Sum('fees_balance'))
+        fees_paid = fees_data['fees_paid__sum'] or Decimal('0.00')
+        fees_balance = fees_data['fees_balance__sum'] or Decimal('0.00')
+
+        stats.append({
+            'counsellor': counsellor,
+            'total_telephonic': total_telephonic,
+            'total_walkin': total_walkin,
+            'joined_telephonic': joined_telephonic,
+            'joined_walkin': joined_walkin,
+            'joined': joined_total,
+            'pending_telephonic': pending_telephonic,
+            'pending_walkin': pending_walkin,
+            'pending': pending_total,
+            'dropout_telephonic': dropout_telephonic,
+            'dropout_walkin': dropout_walkin,
+            'dropout': dropout_total,
+            'fees_paid': float(fees_paid),
+            'fees_balance': float(fees_balance),
+            'previous_month_conversion': previous_month_conversion,
+        })
+
+    return stats
+
+from django.db.models import Q, Sum
+from decimal import Decimal
+from datetime import datetime
+import calendar
+
+def get_monthly_stats_by_counsellor(request, month_filter=None, status_filter=None):
+    stats = []
+    counsellors = Counsellor.objects.all().prefetch_related('enquiries')
+
+    TELEPHONIC_TYPES = [
+        'someone_telephonic',
+        'direct_telephonic',
+        'telephonic_to_walkin',
+    ]
+
     for counsellor in counsellors:
         queryset = counsellor.enquiries.all()
         previous_month_conversion = 0

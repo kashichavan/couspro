@@ -591,50 +591,38 @@ body {
 
 {% endblock %}
 
+
+
 {% block extra_js %}
-<!-- DataTables JS -->
+<!-- DataTables CSS & JS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"> 
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> 
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script> 
 
-<!-- Flatpickr Core JS -->
+<!-- Flatpickr Month Picker -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<!-- Month Select Plugin -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
 <script>
 $(document).ready(function() {
-    // Initialize Flatpickr Month Picker
     const monthPicker = flatpickr("#month-picker", {
         dateFormat: "Y-m",
         altInput: true,
         altFormat: "F Y",
-        plugins: [
-            new monthSelectPlugin({
-                shorthand: false,
-                dateFormat: "Y-m",
-                altFormat: "F Y",
-                theme: "light"
-            })
-        ]
+        plugins: [new monthSelectPlugin({ shorthand: false, dateFormat: "Y-m", altFormat: "F Y", theme: "light" })]
     });
 
-    // Check if table has actual data (not just empty state)
     const $table = $('#counsellor-table');
     const $tbody = $table.find('tbody');
     const dataRows = $tbody.find('tr').filter(function() {
-        return $(this).find('td').length > 1; // Has more than 1 column (actual data)
+        return $(this).find('td').length > 1;
     });
-    
-    const hasData = dataRows.length > 0;
-    console.log('Has actual data rows:', hasData);
-    console.log('Total data rows:', dataRows.length);
 
+    const hasData = dataRows.length > 0;
     let table;
 
     if (hasData) {
-        // Initialize DataTable only if we have actual data
         try {
             table = $('#counsellor-table').DataTable({
                 responsive: true,
@@ -651,53 +639,36 @@ $(document).ready(function() {
                     info: "Showing _START_ to _END_ of _TOTAL_ counsellors",
                     infoEmpty: "No counsellors found",
                     infoFiltered: "(filtered from _MAX_ total entries)",
-                    paginate: {
-                        first: "First",
-                        last: "Last",
-                        next: "Next",
-                        previous: "Prev"
-                    },
+                    paginate: { first: "First", last: "Last", next: "Next", previous: "Prev" },
                     emptyTable: "No counsellor data available"
                 },
                 columnDefs: [
                     { targets: 0, className: "counsellor-cell" },
-                    { targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], className: "text-center" },
-                    { targets: [12, 13], className: "text-end" }
+                    { targets: [1,2,3,4,5,6,7,8,9,10,11,12], className: "text-center" },
+                    { targets: [13,14], className: "text-end" }
                 ],
-                initComplete: function(settings, json) {
-                    console.log('DataTable initialized successfully');
+                initComplete: function() {
                     updateSummaryStats();
                 },
-                drawCallback: function(settings) {
+                drawCallback: function() {
                     updateSummaryStats();
                 }
             });
-            
-            console.log('DataTable initialized successfully');
-            
         } catch (error) {
-            console.error('DataTable initialization failed:', error);
-            // Fallback to manual stats update
+            console.error('DataTable init failed:', error);
             updateSummaryStatsManual();
         }
     } else {
-        // No data - just show the table as-is and update stats manually
-        console.log('No data found - skipping DataTable initialization');
         updateSummaryStatsManual();
-        
-        // Hide DataTable controls since we're not using DataTables
         $('.dataTables_wrapper').hide();
     }
 
-    // Handle month filter form submission
     $('#month-filter-form').on('submit', function(e) {
         e.preventDefault();
-        
         const selectedMonth = $('#month-picker').val();
         const filterBtn = $(this).find('button[type="submit"]');
-        
         filterBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading...').prop('disabled', true);
-        
+
         if (selectedMonth) {
             window.location.href = window.location.pathname + '?month=' + encodeURIComponent(selectedMonth);
         } else {
@@ -705,53 +676,38 @@ $(document).ready(function() {
         }
     });
 
-    // Reset button handler
     $('#reset-btn').on('click', function() {
         monthPicker.clear();
         window.location.href = window.location.pathname;
     });
 
-    // Summary stats update function for DataTables
     function updateSummaryStats() {
         if (!table || typeof table.rows !== 'function') {
             updateSummaryStatsManual();
             return;
         }
 
-        let totalTelephonic = 0;
-        let totalWalkin = 0;
-        let totalJoined = 0;
-        let totalPending = 0;
-        let totalDropout = 0;
-        let totalFees = 0;
+        let totalTelephonic = 0, totalWalkin = 0, totalJoined = 0;
+        let totalPending = 0, totalDropout = 0, totalFees = 0;
 
         try {
             table.rows({ search: 'applied' }).every(function() {
                 const node = this.node();
-                
                 if ($(node).find('td').length > 1) {
-                    const walkinBadge = $(node).find('td:eq(1) .badge-walkin').text().trim();
-                    const telephonicBadge = $(node).find('td:eq(5) .badge-telephonic').text().trim();
-                    const joinedBadge = $(node).find('td:eq(9) .status-joined').text().trim();
-                    const pendingBadge = $(node).find('td:eq(10) .status-pending').text().trim();
-                    const dropoutBadge = $(node).find('td:eq(11) .status-dropout').text().trim();
-                    const feesText = $(node).find('td:eq(12) .money-positive').text().replace('₹', '').replace(/,/g, '').trim();
-
-                    totalWalkin += parseInt(walkinBadge) || 0;
-                    totalTelephonic += parseInt(telephonicBadge) || 0;
-                    totalJoined += parseInt(joinedBadge) || 0;
-                    totalPending += parseInt(pendingBadge) || 0;
-                    totalDropout += parseInt(dropoutBadge) || 0;
-                    totalFees += parseInt(feesText) || 0;
+                    totalWalkin     += parseInt($(node).find('td:eq(1) .badge-walkin').text().trim()) || 0;
+                    totalTelephonic += parseInt($(node).find('td:eq(5) .badge-telephonic').text().trim()) || 0;
+                    totalJoined     += parseInt($(node).find('td:eq(9) .status-joined').text().trim()) || 0;
+                    totalPending    += parseInt($(node).find('td:eq(10) .status-pending').text().trim()) || 0;
+                    totalDropout    += parseInt($(node).find('td:eq(11) .status-dropout').text().trim()) || 0;
+                    totalFees       += parseFloat($(node).find('td:eq(13) .money-positive').text().replace(/[₹,]/g, '')) || 0;
                 }
             });
         } catch (error) {
-            console.error('Error updating summary stats:', error);
+            console.error('Error in stats update:', error);
             updateSummaryStatsManual();
             return;
         }
 
-        // Animate number updates
         animateNumber('#total-telephonic', totalTelephonic);
         animateNumber('#total-walkin', totalWalkin);
         animateNumber('#total-joined', totalJoined);
@@ -760,98 +716,55 @@ $(document).ready(function() {
         animateNumber('#total-fees', totalFees, true);
     }
 
-    // Manual stats update fallback (without DataTables)
     function updateSummaryStatsManual() {
-        let totalTelephonic = 0;
-        let totalWalkin = 0;
-        let totalJoined = 0;
-        let totalPending = 0;
-        let totalDropout = 0;
-        let totalFees = 0;
+        let totalTelephonic = 0, totalWalkin = 0, totalJoined = 0;
+        let totalPending = 0, totalDropout = 0, totalFees = 0;
 
-        // Only process actual data rows (not empty state)
         $('#counsellor-table tbody tr').each(function() {
             const $row = $(this);
-            
-            if ($row.find('td').length > 1) { // Skip empty state row
-                const walkinBadge = $row.find('td:eq(1) .badge-walkin').text().trim();
-                const telephonicBadge = $row.find('td:eq(5) .badge-telephonic').text().trim();
-                const joinedBadge = $row.find('td:eq(9) .status-joined').text().trim();
-                const pendingBadge = $row.find('td:eq(10) .status-pending').text().trim();
-                const dropoutBadge = $row.find('td:eq(11) .status-dropout').text().trim();
-                const feesText = $row.find('td:eq(12) .money-positive').text().replace('₹', '').replace(/,/g, '').trim();
-
-                totalWalkin += parseInt(walkinBadge) || 0;
-                totalTelephonic += parseInt(telephonicBadge) || 0;
-                totalJoined += parseInt(joinedBadge) || 0;
-                totalPending += parseInt(pendingBadge) || 0;
-                totalDropout += parseInt(dropoutBadge) || 0;
-                totalFees += parseInt(feesText) || 0;
+            if ($row.find('td').length > 1) {
+                totalWalkin     += parseInt($row.find('td:eq(1) .badge-walkin').text().trim()) || 0;
+                totalTelephonic += parseInt($row.find('td:eq(5) .badge-telephonic').text().trim()) || 0;
+                totalJoined     += parseInt($row.find('td:eq(9) .status-joined').text().trim()) || 0;
+                totalPending    += parseInt($row.find('td:eq(10) .status-pending').text().trim()) || 0;
+                totalDropout    += parseInt($row.find('td:eq(11) .status-dropout').text().trim()) || 0;
+                totalFees       += parseFloat($row.find('td:eq(13) .money-positive').text().replace(/[₹,]/g, '')) || 0;
             }
         });
 
-        // Update summary cards (will show 0 for empty state)
         $('#total-telephonic').text(totalTelephonic);
         $('#total-walkin').text(totalWalkin);
         $('#total-joined').text(totalJoined);
         $('#total-pending').text(totalPending);
         $('#total-dropout').text(totalDropout);
         $('#total-fees').text('₹' + new Intl.NumberFormat('en-IN').format(totalFees));
-        
-        console.log('Manual stats updated:', {
-            totalTelephonic,
-            totalWalkin,
-            totalJoined,
-            totalPending,
-            totalDropout,
-            totalFees
-        });
     }
 
     function animateNumber(selector, targetValue, isCurrency = false) {
         const element = $(selector);
         const currentValue = parseInt(element.text().replace(/[₹,]/g, '')) || 0;
-        
         if (currentValue === targetValue) return;
-        
+
         const increment = (targetValue - currentValue) / 20;
         let current = currentValue;
         let steps = 0;
-        const maxSteps = 20;
 
         const timer = setInterval(function() {
             steps++;
             current += increment;
-            
-            if (steps >= maxSteps || 
-                (increment > 0 && current >= targetValue) || 
-                (increment < 0 && current <= targetValue)) {
+
+            if (steps >= 20 || (increment > 0 && current >= targetValue) || (increment < 0 && current <= targetValue)) {
                 current = targetValue;
                 clearInterval(timer);
             }
-            
+
             const displayValue = Math.round(current);
             const formattedValue = new Intl.NumberFormat('en-IN').format(displayValue);
-            element.text(isCurrency ? '₹' + formattedValue : displayValue);
+            element.text(isCurrency ? '₹' + formattedValue : formattedValue);
         }, 50);
-    }
-
-    function showNotification(message, type) {
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-        const iconClass = type === 'success' ? 'check-circle' : 'exclamation-circle';
-        
-        const notification = $(`
-            <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
-                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                <i class="fas fa-${iconClass} me-2"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `);
-        
-        $('body').append(notification);
-        setTimeout(() => notification.fadeOut(), 3000);
     }
 });
 </script>
+
+
 {% endblock %}
